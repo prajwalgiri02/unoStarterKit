@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,7 +38,33 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'auth' => [
+                'user' => $request->user(),
+            ],
+            'flash' => [
+                'status' => fn () => $request->session()->get('status'),
+            ],
+            'resendAvailableAt' => $request->routeIs('cms.password.otp.*')
+                ? $this->resolveResendAvailableAt($request)
+                : null,
         ];
+    }
+
+    private function resolveResendAvailableAt(Request $request): ?string
+    {
+        $candidates = array_filter([
+            $request->attributes->get('resendAvailableAt'),
+            $request->session()->get('resendAvailableAt'),
+        ], fn (mixed $value): bool => is_string($value) && $value !== '');
+
+        if ($candidates === []) {
+            return null;
+        }
+
+        return collect($candidates)
+            ->map(fn (string $timestamp): Carbon => Carbon::parse($timestamp))
+            ->sortByDesc(fn (Carbon $timestamp): int => $timestamp->getTimestamp())
+            ->first()
+            ?->toIso8601String();
     }
 }
