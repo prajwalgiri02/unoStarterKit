@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'avatar'])]
+#[Fillable(['name', 'email', 'password', 'avatar', 'location', 'subscription_type'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -59,5 +59,15 @@ class User extends Authenticatable
     public function isBlocked(): bool
     {
         return $this->blocked_at !== null;
+    }
+
+    public function firebaseTokens()
+    {
+        return $this->hasMany(FirebaseTokens::class);
+    }
+
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class, 'notifiable_id')->where('notifiable_type', self::class);
     }
 }

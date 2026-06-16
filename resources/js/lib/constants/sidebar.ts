@@ -56,7 +56,7 @@ export const sidebar: SidebarItem[] = [
         path: '/cms/faqs',
     },
     {
-        label: 'Notifications',
+        label: 'Broadcast Notification',
         icon: Bell,
         path: '/cms/notifications',
     },
