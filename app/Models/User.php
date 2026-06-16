@@ -28,6 +28,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -53,5 +54,10 @@ class User extends Authenticatable
     public function isPendingApproval(): bool
     {
         return $this->isApprovalRequired() && ! $this->isApproved();
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
     }
 }

@@ -49,5 +49,13 @@ class LoginRequest extends FormRequest
                 'email' => __('auth.approval_pending'),
             ]);
         }
+
+        if ($user !== null && $user->isBlocked()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => __('auth.blocked'),
+            ]);
+        }
     }
 }

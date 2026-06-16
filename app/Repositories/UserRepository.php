@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Contracts\UserRepositoryInterface;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class UserRepository implements UserRepositoryInterface
@@ -21,6 +22,32 @@ class UserRepository implements UserRepositoryInterface
         $user->save();
 
         return $user;
+    }
+
+    public function findById(int $id): ?User
+    {
+        return User::query()
+            ->with('roles')
+            ->find($id);
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function search(?string $search, int $perPage = 15): LengthAwarePaginator
+    {
+        return User::query()
+            ->with('roles')
+            ->when(
+                filled($search),
+                fn ($query) => $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                }),
+            )
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     /**
@@ -42,5 +69,32 @@ class UserRepository implements UserRepositoryInterface
         ])->save();
 
         return $user->fresh();
+    }
+
+    public function update(User $user, array $attributes): User
+    {
+        $user->fill($attributes);
+
+        if (array_key_exists('password', $attributes) && filled($attributes['password'])) {
+            $user->password = $attributes['password'];
+        }
+
+        $user->save();
+
+        return $user->fresh(['roles']);
+    }
+
+    public function delete(User $user): bool
+    {
+        return (bool) $user->delete();
+    }
+
+    public function toggleBlock(User $user): User
+    {
+        $user->forceFill([
+            'blocked_at' => $user->isBlocked() ? null : now(),
+        ])->save();
+
+        return $user->fresh(['roles']);
     }
 }
