@@ -7,23 +7,11 @@ namespace App\Models;
 use App\Enums\OtpChannel;
 use App\Enums\OtpPurpose;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 
+#[Fillable(['channel','purpose','destination','flow_token','code','attempts','max_attempts','resend_count','max_resends','expires_at','verified_at','metadata',])]
 class Otp extends Model
 {
-    protected $fillable = [
-        'channel',
-        'purpose',
-        'destination',
-        'flow_token',
-        'code',
-        'attempts',
-        'max_attempts',
-        'resend_count',
-        'max_resends',
-        'expires_at',
-        'verified_at',
-        'metadata',
-    ];
 
     protected $hidden = [
         'code',
