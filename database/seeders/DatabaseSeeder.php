@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermission::class,
             AdminUser::class,
             StaticContentSeeder::class,
+            SupportTicketSeeder::class,
         ]);
     }
 }
