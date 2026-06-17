@@ -19,6 +19,13 @@ class StaticContentService
             ->get();
     }
 
+    public function getByType(string $type): ?StaticContent
+    {
+        return StaticContent::query()
+            ->where('type', $type)
+            ->first();
+    }
+
     /**
      * @param  array{title: string, description: string}  $attributes
      */

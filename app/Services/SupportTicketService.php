@@ -48,4 +48,19 @@ class SupportTicketService
 
         return $ticket->refresh();
     }
+
+    /**
+     * @param array{user_id?: int, name: string, email: string, message: string, type: SupportTicketType} $data
+     */
+    public function create(array $data): SupportTicket
+    {
+        return SupportTicket::create([
+            'user_id' => $data['user_id'] ?? null,
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'message' => $data['message'],
+            'type' => $data['type'],
+            'status' => SupportTicketStatus::Pending,
+        ]);
+    }
 }

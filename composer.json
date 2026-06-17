@@ -9,7 +9,9 @@
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.1",
         "laravel/framework": "^13.8",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "php-open-source-saver/jwt-auth": "^2.9",
         "spatie/laravel-permission": "^8.0"
     },
     "require-dev": {
