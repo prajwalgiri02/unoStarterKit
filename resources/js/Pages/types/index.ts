@@ -11,8 +11,8 @@ export type PageProps<
         user: User | null;
     };
     cms: {
-        sessionLifetimeMinutes: number;
-        sessionExpireOnBrowserClose: boolean;
+        // sessionLifetimeMinutes: number;
+        // sessionExpireOnBrowserClose: boolean;
         assetBaseUrl: string;
     };
     flash: {

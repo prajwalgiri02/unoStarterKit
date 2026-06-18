@@ -7,9 +7,9 @@ use App\Http\Requests\Profile\ChangePassword;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\ImageUploadService;
 use App\Services\UserManagerService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -17,6 +17,7 @@ class ProfileController extends Controller
 
     public function __construct(
         private readonly UserManagerService $userManagerService,
+        private readonly ImageUploadService $imageUploadService,
     ) {}
 
     public function index()
@@ -32,10 +33,10 @@ class ProfileController extends Controller
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
+                $this->imageUploadService->delete($user->avatar);
             }
 
-            $attributes['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $attributes['avatar'] = $this->imageUploadService->upload($request->file('avatar'), 'avatars');
         }
 
         $this->userManagerService->updateUser(

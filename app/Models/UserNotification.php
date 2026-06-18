@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class UserNotification extends Model
 {
     protected $fillable = [
-        'broadcast_id',
+        'notification_id',
         'notifiable_id',
         'notifiable_type',
         'read_at',
@@ -19,9 +19,9 @@ class UserNotification extends Model
         'read_at' => 'datetime',
     ];
 
-    public function broadcast(): BelongsTo
+    public function notification(): BelongsTo
     {
-        return $this->belongsTo(Notification::class, 'broadcast_id');
+        return $this->belongsTo(Notification::class, 'notification_id');
     }
 
     public function notifiable(): MorphTo

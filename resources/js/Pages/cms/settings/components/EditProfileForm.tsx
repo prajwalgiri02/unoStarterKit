@@ -1,10 +1,9 @@
-import { useForm, router } from "@inertiajs/react";
+import { useForm, router, usePage } from "@inertiajs/react";
 import TextInput from "@/components/inputs/text-input";
 import EmailInput from "@/components/inputs/email-input";
 import PasswordInput from "@/components/inputs/password-input";
 import PrimaryButton from "@/components/buttons/primary-button";
 import ConfirmationAccountModal from "./ConfirmationAccountModal";
-import ConfirmOldPasswordModal from "./ConfirmOldPasswordModal";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 
@@ -21,7 +20,6 @@ const profileSchema = z
             .max(255, "Email is too long"),
         password: z.string().optional().or(z.literal("")),
         password_confirmation: z.string().optional().or(z.literal("")),
-        old_password: z.string().optional(),
     })
     .refine(
         (data) => {
@@ -46,22 +44,6 @@ const profileSchema = z
             message: "Passwords do not match",
             path: ["password_confirmation"],
         },
-    )
-    .refine(
-        (data) => {
-            if (
-                data.password &&
-                data.password.length > 0 &&
-                data.old_password
-            ) {
-                return data.password !== data.old_password;
-            }
-            return true;
-        },
-        {
-            message: "Same old password cannot be used",
-            path: ["password"],
-        },
     );
 
 import type { SettingsUser as User } from "@/types/cms/settings";
@@ -75,9 +57,12 @@ export default function EditProfileForm({
     user,
     onCancel,
 }: EditProfileFormProps) {
+    const { url } = usePage();
+    const basePath = url.split("?")[0];
+
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [showOldPasswordModal, setShowOldPasswordModal] = useState(false);
     const [pendingEmail, setPendingEmail] = useState("");
+    const [otpToken, setOtpToken] = useState("");
     const [timeLeft, setTimeLeft] = useState(0);
 
     const {
@@ -94,7 +79,6 @@ export default function EditProfileForm({
         email: user.email,
         password: "",
         password_confirmation: "",
-        old_password: "",
     });
 
     // Background timer for OTP cooldown
@@ -124,17 +108,6 @@ export default function EditProfileForm({
             result.error.issues.forEach((issue) => {
                 setError(issue.path[0] as any, issue.message);
             });
-
-            // Close modal if the same password was used
-            if (
-                data.password &&
-                data.old_password &&
-                data.password === data.old_password
-            ) {
-                setShowOldPasswordModal(false);
-                setData("old_password", "");
-            }
-
             return false;
         }
         return true;
@@ -145,20 +118,13 @@ export default function EditProfileForm({
 
         if (!validate()) return;
 
-        // If password is being changed and we haven't asked for old password yet
-        if (data.password && !data.old_password && !showOldPasswordModal) {
-            setShowOldPasswordModal(true);
-            return;
-        }
-
-        put("/cms/settings", {
+        put(basePath, {
             preserveScroll: true,
             onSuccess: (page) => {
                 const flash = page.props.flash as any;
                 if (flash?.otp_required) {
                     setPendingEmail(flash.new_email);
-                    // Only sync from server if our local timer is not already running.
-                    // This preserves the background countdown when the user re-clicks Save.
+                    setOtpToken(flash.otp_token);
                     if (timeLeft === 0) {
                         setTimeLeft(flash.seconds_remaining || 120);
                     }
@@ -166,71 +132,59 @@ export default function EditProfileForm({
                 } else {
                     onCancel();
                 }
-                setShowOldPasswordModal(false);
             },
         });
     };
 
-    const handleConfirmOldPassword = (password: string) => {
-        setData("old_password", password);
-    };
-
-    // Trigger submit when old_password is set from modal
-    useEffect(() => {
-        if (data.old_password && showOldPasswordModal) {
-            handleSubmit();
-        }
-    }, [data.old_password]);
-
     return (
-        <div className="legal-content-card">
-            <div className="legal-card-content d-flex flex-column gap-4">
-                <div className="d-flex align-items-center justify-content-between">
-                    <h2 className="subtitle-md">Profile</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+            <div className="p-6 flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-neutral-900">
+                        Profile
+                    </h2>
                 </div>
-                <div className="d-flex flex-column flex-md-row gap-3 align-items-center">
-                    <div className="user-details-avatar user-settings text-white subtitle-md">
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                    <div className="w-16 h-16 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold">
                         {getInitials(user.name)}
                     </div>
-                    <div className="d-flex gap-2 flex-column">
-                        <p className="subtitle-xs">{user.name}</p>
-                        <div className="body-xs">{user.email}</div>
+                    <div className="flex flex-col gap-1 text-center md:text-left">
+                        <p className="text-lg font-semibold text-neutral-900">
+                            {user.name}
+                        </p>
+                        <div className="text-sm text-neutral-500">
+                            {user.email}
+                        </div>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="legal-form">
-                    <div className="row g-4">
-                        <div className="col-md-6 col-12">
-                            <TextInput
-                                id="name"
-                                name="name"
-                                label="Full Name"
-                                placeholder="Enter full name"
-                                value={data.name}
-                                onChange={(e) =>
-                                    setData("name", e.target.value)
-                                }
-                                error={errors.name}
-                            />
-                        </div>
-                        <div className="col-md-6 col-12">
-                            <EmailInput
-                                id="email"
-                                name="email"
-                                label="Email"
-                                placeholder="Enter email"
-                                value={data.email}
-                                onChange={(e) =>
-                                    setData("email", e.target.value)
-                                }
-                                error={errors.email}
-                            />
-                        </div>
-                        <div className="col-12 p-0 m-0"></div>
-                        <div className="col-12">
-                            <span className="subtitle-xs">Change Password</span>
-                        </div>
-                        <div className="col-md-6 col-12">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <TextInput
+                            id="name"
+                            name="name"
+                            label="Full Name"
+                            placeholder="Enter full name"
+                            value={data.name}
+                            onChange={(e) => setData("name", e.target.value)}
+                            error={errors.name}
+                        />
+                        <EmailInput
+                            id="email"
+                            name="email"
+                            label="Email"
+                            placeholder="Enter email"
+                            value={data.email}
+                            onChange={(e) => setData("email", e.target.value)}
+                            error={errors.email}
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-4 pt-4 border-t border-neutral-100">
+                        <span className="text-sm font-semibold text-neutral-900">
+                            Change Password
+                        </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <PasswordInput
                                 id="password"
                                 name="password"
@@ -242,8 +196,6 @@ export default function EditProfileForm({
                                 }
                                 error={errors.password}
                             />
-                        </div>
-                        <div className="col-md-6 col-12">
                             <PasswordInput
                                 id="password_confirmation"
                                 name="password_confirmation"
@@ -260,17 +212,19 @@ export default function EditProfileForm({
                             />
                         </div>
                     </div>
-                    <div className="d-flex mt-4 gap-2">
+
+                    <div className="flex items-center gap-3 pt-4">
                         <PrimaryButton
                             type="submit"
                             disabled={processing}
                             size="giant"
+                            className="px-8"
                         >
                             {processing ? "Saving..." : "Save Details"}
                         </PrimaryButton>
                         <button
                             type="button"
-                            className="btns btn-gaints btns-secondary text-btn-500"
+                            className="px-6 py-3 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors"
                             onClick={onCancel}
                             disabled={processing}
                         >
@@ -279,19 +233,10 @@ export default function EditProfileForm({
                     </div>
                 </form>
 
-                {showOldPasswordModal && (
-                    <ConfirmOldPasswordModal
-                        onConfirm={(pwd) => {
-                            setData("old_password", pwd);
-                        }}
-                        onClose={() => setShowOldPasswordModal(false)}
-                        error={errors.old_password}
-                    />
-                )}
-
                 {showConfirmModal && (
                     <ConfirmationAccountModal
                         email={pendingEmail}
+                        token={otpToken}
                         timeLeft={timeLeft}
                         onResendSuccess={() => setTimeLeft(120)}
                         onClose={() => setShowConfirmModal(false)}

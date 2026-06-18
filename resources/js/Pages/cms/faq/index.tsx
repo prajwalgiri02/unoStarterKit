@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import CmsLayout from "@/layouts/cms-layout";
-import { useForm, router } from "@inertiajs/react";
+import { useForm, router, usePage } from "@inertiajs/react";
 import FaqForm from "./components/faq-form";
 import FaqItem from "./components/faq-item";
 import DeleteModal from "@/components/modals/DeleteModal";
@@ -20,6 +20,9 @@ const faqSchema = z.object({
 });
 
 function Faq({ faqs }: Props) {
+    const { url } = usePage();
+    const basePath = url.split("?")[0];
+
     const [editingFaq, setEditingFaq] = useState<FaqData | null>(null);
     const [faqToDelete, setFaqToDelete] = useState<FaqData | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -28,12 +31,13 @@ function Faq({ faqs }: Props) {
         data,
         setData,
         post,
-        patch,
+        put,
         processing,
         errors,
         clearErrors,
         setError,
         reset,
+        transform,
     } = useForm({
         title: "",
         content: "",
@@ -67,7 +71,7 @@ function Faq({ faqs }: Props) {
         if (!faqToDelete) return;
 
         setIsDeleting(true);
-        router.delete(`/cms/legal-and-help/faq/${faqToDelete.id}`, {
+        router.delete(`${basePath}/${faqToDelete.id}`, {
             onSuccess: () => {
                 setFaqToDelete(null);
             },
@@ -95,9 +99,14 @@ function Faq({ faqs }: Props) {
 
         if (!validate()) return;
 
-        const url = editingFaq
-            ? `/cms/legal-and-help/faq/${editingFaq.id}`
-            : "/cms/legal-and-help/faq";
+        transform((data) => ({
+            question: data.title,
+            answer: data.content,
+        }));
+
+        const requestUrl = editingFaq
+            ? `${basePath}/${editingFaq.id}`
+            : basePath;
 
         const options = {
             preserveScroll: true,
@@ -108,9 +117,9 @@ function Faq({ faqs }: Props) {
         };
 
         if (editingFaq) {
-            patch(url, options);
+            put(requestUrl, options);
         } else {
-            post(url, options);
+            post(requestUrl, options);
         }
     };
 
@@ -173,16 +182,29 @@ function Faq({ faqs }: Props) {
     );
 }
 
-Faq.layout = (page: React.ReactNode) => (
-    <CmsLayout
-        headerLabel="FAQ's"
-        showSearchBar={false}
-        showActionButton={false}
-        showNotificationButton={true}
-        wrapperClass="legal-help-content-wrapper"
-    >
-        {page}
-    </CmsLayout>
-);
+const FaqLayout = ({ children }: { children: React.ReactNode }) => {
+    const { url } = usePage();
+    const parts = url.split("/").filter(Boolean);
+    const lastPart = parts[parts.length - 1];
+    const label =
+        lastPart === "faqs"
+            ? "FAQs"
+            : lastPart.charAt(0).toUpperCase() +
+              lastPart.slice(1).replace(/-/g, " ");
+
+    return (
+        <CmsLayout
+            headerLabel={label}
+            showSearchBar={false}
+            showActionButton={false}
+            showNotificationButton={true}
+            wrapperClass="legal-help-content-wrapper"
+        >
+            {children}
+        </CmsLayout>
+    );
+};
+
+Faq.layout = (page: React.ReactNode) => <FaqLayout>{page}</FaqLayout>;
 
 export default Faq;

@@ -1,8 +1,9 @@
-import { useForm, router } from "@inertiajs/react";
+import { useForm, router, usePage } from "@inertiajs/react";
 import { useEffect, useState, useRef } from "react";
 
 interface ConfirmationAccountModalProps {
     email: string;
+    token: string;
     timeLeft: number;
     onResendSuccess: () => void;
     onClose: () => void;
@@ -10,22 +11,22 @@ interface ConfirmationAccountModalProps {
 
 export default function ConfirmationAccountModal({
     email,
+    token,
     timeLeft,
     onResendSuccess,
     onClose,
 }: ConfirmationAccountModalProps) {
+    const { url } = usePage();
+    const basePath = url.split("?")[0];
+
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [isResending, setIsResending] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const { post, processing, errors, setData, setError, clearErrors } =
-        useForm({
-            otp: "",
-            email: email,
-        });
+    const { errors, setError, clearErrors } = useForm();
 
     useEffect(() => {
-        document.body.classList.add("modal-open");
-        const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         const handleEscapeKey = (e: KeyboardEvent) => {
@@ -37,16 +38,16 @@ export default function ConfirmationAccountModal({
         document.addEventListener("keydown", handleEscapeKey);
 
         return () => {
-            document.body.classList.remove("modal-open");
-            document.body.style.overflow = prevOverflow;
+            document.body.style.overflow = "";
             document.removeEventListener("keydown", handleEscapeKey);
         };
     }, [onClose]);
 
     // Automatically trigger verification when last digit is entered
     useEffect(() => {
-        if (otp.every((digit) => digit !== "")) {
-            handleVerify(otp.join(""));
+        const code = otp.join("");
+        if (code.length === 6 && !otp.includes("")) {
+            handleVerify(code);
         }
     }, [otp]);
 
@@ -92,14 +93,17 @@ export default function ConfirmationAccountModal({
     };
 
     const handleResend = () => {
-        if (timeLeft === 0) {
-            // Using router.post here since we don't need to update the modal's specific form state
+        if (timeLeft === 0 && !isResending) {
+            setIsResending(true);
             router.post(
-                "/cms/settings/send-otp",
-                { email: email },
+                `${basePath}/resend/${token}`,
+                {},
                 {
                     onSuccess: () => {
                         onResendSuccess();
+                    },
+                    onFinish: () => {
+                        setIsResending(false);
                     },
                 },
             );
@@ -107,131 +111,132 @@ export default function ConfirmationAccountModal({
     };
 
     const handleVerify = (code: string) => {
+        if (code.length !== 6 || isVerifying || !token) return;
+        
+        setIsVerifying(true);
         clearErrors();
 
         router.post(
-            "/cms/settings/verify-otp",
+            `${basePath}/verify/${token}`,
             {
                 otp: code,
                 email: email,
             },
             {
+                preserveScroll: true,
                 onSuccess: () => {
                     onClose();
                 },
                 onError: (errs) => {
-                    // Map errors back to the form state to display them
                     Object.keys(errs).forEach((key) => {
                         setError(key as any, errs[key]);
                     });
                     inputRefs.current[5]?.focus();
+                },
+                onFinish: () => {
+                    setIsVerifying(false);
                 },
             },
         );
     };
 
     return (
-        <>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div
-                className="modal fade show d-block"
-                id="confirmantModal"
-                tabIndex={-1}
-                aria-labelledby="confirmantModalLabel"
-                aria-modal="true"
-                role="dialog"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
-            >
-                <div
-                    className="modal-dialog modal-dialog-centered"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="modal-content modal-content-account">
-                        <div className="modal-body modal-body-success d-flex flex-column align-items-center text-center">
-                            <div className="d-flex flex-column gap-2 align-items-center">
-                                <h4 className="title-xs text-neutral-900">
-                                    Confirm Account
-                                </h4>
-                                <p className="body-md text-neutral-700">
-                                    We have sent a verification code to your
-                                    email{" "}
-                                    <span className="body-lg text-neutral-700">
-                                        {email}
-                                    </span>
-                                </p>
-                            </div>
-                            <div className="w-100">
-                                <div
-                                    className="d-flex justify-content-center otp-container"
-                                    id="otpContainer"
-                                >
-                                    {otp.map((digit, i) => (
-                                        <input
-                                            key={i}
-                                            ref={(el) => {
-                                                inputRefs.current[i] = el;
-                                            }}
-                                            className={`otp-input body-lg ${errors.otp ? "border-danger text-danger" : ""}`}
-                                            type="text"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChange={(e) =>
-                                                handleOtpChange(
-                                                    i,
-                                                    e.target.value,
-                                                )
-                                            }
-                                            onKeyDown={(e) =>
-                                                handleKeyDown(i, e)
-                                            }
-                                            onPaste={handlePaste}
-                                            inputMode="numeric"
-                                            disabled={processing}
-                                        />
-                                    ))}
-                                </div>
-                                {errors.otp && (
-                                    <div className="text-danger body-xs mt-2">
-                                        {errors.otp}
-                                    </div>
-                                )}
-                            </div>
-                            <p className="body-md text-neutral-600 text-center">
-                                {timeLeft > 0 ? (
-                                    <>
-                                        Resend code in <br />
-                                        <span
-                                            className="body-md text-primary-500"
-                                            id="countdown"
-                                        >
-                                            {formatTime(timeLeft)}
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span
-                                        className="body-md text-primary-500"
-                                        onClick={handleResend}
-                                        style={{
-                                            cursor: "pointer",
-                                            fontWeight: "bold",
-                                        }}
-                                    >
-                                        Resend
-                                    </span>
-                                )}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="btns btn-gaints btns-primary text-btn-500 w-100 d-flex justify-content-center align-items-center text-decoration-none border-0"
-                                disabled={processing}
-                            >
-                                {processing ? "Verifying..." : "Cancel"}
-                            </button>
+            />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+                <div className="p-8 flex flex-col items-center text-center gap-6">
+                    <div className="flex flex-col gap-2">
+                        <h4 className="text-2xl font-bold text-neutral-900">
+                            Confirm Account
+                        </h4>
+                        <p className="text-neutral-600">
+                            We have sent a verification code to your email{" "}
+                            <span className="font-semibold text-neutral-900">
+                                {email}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div className="w-full">
+                        <div className="flex justify-center gap-3">
+                            {otp.map((digit, i) => (
+                                <input
+                                    key={i}
+                                    ref={(el) => {
+                                        inputRefs.current[i] = el;
+                                    }}
+                                    className={`w-12 h-14 text-center text-2xl font-bold border-2 rounded-xl transition-all focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 outline-none ${
+                                        errors.otp
+                                            ? "border-red-500 text-red-500 bg-red-50"
+                                            : "border-neutral-200 text-neutral-900 bg-neutral-50"
+                                    }`}
+                                    type="text"
+                                    maxLength={1}
+                                    value={digit}
+                                    onChange={(e) =>
+                                        handleOtpChange(i, e.target.value)
+                                    }
+                                    onKeyDown={(e) => handleKeyDown(i, e)}
+                                    onPaste={handlePaste}
+                                    inputMode="numeric"
+                                    disabled={isVerifying}
+                                />
+                            ))}
                         </div>
+                        {errors.otp && (
+                            <div className="text-red-500 text-sm font-medium mt-3">
+                                {errors.otp}
+                            </div>
+                        )}
+                        {errors.email && (
+                            <div className="text-red-500 text-sm font-medium mt-1">
+                                {errors.email}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="text-neutral-600">
+                        {timeLeft > 0 ? (
+                            <p>
+                                Resend code in{" "}
+                                <span className="font-bold text-primary-600 tabular-nums">
+                                    {formatTime(timeLeft)}
+                                </span>
+                            </p>
+                        ) : (
+                            <button
+                                onClick={handleResend}
+                                disabled={isResending}
+                                className="text-primary-600 font-bold hover:text-primary-700 transition-colors disabled:opacity-50"
+                            >
+                                {isResending ? "Sending..." : "Resend Code"}
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col w-full gap-3">
+                        <button
+                            type="button"
+                            onClick={() => handleVerify(otp.join(""))}
+                            className="w-full py-4 bg-primary-600 text-white rounded-xl font-bold text-lg hover:bg-primary-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isVerifying || otp.some(digit => digit === "")}
+                        >
+                            {isVerifying ? "Verifying..." : "Verify Code"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="w-full py-4 bg-neutral-100 text-neutral-700 rounded-xl font-bold text-lg hover:bg-neutral-200 transition-all disabled:opacity-50"
+                            disabled={isVerifying}
+                        >
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
-            <div className="modal-backdrop fade show" onClick={onClose} />
-        </>
+        </div>
     );
 }

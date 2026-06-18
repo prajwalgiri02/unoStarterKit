@@ -23,12 +23,15 @@ class FaqController extends Controller
     {
         $faqs = $this->faqsService->listAll();
 
-        return Inertia::render('cms/Admin/Faqs/Index', [
-            'faqs' => $faqs->map(fn (Faq $faq): array => [
-                'id'       => $faq->id,
-                'question' => $faq->question,
-                'answer'   => $faq->answer,
-            ])->values(),
+        return Inertia::render('cms/faq/index', [
+            'faqs' => [
+                'data' => $faqs->map(fn (Faq $faq): array => [
+                    'id'      => $faq->id,
+                    'title'   => $faq->question,
+                    'content' => $faq->answer,
+                    'status'  => 'published',
+                ])->values(),
+            ],
         ]);
     }
 

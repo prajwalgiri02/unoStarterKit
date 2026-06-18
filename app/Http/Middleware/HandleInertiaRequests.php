@@ -45,6 +45,10 @@ class HandleInertiaRequests extends Middleware
                 'status' => fn () => $request->session()->get('status'),
                 'success' => fn () => $request->session()->get('success') ?? $request->session()->get('status'),
                 'error' => fn () => $request->session()->get('error'),
+                'otp_required' => fn () => $request->session()->get('otp_required'),
+                'otp_token' => fn () => $request->session()->get('otp_token'),
+                'new_email' => fn () => $request->session()->get('new_email'),
+                'seconds_remaining' => fn () => $request->session()->get('seconds_remaining'),
             ],
             'resendAvailableAt' => $request->routeIs(['cms.password.otp.*', 'cms.admin.settings.otp.*'])
                 ? $this->resolveResendAvailableAt($request)

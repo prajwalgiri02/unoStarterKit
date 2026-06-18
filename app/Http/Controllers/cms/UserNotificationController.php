@@ -17,7 +17,7 @@ class UserNotificationController extends Controller
         $user = Auth::user();
         $notifications = UserNotification::where('notifiable_id', $user->id)
             ->where('notifiable_type', get_class($user))
-            ->with('broadcast')
+            ->with('notification')
             ->latest()
             ->paginate(20);
 

@@ -2,6 +2,7 @@ import CmsLayout from "@/layouts/cms-layout";
 import { useState, useEffect } from "react";
 import ProfileDetails from "./components/ProfileDetails";
 import EditProfileForm from "./components/EditProfileForm";
+import { usePage } from "@inertiajs/react";
 
 import type {
     SettingsUser as User,
@@ -32,16 +33,29 @@ function Settings({ user, flash }: SettingsProps) {
     );
 }
 
-Settings.layout = (page: React.ReactNode) => (
-    <CmsLayout
-        headerLabel="Settings"
-        showSearchBar={false}
-        showActionButton={false}
-        showNotificationButton={true}
-        wrapperClass="legal-help-content-wrapper"
-    >
-        {page}
-    </CmsLayout>
-);
+const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
+    const { url } = usePage();
+    const parts = url.split("/").filter(Boolean);
+    const lastPart = parts[parts.length - 1];
+    const label =
+        lastPart === "settings"
+            ? "Settings"
+            : lastPart.charAt(0).toUpperCase() +
+              lastPart.slice(1).replace(/-/g, " ");
+
+    return (
+        <CmsLayout
+            headerLabel={label}
+            showSearchBar={false}
+            showActionButton={false}
+            showNotificationButton={true}
+            wrapperClass="legal-help-content-wrapper"
+        >
+            {children}
+        </CmsLayout>
+    );
+};
+
+Settings.layout = (page: React.ReactNode) => <SettingsLayout>{page}</SettingsLayout>;
 
 export default Settings;

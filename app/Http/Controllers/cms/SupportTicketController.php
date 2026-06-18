@@ -37,7 +37,7 @@ class SupportTicketController extends Controller
             SupportTicketType::cases(),
         );
 
-        return Inertia::render('cms/Admin/Messages/Index', [
+        return Inertia::render('cms/messages-and-support/index', [
             'tickets' => $tickets->map(fn (SupportTicket $ticket): array => [
                 'id' => $ticket->id,
                 'name' => $ticket->name,

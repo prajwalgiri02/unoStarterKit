@@ -21,7 +21,7 @@ class NotificationController extends Controller
     {
         $notifications = Notification::with('creator')->latest()->paginate(20);
 
-        return Inertia::render('cms/Admin/Notifications/Index', [
+        return Inertia::render('cms/broadcast-notification/index', [
             'notifications' => $notifications,
         ]);
     }
@@ -89,7 +89,7 @@ class NotificationController extends Controller
             foreach ($users as $user) {
                 // 1. Create in-app notification record
                 UserNotification::create([
-                    'broadcast_id' => $broadcast->id,
+                    'notification_id' => $broadcast->id,
                     'notifiable_id' => $user->id,
                     'notifiable_type' => User::class,
                 ]);

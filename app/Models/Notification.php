@@ -30,7 +30,7 @@ class Notification extends Model
 
     public function userNotifications(): HasMany
     {
-        return $this->hasMany(UserNotification::class, 'broadcast_id');
+        return $this->hasMany(UserNotification::class, 'notification_id');
     }
 
     public function creator()

@@ -8,9 +8,9 @@ type DashboardProps = {
     auth: {
         user: { id: number; name: string; email: string } | null;
     };
-    cms: {
-        sessionExpireOnBrowserClose: boolean;
-    };
+    // cms: {
+    //     sessionExpireOnBrowserClose: boolean;
+    // };
 };
 
 const Dashboard = () => {

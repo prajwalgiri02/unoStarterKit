@@ -22,7 +22,7 @@ class StaticContentController extends Controller
     {
         $contents = $this->staticContentService->listAll();
 
-        return Inertia::render('cms/Admin/StaticContent', [
+        return Inertia::render('cms/static-content/index', [
             'contents' => $contents->map(fn (StaticContent $content): array => [
                 'id' => $content->id,
                 'type' => $content->type->value,
