@@ -69,16 +69,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
-    {
-        return $this->resourceResponse(new UserResource(Auth::guard('api')->user()));
-    }
-
-    /**
      * Log the user out (Invalidate the token).
      *
      * @return \Illuminate\Http\JsonResponse
