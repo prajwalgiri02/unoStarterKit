@@ -4,23 +4,32 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class UserManagerService
 {
-    public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
-    ) {}
+    public function __construct() {}
 
     /**
      * @return LengthAwarePaginator<int, User>
      */
     public function listUsers(?string $search = null, int $perPage = 15): LengthAwarePaginator
     {
-        return $this->userRepository->search($search, $perPage);
+        return User::query()
+            ->with('roles')
+            ->when(
+                filled($search),
+                fn ($query) => $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                }),
+            )
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getUser(User $user): User
@@ -32,30 +41,42 @@ class UserManagerService
     {
         $this->ensureActorCanManage($user, $actor);
 
-        $payload = [
-            'name' => $attributes['name'],
-            'email' => $attributes['email'],
-        ];
+        $payload = array_intersect_key($attributes, array_flip([
+            'name',
+            'email',
+            'avatar',
+            'location',
+            'subscription_type',
+            'password',
+        ]));
 
-        if (! empty($attributes['password'])) {
-            $payload['password'] = $attributes['password'];
+        $user->fill($payload);
+
+        if (array_key_exists('password', $payload) && filled($payload['password'])) {
+            $user->password = $payload['password'];
         }
 
-        return $this->userRepository->update($user, $payload);
+        $user->save();
+
+        return $user->fresh(['roles']);
     }
 
     public function deleteUser(User $user, User $actor): void
     {
         $this->ensureActorCanManage($user, $actor, allowSelf: false);
 
-        $this->userRepository->delete($user);
+        $user->delete();
     }
 
     public function toggleBlock(User $user, User $actor): User
     {
         $this->ensureActorCanManage($user, $actor, allowSelf: false);
 
-        return $this->userRepository->toggleBlock($user);
+        $user->forceFill([
+            'blocked_at' => $user->isBlocked() ? null : now(),
+        ])->save();
+
+        return $user->fresh(['roles']);
     }
 
     private function ensureActorCanManage(
@@ -78,5 +99,19 @@ class UserManagerService
                 ]);
             }
         }
+    }
+
+    public function changePassword(User $user, string $newPassword, ?string $currentPassword = null): User
+    {
+        if ($currentPassword !== null && ! Hash::check($currentPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => 'The provided password does not match your current password.',
+            ]);
+        }
+
+        $user->password = $newPassword;
+        $user->save();
+
+        return $user->fresh(['roles']);
     }
 }

@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserApprovalService
 {
-    public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
-    ) {}
+    public function __construct() {}
 
     public function isEnabled(): bool
     {
@@ -29,7 +26,11 @@ class UserApprovalService
             return new Collection;
         }
 
-        return $this->userRepository->pendingApproval();
+        return User::query()
+            ->whereNull('approved_at')
+            ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
+            ->orderBy('created_at')
+            ->get();
     }
 
     public function approve(User $user): User
@@ -46,6 +47,10 @@ class UserApprovalService
             return $user;
         }
 
-        return $this->userRepository->approve($user);
+        $user->forceFill([
+            'approved_at' => now(),
+        ])->save();
+
+        return $user->fresh();
     }
 }

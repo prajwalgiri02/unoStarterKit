@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use App\Contracts\SmsGateway;
-use App\Contracts\UserRepositoryInterface;
-use App\Repositories\UserRepository;
 use App\Services\Sms\LogSmsGateway;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -17,7 +15,6 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SmsGateway::class, LogSmsGateway::class);
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 
     /**
