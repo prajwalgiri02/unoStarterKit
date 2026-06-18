@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Form, usePage } from '@inertiajs/react'
 import { FileText, ScrollText, Shield, Users } from 'lucide-react'
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import PrimaryButton from '@/Components/buttons/primary-button'
+import AdminLayout from '@/layouts/AdminLayout'
+import PrimaryButton from '@/components/buttons/primary-button'
 
 type StaticContentItem = {
   id: number

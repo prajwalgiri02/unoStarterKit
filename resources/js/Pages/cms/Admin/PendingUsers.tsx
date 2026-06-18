@@ -1,7 +1,7 @@
 import { Form, Link, usePage } from '@inertiajs/react'
 
-import AuthLayout from '@/Layouts/AuthLayout'
-import Button from '@/Components/Form/Button'
+import AuthLayout from '@/layouts/AuthLayout'
+import Button from '@/components/Form/Button'
 
 type PendingUser = {
   id: number

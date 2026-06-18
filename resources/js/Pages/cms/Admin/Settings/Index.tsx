@@ -2,9 +2,9 @@ import { useForm, usePage } from '@inertiajs/react'
 import { Camera, Eye, EyeOff } from 'lucide-react'
 import { useRef, useState } from 'react'
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import Input from '@/Components/Form/Input'
-import PrimaryButton from '@/Components/buttons/primary-button'
+import AdminLayout from '@/layouts/AdminLayout'
+import Input from '@/components/Form/Input'
+import PrimaryButton from '@/components/buttons/primary-button'
 
 type AuthUser = {
   id: number

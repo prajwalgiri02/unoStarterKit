@@ -1,122 +1,127 @@
-import { Form, usePage } from '@inertiajs/react'
+import PrimaryButton from "@/components/buttons/primary-button";
+import TextButton from "@/components/buttons/text-button";
+import TextInput from "@/components/inputs/text-input";
+import AuthLayout from "@/layouts/auth-layout";
+import { Form, router, usePage } from "@inertiajs/react";
+import { useCallback, useEffect, useState } from "react";
+import { secondsUntil, formatCountdown } from "@/lib/helper";
 
-import AuthLayout from '@/Layouts/AuthLayout'
-import Input from '@/Components/Form/Input'
-import Button from '@/Components/Form/Button'
-import useCountdownUntil from '@/hooks/useCountdownUntil'
+export type OtpPayload = {
+    requestReason: string;
+    createdAt: string;
+    updatedAt: string;
+    expiresAt: string;
+    verifiedAt: string | null;
+};
 
-type VerifyPasswordOtpProps = {
-  token: string
-  email: string
-  otpLength: number
-  status?: string
-  isExpired?: boolean
-  errors?: Record<string, string>
-  resendAvailableAt?: string | null
-}
+type VerifyOtpPageProps = {
+    otp: OtpPayload;
+    email: string;
+    token: string;
+};
 
-export default function VerifyPasswordOtp({
-  token,
-  email,
-  otpLength,
-  status,
-}: VerifyPasswordOtpProps) {
-  const { errors = {}, resendAvailableAt = null, isExpired = false } =
-    usePage<VerifyPasswordOtpProps>().props
-  const resendCooldown = useCountdownUntil(isExpired ? null : resendAvailableAt)
-  const canResend = isExpired || resendCooldown === 0
-  const otpPlaceholder = '0'.repeat(otpLength)
+const VerifyOTP = () => {
+    const { otp, email, token } = usePage<VerifyOtpPageProps>().props;
+    const [secondsLeft, setSecondsLeft] = useState(() =>
+        secondsUntil(otp.expiresAt),
+    );
+    const [resendProcessing, setResendProcessing] = useState(false);
 
-  return (
-    <AuthLayout>
-      <h2 className="mb-2 text-lg font-semibold text-gray-900">
-        Enter verification code
-      </h2>
+    useEffect(() => {
+        const tick = () => setSecondsLeft(secondsUntil(otp.expiresAt));
+        tick();
+        const id = window.setInterval(tick, 1000);
+        return () => window.clearInterval(id);
+    }, [otp.expiresAt]);
 
-      <p className="mb-6 text-sm text-gray-500">
-        We sent a {otpLength}-digit code to{' '}
-        <span className="font-medium text-gray-900">{email}</span>.
-      </p>
+    const canResend = secondsLeft <= 0 && !resendProcessing;
 
-      {status && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          {status}
-        </div>
-      )}
+    const handleResend = useCallback(() => {
+        if (!canResend) {
+            return;
+        }
+        setResendProcessing(true);
+        router.post(
+            `/cms/forgot-password/resend/${token}`,
+            { email },
+            {
+                preserveScroll: true,
+                onFinish: () => setResendProcessing(false),
+            },
+        );
+    }, [canResend, email, token]);
 
-      {isExpired && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Your verification code has expired. Resend a new code below.
-        </div>
-      )}
+    const resendDisabled = secondsLeft > 0 || resendProcessing;
 
-      {resendCooldown > 0 && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Please wait <span className="font-semibold">{resendCooldown}</span> seconds before resending.
-        </div>
-      )}
+    return (
+        <Form
+            id="verifyCodeForm"
+            action={`/cms/forgot-password/verify/${token}`}
+            method="post"
+            validationTimeout={500}
+            disableWhileProcessing
+        >
+            {({ processing }) => (
+                <>
+                    <input type="hidden" name="email" value={email} />
+                    <div className="d-flex flex-column gap-4">
+                        <TextInput
+                            id="code"
+                            name="code"
+                            label="Code"
+                            autoComplete="one-time-code"
+                            placeholder="Enter code"
+                        />
+                    </div>
+                    <p className="caption-md text-neutral-600 mt-2 mb-0">
+                        {secondsLeft < 0 && (
+                            <span className="text-neutral-700">
+                                This code has expired. Resend a new code.
+                            </span>
+                        )}
+                    </p>
+                    <div className="d-flex flex-column gap-4 mt-40">
+                        <PrimaryButton type="submit" disabled={processing}>
+                            {processing ? "Verifying..." : "Verify"}
+                        </PrimaryButton>
 
-      {errors.otp && !isExpired && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {errors.otp}
-        </div>
-      )}
-
-      <Form action={`/cms/forgot-password/verify/${token}`} method="post">
-        {({ processing }) => (
-          <div className="space-y-4">
-            <Input
-              name="otp"
-              type="text"
-              label="Verification code"
-              placeholder={otpPlaceholder}
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={otpLength}
-              error={errors.otp}
-              autoFocus
-              required
-            />
-
-            <Button
-              type="submit"
-              loading={processing}
-              loadingText="Verifying..."
-              fullWidth
-            >
-              Verify code
-            </Button>
-          </div>
-        )}
-      </Form>
-
-      <div className="mt-4 flex items-center justify-between text-sm">
-        <Form action={`/cms/forgot-password/resend/${token}`} method="post">
-          {({ processing }) => (
-            <button
-              type="submit"
-              disabled={!canResend || processing}
-              className="font-medium text-gray-900 hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:no-underline"
-            >
-              {canResend
-                ? 'Resend code'
-                : `Resend code in ${resendCooldown}s`}
-            </button>
-          )}
+                        <p className="body-sm text-neutral-600 text-center mb-0">
+                            Didn&apos;t receive a code?{" "}
+                            <TextButton
+                                type="button"
+                                disabled={resendDisabled}
+                                onClick={handleResend}
+                                className={resendDisabled ? "opacity-50" : ""}
+                                aria-label={
+                                    secondsLeft > 0
+                                        ? `Resend available in ${formatCountdown(secondsLeft)}`
+                                        : "Resend code"
+                                }
+                            >
+                                {resendProcessing
+                                    ? "Sending..."
+                                    : secondsLeft > 0
+                                      ? `Resend in ${formatCountdown(secondsLeft)}`
+                                      : "Resend code"}
+                            </TextButton>
+                        </p>
+                    </div>
+                </>
+            )}
         </Form>
+    );
+};
 
-        <Form action={`/cms/forgot-password/cancel/${token}`} method="post">
-          {({ processing }) => (
-            <button
-              type="submit"
-              disabled={processing}
-              className="text-gray-500 hover:text-gray-900 disabled:opacity-50"
-            >
-              Cancel
-            </button>
-          )}
-        </Form>
-      </div>
+VerifyOTP.layout = (page: React.ReactNode) => (
+    <AuthLayout
+        headerTitle="Verify Code"
+        headerDescription="An authentication code has been sent to your email."
+        goBack={true}
+        goBackLabelText="Back to signin"
+        goBackUrl="/cms/login"
+    >
+        {page}
     </AuthLayout>
-  )
-}
+);
+
+export default VerifyOTP;

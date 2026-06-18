@@ -1,7 +1,7 @@
 import { Form, Link, usePage } from '@inertiajs/react'
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import Button from '@/Components/Form/Button'
+import AdminLayout from '@/layouts/AdminLayout'
+import Button from '@/components/Form/Button'
 
 type ManagedUser = {
   id: number

@@ -1,61 +1,100 @@
-import React, { useState } from 'react';
-import Sidebar from '@/Components/layouts/sidebar';
-import Header from '@/Components/layouts/header';
+import Header from "@/components/layouts/header";
+import Sidebar from "@/components/layouts/sidebar";
+import type { PageProps } from "@/types/index";
+import { usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+import { Toaster, toast } from "sonner";
 
-export type ActionButtonConfig = {
-    show?: boolean;
-    label?: string;
-    route?: string;
-    /** e.g. "giant" | "large" | "medium" — passed through to PrimaryButton */
-    size?: string;
+export interface ActionButtonConfig {
+    show: boolean;
+    label: string;
+    route: string;
+    size?: "small" | "medium" | "large" | "giant";
     textSize?: string;
     showIcon?: boolean;
-};
+}
 
-type CmsLayoutProps = {
+interface CmsLayoutProps {
     children: React.ReactNode;
     headerLabel: string;
     showSearchBar?: boolean;
+    showActionButton?: boolean;
+    actionButtonLabel?: string;
+    actionButtonRoute?: string;
     showNotificationButton?: boolean;
-    actionButton?: ActionButtonConfig;
-    /** URL to navigate back to */
-    backUrl?: string;
-    /** Callback for back navigation (when no URL is available) */
     onBackButton?: (() => void) | null;
-};
+    backUrl?: string;
+    wrapperClass?: string;
+    actionButton?: ActionButtonConfig;
+}
 
 export default function CmsLayout({
     children,
     headerLabel,
-    showSearchBar = true,
-    showNotificationButton = false,
-    actionButton,
-    backUrl,
+    showSearchBar,
+    showActionButton,
+    actionButtonLabel,
+    actionButtonRoute,
+    showNotificationButton,
     onBackButton,
+    backUrl,
+    wrapperClass,
+    actionButton,
 }: CmsLayoutProps) {
+    const { url, props } = usePage<PageProps>();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [url]);
+
+    useEffect(() => {
+        if (props.flash?.success) {
+            toast.success(props.flash.success, {
+                id: props.flash.success,
+            });
+        }
+        if (props.flash?.error) {
+            toast.error(props.flash.error, {
+                id: props.flash.error,
+            });
+        }
+    }, [props.flash]);
+
+    // useEffect(() => {
+    //     if (props.errors && Object.keys(props.errors).length > 0) {
+    //         Object.values(props.errors).forEach((error: any) => {
+    //             toast.error(error);
+    //         });
+    //     }
+    // }, [props.errors]);
+
     return (
-        <div className="app-wrapper">
+        <div className="app-container">
             <Sidebar
                 mobileMenuOpen={mobileMenuOpen}
                 onCloseMobile={() => setMobileMenuOpen(false)}
             />
-
-            <div className="main-content">
+            <main
+                className={`main-content ${wrapperClass || ""}`}
+                id="mainContent"
+            >
                 <Header
+                    children={children}
                     headerLabel={headerLabel}
                     showSearchBar={showSearchBar}
+                    showActionButton={showActionButton}
+                    actionButtonLabel={actionButtonLabel}
+                    actionButtonRoute={actionButtonRoute}
                     showNotificationButton={showNotificationButton}
-                    actionButton={actionButton}
-                    backUrl={backUrl}
-                    onBackButton={onBackButton}
                     mobileMenuOpen={mobileMenuOpen}
-                    onMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
-                >
-                    {children}
-                </Header>
-            </div>
+                    onMenuToggle={() => setMobileMenuOpen((open) => !open)}
+                    onBackButton={onBackButton}
+                    backUrl={backUrl}
+                    actionButton={actionButton}
+                />
+            </main>
+            <Toaster richColors position="bottom-right" />
         </div>
     );
 }

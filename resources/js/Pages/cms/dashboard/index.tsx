@@ -1,0 +1,72 @@
+import DashboardCharts from "@/components/cms/dashboard/DashboardCharts";
+import StatsGrid from "@/components/cms/dashboard/StatsGrid";
+import CmsLayout from "@/layouts/cms-layout";
+import { router, usePage } from "@inertiajs/react";
+import FilterRow from "@/components/common/FilterRow";
+
+type DashboardProps = {
+    auth: {
+        user: { id: number; name: string; email: string } | null;
+    };
+    cms: {
+        sessionLifetimeMinutes: number;
+        sessionExpireOnBrowserClose: boolean;
+    };
+};
+
+const Dashboard = () => {
+    const {
+        auth: { user },
+        cms: { sessionLifetimeMinutes, sessionExpireOnBrowserClose },
+    } = usePage<DashboardProps>().props;
+
+    return (
+        <>
+            <FilterRow
+                className="filters-row"
+                labelClassName="filter-label link-md-400"
+                dropdownContainerClassName="dropdown-select"
+                dropdownClassName="link-md-400 text-neutral-500"
+                items={[
+                    {
+                        value: "date",
+                        onChange: (val) => {},
+                        options: [
+                            { value: "date", label: "Date" },
+                            { value: "name", label: "Name" },
+                        ],
+                    },
+                    {
+                        value: "city",
+                        onChange: (val) => {},
+                        options: [
+                            { value: "city", label: "City" },
+                            { value: "state", label: "State" },
+                        ],
+                    },
+                ]}
+            >
+                <button className="btns btns-primary btn-small1 link-md-700">
+                    Export
+                </button>
+            </FilterRow>
+
+            <StatsGrid />
+
+            <DashboardCharts />
+        </>
+    );
+};
+
+Dashboard.layout = (page: React.ReactNode) => (
+    <CmsLayout
+        headerLabel="Dashboard"
+        showSearchBar={true}
+        showActionButton={false}
+        showNotificationButton={true}
+    >
+        {page}
+    </CmsLayout>
+);
+
+export default Dashboard;

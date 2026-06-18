@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Form, usePage } from '@inertiajs/react'
 import { Bell, Plus, Send, Calendar, MapPin, Users, Link as LinkIcon } from 'lucide-react'
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import PrimaryButton from '@/Components/buttons/primary-button'
+import AdminLayout from '@/layouts/AdminLayout'
+import PrimaryButton from '@/components/buttons/primary-button'
 
 type NotificationBroadcast = {
   id: number

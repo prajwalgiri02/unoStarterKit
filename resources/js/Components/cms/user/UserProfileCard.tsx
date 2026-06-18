@@ -1,0 +1,55 @@
+import React from "react";
+
+interface UserProfileCardProps {
+    name: string;
+    email: string;
+    status: string;
+    tier: string;
+    onEdit: () => void;
+}
+
+const UserProfileCard = ({
+    name,
+    email,
+    status,
+    tier,
+    onEdit,
+}: UserProfileCardProps) => {
+    const initials = name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+
+    return (
+        <div className="user-detail-sl-card d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <div className="d-flex flex-column flex-md-row gap-3 align-items-center">
+                <div className="user-details-avatar subtitle-md">
+                    {initials}
+                </div>
+                <div className="">
+                    <div className="d-flex gap-3 align-items-center justify-content-center">
+                        <p className="user-name subtitle-xs">{name}</p>
+                        <div className="badge-tiny link-sm bg-success-500 text-white d-flex align-items-center justify-content-center">
+                            {status}
+                        </div>
+                    </div>
+                    <div className="user-email body-xs">{email}</div>
+                </div>
+            </div>
+
+            <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-3">
+                <h1 className="body-sm text-neutral-900">{tier}</h1>
+                <button
+                    className="btn-small btns btns-secondary"
+                    onClick={onEdit}
+                >
+                    Edit Details
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default UserProfileCard;

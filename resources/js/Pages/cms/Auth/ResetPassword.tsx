@@ -1,79 +1,67 @@
-import { Form, Link } from '@inertiajs/react'
+import PrimaryButton from "@/components/buttons/primary-button";
+import PasswordInput from "@/components/inputs/password-input";
+import SuccessModal from "@/components/modals/success-modal";
+import AuthLayout from "@/layouts/auth-layout";
+import { Form, usePage } from "@inertiajs/react";
 
-import AuthLayout from '@/Layouts/AuthLayout'
-import Input from '@/Components/Form/Input'
-import Button from '@/Components/Form/Button'
+type ChangePasswordPageProps = {
+    passwordChanged?: boolean;
+    email?: string;
+    token: string;
+};
 
-type ResetPasswordProps = {
-  token: string
-  status?: string
-}
+const ResetPassword = () => {
+    const { passwordChanged, email, token } =
+        usePage<ChangePasswordPageProps>().props;
 
-export default function ResetPassword({ token, status }: ResetPasswordProps) {
-  return (
-    <AuthLayout>
-      <h2 className="mb-2 text-lg font-semibold text-gray-900">
-        Create new password
-      </h2>
-
-      <p className="mb-6 text-sm text-gray-500">
-        Choose a strong password for your account.
-      </p>
-
-      {status && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          {status}
-        </div>
-      )}
-
-      <Form
-        action={`/cms/reset-password/${token}`}
-        method="post"
-        resetOnSuccess={['password', 'password_confirmation']}
-      >
-        {({ errors, processing }) => (
-          <div className="space-y-4">
-            <Input
-              name="password"
-              type="password"
-              label="New password"
-              placeholder="Enter your new password"
-              autoComplete="new-password"
-              error={errors.password}
-              autoFocus
-              required
+    if (passwordChanged) {
+        return (
+            <SuccessModal
+                title="Password changed"
+                description="Your password has been changed successfully."
+                buttonText="Back to Sign In"
+                buttonLink="/cms/login"
             />
+        );
+    }
 
-            <Input
-              name="password_confirmation"
-              type="password"
-              label="Confirm password"
-              placeholder="Confirm your new password"
-              autoComplete="new-password"
-              error={errors.password_confirmation}
-              required
-            />
-
-            <Button
-              type="submit"
-              loading={processing}
-              loadingText="Saving password..."
-              fullWidth
-            >
-              Reset password
-            </Button>
-          </div>
-        )}
-      </Form>
-
-      <p className="mt-6 text-center text-sm text-gray-500">
-        <Link
-          href="/cms/login"
-          className="font-medium text-gray-900 hover:underline"
+    return (
+        <Form
+            id="changePasswordForm"
+            action={`/cms/reset-password/${token}`}
+            method="post"
+            validationTimeout={500}
+            disableWhileProcessing
         >
-          Back to sign in
-        </Link>
-      </p>
+            {({ processing }) => (
+                <>
+                    <input type="hidden" name="email" value={email} />
+                    <div className="d-flex flex-column gap-4">
+                        <PasswordInput confirmed />
+                    </div>
+                    <div className="d-flex flex-column gap-4 mt-40">
+                        <PrimaryButton type="submit" disabled={processing}>
+                            {processing
+                                ? "Resetting password..."
+                                : "Reset password"}
+                        </PrimaryButton>
+                    </div>
+                </>
+            )}
+        </Form>
+    );
+};
+
+ResetPassword.layout = (page: React.ReactNode) => (
+    <AuthLayout
+        headerTitle="Set new password"
+        headerDescription="Your previous password has been reseted. Please set a new password for your account."
+        goBack={true}
+        goBackLabelText="Back to signin"
+        goBackUrl="/cms/login"
+    >
+        {page}
     </AuthLayout>
-  )
-}
+);
+
+export default ResetPassword;

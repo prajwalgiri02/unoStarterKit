@@ -1,8 +1,7 @@
-import { Link, router, usePage } from '@inertiajs/react';
-import React, { useState, useEffect } from 'react';
-import { Menu, ChevronLeft, Search, Bell, Plus } from 'lucide-react';
-import PrimaryButton from '@/Components/buttons/primary-button';
-import type { ActionButtonConfig } from '@/layouts/cms-layout';
+import { Link, router, usePage } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import PrimaryButton from "../buttons/primary-button";
+import type { ActionButtonConfig } from "@/layouts/cms-layout";
 
 interface HeaderProps {
     children: React.ReactNode;
@@ -23,9 +22,9 @@ export default function Header({
     children,
     showSearchBar = true,
     showActionButton = false,
-    actionButtonLabel = '',
-    actionButtonRoute = '#',
-    headerLabel = '',
+    actionButtonLabel = "",
+    actionButtonRoute = "#",
+    headerLabel = "",
     showNotificationButton = false,
     mobileMenuOpen = false,
     onMenuToggle,
@@ -34,24 +33,24 @@ export default function Header({
     actionButton,
 }: HeaderProps) {
     const { url } = usePage();
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        setSearch(params.get('search') || '');
+        setSearch(params.get("search") || "");
     }, [url]);
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             const params = new URLSearchParams(window.location.search);
             const searchValue = (e.target as HTMLInputElement).value;
 
             if (searchValue) {
-                params.set('search', searchValue);
+                params.set("search", searchValue);
             } else {
-                params.delete('search');
+                params.delete("search");
             }
-            params.delete('page');
+            params.delete("page");
 
             router.get(
                 window.location.pathname,
@@ -76,65 +75,101 @@ export default function Header({
                         aria-expanded={mobileMenuOpen}
                         onClick={onMenuToggle}
                     >
-                        <Menu size={22} className="menu-bar-icon" />
+                        <img
+                            src="/icons/menubar.svg"
+                            alt=""
+                            className="menu-bar-icon"
+                        />
                     </button>
-
-                    <div className="header-title-group">
+                    <div className="d-flex align-items-center gap-2">
                         {backUrl ? (
-                            <Link href={backUrl} className="back-arrow-container">
-                                <ChevronLeft size={20} className="back-arrow-icon" />
+                            <Link
+                                href={backUrl}
+                                className="back-arrow-container"
+                            >
+                                <img
+                                    src="/icons/back-arrow1.svg"
+                                    alt="back-arrow"
+                                    className="back-arrow-icon"
+                                />
                             </Link>
                         ) : onBackButton ? (
-                            <button
-                                type="button"
+                            <div
                                 className="back-arrow-container"
-                                onClick={onBackButton}
+                                onClick={() => onBackButton()}
+                                style={{ cursor: "pointer" }}
                             >
-                                <ChevronLeft size={20} className="back-arrow-icon" />
-                            </button>
+                                <img
+                                    src="/icons/back-arrow1.svg"
+                                    alt="back-arrow"
+                                    className="back-arrow-icon"
+                                />
+                            </div>
                         ) : null}
-
-                        <h1 className="header-title">{headerLabel}</h1>
+                        <h1 className="header-title mb-0">{headerLabel}</h1>
                     </div>
                 </div>
-
                 <div className="header-right">
-                    {/* Structured action button */}
+                    {/* New structured Action Button */}
                     {actionButton?.show && (
-                        <PrimaryButton
-                            size={(actionButton.size as any) || 'giant'}
-                            onClick={() =>
-                                actionButton.route && router.get(actionButton.route)
-                            }
-                            className="text-nowrap"
-                        >
-                            {actionButton.showIcon !== false && (
-                                <Plus size={18} />
-                            )}
-                            <span>{actionButton.label}</span>
-                        </PrimaryButton>
+                        <div>
+                            <PrimaryButton
+                                size={actionButton.size || "giant"}
+                                textSize={actionButton.textSize}
+                                onClick={() =>
+                                    actionButton.route &&
+                                    router.get(actionButton.route)
+                                }
+                                className="text-nowrap"
+                            >
+                                {actionButton.showIcon !== false && (
+                                    <img
+                                        src="/icons/plus.svg"
+                                        alt="plus"
+                                        width="24"
+                                        height="24"
+                                    />
+                                )}
+                                <span className="body-sm">
+                                    {actionButton.label}
+                                </span>
+                            </PrimaryButton>
+                        </div>
                     )}
 
-                    {/* Legacy action button */}
+                    {/* Legacy Action Button */}
                     {!actionButton?.show &&
                         showActionButton &&
                         actionButtonLabel &&
                         actionButtonRoute && (
-                            <PrimaryButton
-                                size="giant"
-                                onClick={() => router.get(actionButtonRoute)}
-                                className="text-nowrap"
-                            >
-                                <Plus size={18} />
-                                {actionButtonLabel}
-                            </PrimaryButton>
+                            <div>
+                                <PrimaryButton
+                                    size="giant"
+                                    onClick={() =>
+                                        router.get(actionButtonRoute)
+                                    }
+                                    className="text-nowrap"
+                                >
+                                    <img
+                                        src="/icons/plus.svg"
+                                        alt="plus"
+                                        width="24"
+                                        height="24"
+                                    />
+                                    {actionButtonLabel}
+                                </PrimaryButton>
+                            </div>
                         )}
 
                     {showSearchBar && (
                         <div className="search-box">
-                            <Search size={16} className="search-icon-header" />
+                            <img
+                                src="/icons/search.svg"
+                                alt="search"
+                                className="search-icon-header"
+                            />
                             <input
-                                className="header-search-input"
+                                className="header-search-inputs"
                                 type="text"
                                 placeholder="Search"
                                 value={search}
@@ -145,13 +180,16 @@ export default function Header({
                     )}
 
                     {showNotificationButton && (
-                        <button type="button" className="notification-btn">
-                            <Bell size={20} className="notification-icon" />
+                        <button className="notification-btn">
+                            <img
+                                src="/icons/notification1.svg"
+                                alt="notification"
+                                className="notification-icon"
+                            />
                         </button>
                     )}
                 </div>
             </header>
-
             <div className="dashboard-content">{children}</div>
         </>
     );

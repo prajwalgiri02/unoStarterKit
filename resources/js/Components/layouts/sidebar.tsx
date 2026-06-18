@@ -1,9 +1,8 @@
-import { Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronDown } from 'lucide-react';
-import { STORAGE_KEYS } from '@/lib/constants/storage-keys';
-import { CMS_AUTH_SIGN_OUT_PATH, sidebar } from '@/lib/constants/sidebar';
-import { getItem, saveItem } from '@/services/storage.service';
+import { Link, router, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+import { STORAGE_KEYS } from "@/lib/constants/storage-keys";
+import { CMS_AUTH_SIGN_OUT_PATH, sidebar } from "@/lib/constants/sidebar";
+import { getItem, saveItem } from "@/services/storage.service";
 
 function isPathActive(currentPath: string, path?: string): boolean {
     if (!path) return false;
@@ -57,15 +56,15 @@ export default function Sidebar({
     onCloseMobile,
 }: SidebarProps) {
     const { url } = usePage();
-    const currentPath = url.split('?')[0];
+    const currentPath = url.split("?")[0];
 
     const [collapsed, setCollapsed] = useState(() => readSidebarCollapsed());
 
     const [openGroups, setOpenGroups] = useState<Set<number>>(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === "undefined") {
             return new Set();
         }
-        const path = window.location.pathname.split('?')[0];
+        const path = window.location.pathname.split("?")[0];
         return openGroupsForPath(path);
     });
 
@@ -106,43 +105,29 @@ export default function Sidebar({
 
     return (
         <>
-            {/* Mobile overlay */}
             <div
-                className={`sidebar-overlay${mobileMenuOpen ? ' active' : ''}`}
+                className={`sidebar-overlay${mobileMenuOpen ? " active" : ""}`}
                 id="sidebarOverlay"
                 onClick={onCloseMobile}
                 role="presentation"
                 aria-hidden={!mobileMenuOpen}
             />
-
             <aside
-                className={`sidebar${collapsed ? ' collapsed' : ''}${mobileMenuOpen ? ' active' : ''}`}
+                className={`sidebar${collapsed ? " collapsed" : ""}${mobileMenuOpen ? " active" : ""}`}
                 id="sidebar"
             >
                 <div className="sidebar-header">
-                    {/* Logo */}
-                    <Link href="/" className="sidebar-logo-link">
-                        <div className="sidebar-logo-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
-                        </div>
-                        <span className="sidebar-logo-text">Uno</span>
-                    </Link>
-
+                    <img src="/images/logo3.svg" alt="Logo" className="logo" />
                     <button
                         className="sidebar-collapse-btn"
                         id="sidebarCollapseBtn"
                         type="button"
                         onClick={toggleCollapsed}
-                        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                     >
-                        <ChevronLeft
-                            size={20}
-                            style={{
-                                transform: collapsed ? 'rotate(180deg)' : 'none',
-                                transition: 'transform 0.2s',
-                            }}
+                        <img
+                            src="/icons/chevron-left.svg"
+                            alt="Sidebar collapse"
+                            style={{ width: "20px", height: "20px" }}
                         />
                     </button>
                 </div>
@@ -156,48 +141,58 @@ export default function Sidebar({
                             item.sub_items?.some((sub) =>
                                 isPathActive(currentPath, sub.path),
                             );
-                        const Icon = item.icon;
 
                         if (hasSubmenu) {
                             return (
-                                <div className="nav-item-group" key={item.label}>
+                                <div
+                                    className="nav-item-group"
+                                    key={item.label}
+                                >
                                     <button
                                         type="button"
-                                        className={`nav-item has-submenu${activeItem ? ' active' : ''}${groupOpen ? ' expanded' : ''}`}
+                                        className={`nav-item body-md has-submenu border-0  w-100 text-start${activeItem ? " active" : ""}${groupOpen ? " expanded" : ""}`}
                                         onClick={() => toggleGroup(index)}
                                     >
                                         <span className="nav-icon">
-                                            <Icon size={20} className="nav-icon-img" />
+                                            <item.icon
+                                                className="nav-icon-img"
+                                                size={20}
+                                            />
                                         </span>
-                                        <span className="nav-text">{item.label}</span>
+                                        <span className="nav-text">
+                                            {item.label}
+                                        </span>
                                         <span className="nav-arrow">
-                                            <ChevronDown
-                                                size={16}
+                                            <img
+                                                src="/icons/dropdown.svg"
+                                                alt="Arrow Down"
                                                 style={{
-                                                    transform: groupOpen ? 'rotate(180deg)' : 'none',
-                                                    transition: 'transform 0.2s',
+                                                    transform: groupOpen
+                                                        ? "rotate(180deg)"
+                                                        : "none",
                                                 }}
                                             />
                                         </span>
                                     </button>
-
                                     {groupOpen && (
                                         <div className="nav-submenu">
-                                            {item.sub_items?.map((subItem) => {
-                                                const SubIcon = subItem.icon;
-                                                return (
-                                                    <Link
-                                                        key={subItem.label}
-                                                        href={subItem.path ?? '#'}
-                                                        className={`nav-item nav-subitem${isPathActive(currentPath, subItem.path) ? ' active' : ''}`}
-                                                    >
-                                                        <span className="nav-icon">
-                                                            <SubIcon size={18} className="nav-icon-img" />
-                                                        </span>
-                                                        <span className="nav-text">{subItem.label}</span>
-                                                    </Link>
-                                                );
-                                            })}
+                                            {item.sub_items?.map((subItem) => (
+                                                <Link
+                                                    key={subItem.label}
+                                                    href={subItem.path ?? "#"}
+                                                    className={`nav-item body-md${isPathActive(currentPath, subItem.path) ? " active" : ""}`}
+                                                >
+                                                    <span className="nav-icon">
+                                                        <subItem.icon
+                                                            className="nav-icon-img"
+                                                            size={20}
+                                                        />
+                                                    </span>
+                                                    <span className="nav-text">
+                                                        {subItem.label}
+                                                    </span>
+                                                </Link>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
@@ -209,13 +204,20 @@ export default function Sidebar({
                                 <button
                                     key={item.label}
                                     type="button"
-                                    className="nav-item nav-logout"
-                                    onClick={() => router.post(CMS_AUTH_SIGN_OUT_PATH)}
+                                    className="nav-item body-md border-0 bg-transparent w-100 text-start"
+                                    onClick={() =>
+                                        router.post(CMS_AUTH_SIGN_OUT_PATH)
+                                    }
                                 >
                                     <span className="nav-icon">
-                                        <Icon size={20} className="nav-icon-img" />
+                                        <item.icon
+                                            className="nav-icon-img"
+                                            size={20}
+                                        />
                                     </span>
-                                    <span className="nav-text">{item.label}</span>
+                                    <span className="nav-text">
+                                        {item.label}
+                                    </span>
                                 </button>
                             );
                         }
@@ -223,11 +225,14 @@ export default function Sidebar({
                         return (
                             <Link
                                 key={item.label}
-                                href={item.path ?? '#'}
-                                className={`nav-item${activeItem ? ' active' : ''}`}
+                                href={item.path ?? "#"}
+                                className={`nav-item body-md${activeItem ? " active" : ""}`}
                             >
                                 <span className="nav-icon">
-                                    <Icon size={20} className="nav-icon-img" />
+                                    <item.icon
+                                        className="nav-icon-img"
+                                        size={20}
+                                    />
                                 </span>
                                 <span className="nav-text">{item.label}</span>
                             </Link>

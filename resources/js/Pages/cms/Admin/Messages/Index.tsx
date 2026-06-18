@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { router, usePage } from '@inertiajs/react'
 import { ChevronDown, MoreVertical, CheckCircle, Trash2 } from 'lucide-react'
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import PrimaryButton from '@/Components/buttons/primary-button'
+import AdminLayout from '@/layouts/AdminLayout'
+import PrimaryButton from '@/components/buttons/primary-button'
 
 type TicketType = {
   value: string

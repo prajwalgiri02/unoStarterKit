@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Form, router, usePage } from '@inertiajs/react'
 import { ChevronDown, ChevronUp, HelpCircle, Pencil, Plus, Trash2, X } from 'lucide-react'
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import PrimaryButton from '@/Components/buttons/primary-button'
+import AdminLayout from '@/layouts/AdminLayout'
+import PrimaryButton from '@/components/buttons/primary-button'
 
 type FaqItem = {
   id: number
