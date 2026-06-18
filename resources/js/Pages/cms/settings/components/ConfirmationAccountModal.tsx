@@ -24,7 +24,10 @@ export default function ConfirmationAccountModal({
     const [isResending, setIsResending] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const { errors, setError, clearErrors } = useForm();
+    const { errors, setError, clearErrors } = useForm({
+        otp: "",
+        email: email,
+    });
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -141,7 +144,7 @@ export default function ConfirmationAccountModal({
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
