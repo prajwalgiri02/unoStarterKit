@@ -37,7 +37,7 @@ export default function EmailInput({
             : undefined);
 
     return (
-        <div className="d-flex flex-column gap-2">
+        <div className="flex flex-col gap-2">
             <label className="caption-md text-neutral-700" htmlFor={id}>
                 {label}
             </label>
@@ -70,7 +70,7 @@ export default function EmailInput({
                 {msg ? (
                     <p
                         id={`${id}-error`}
-                        className="caption-md text-danger mt-1 mb-0"
+                        className="caption-md text-red-500 mt-1 mb-0"
                     >
                         {msg}
                     </p>

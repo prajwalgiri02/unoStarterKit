@@ -127,20 +127,20 @@ export default function GgiQuestionModal({
                         </button>
                     </div>
                     <div className="ggi-modal-body">
-                        <form className="d-flex flex-column gap-4">
-                            <div className="form-group flex-column d-flex">
+                        <form className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-2">
                                 <label className="caption-md text-neutral-700">
                                     Question Prompt
                                 </label>
                                 <textarea
-                                    className={`textarea-large ${mergedErrors.prompt ? "border-danger" : ""}`}
+                                    className={`textarea-large ${mergedErrors.prompt ? "border-red-500" : ""}`}
                                     value={qPrompt}
                                     onChange={(e) => setQPrompt(e.target.value)}
                                     placeholder="Enter the question text"
                                     rows={5}
                                 ></textarea>
                                 {mergedErrors.prompt && (
-                                    <span className="caption-md text-danger">
+                                    <span className="caption-md text-red-500">
                                         {mergedErrors.prompt}
                                     </span>
                                 )}
@@ -163,14 +163,14 @@ export default function GgiQuestionModal({
                                     />
                                 </div>
                                 <div className="col-md-6 mb-3 mb-md-0">
-                                    <div className="form-group flex-column d-flex">
+                                    <div className="flex flex-col gap-2">
                                         <label className="caption-md text-neutral-700">
                                             Weight
                                         </label>
                                         <input
                                             type="number"
                                             step="0.1"
-                                            className={`input-giant ${mergedErrors.weight ? "border-danger" : ""}`}
+                                            className={`input-giant ${mergedErrors.weight ? "border-red-500" : ""}`}
                                             value={qWeight}
                                             onChange={(e) =>
                                                 setQWeight(e.target.value)
@@ -178,7 +178,7 @@ export default function GgiQuestionModal({
                                             placeholder="Enter weight"
                                         />
                                         {mergedErrors.weight && (
-                                            <span className="caption-md text-danger">
+                                            <span className="caption-md text-red-500">
                                                 {mergedErrors.weight}
                                             </span>
                                         )}
@@ -222,15 +222,15 @@ export default function GgiQuestionModal({
                                 </div>
                             </div>
                             {qType === "multiple_choice" && (
-                                <div className="form-group flex-column d-flex">
+                                <div className="flex flex-col gap-2">
                                     <label className="body-xs text-neutral-900 mb-1">
                                         Response Options
                                     </label>
-                                    <div className="d-flex flex-column gap-3">
+                                    <div className="flex flex-col gap-3">
                                         {[0, 1, 2].map((idx) => (
                                             <div
                                                 key={idx}
-                                                className="d-flex align-items-center gap-3"
+                                                className="flex items-center gap-3"
                                             >
                                                 <div className="response-number">
                                                     {idx}
@@ -258,19 +258,19 @@ export default function GgiQuestionModal({
                                         ))}
                                     </div>
                                     {mergedErrors.options && (
-                                        <span className="caption-md text-danger">
+                                        <span className="caption-md text-red-500">
                                             {mergedErrors.options}
                                         </span>
                                     )}
                                 </div>
                             )}
                             {qType === "short_response" && (
-                                <div className="form-group flex-column d-flex">
+                                <div className="flex flex-col gap-2">
                                     <label className="body-xs text-neutral-900 mb-2">
                                         Scoring Keywords (comma-separated)
                                     </label>
                                     <textarea
-                                        className={`textarea-large ${mergedErrors.keywords ? "border-danger" : ""}`}
+                                        className={`textarea-large ${mergedErrors.keywords ? "border-red-500" : ""}`}
                                         value={qKeywords}
                                         onChange={(e) =>
                                             setQKeywords(e.target.value)
@@ -281,7 +281,7 @@ export default function GgiQuestionModal({
                                             boxSizing: "border-box",
                                             padding: "12px 16px",
                                             border: mergedErrors.keywords
-                                                ? "1.5px solid #dc3545"
+                                                ? "1.5px solid #ef4444"
                                                 : "1.5px solid #E7E8EA",
                                             borderRadius: "20px",
                                             width: "100%",
@@ -292,17 +292,17 @@ export default function GgiQuestionModal({
                                         }}
                                     ></textarea>
                                     {mergedErrors.keywords && (
-                                        <span className="caption-md text-danger">
+                                        <span className="caption-md text-red-500">
                                             {mergedErrors.keywords}
                                         </span>
                                     )}
-                                    <span className="caption-md text-neutral-500 d-block mt-1">
+                                    <span className="caption-md text-neutral-500 block mt-1">
                                         2+ matches = 2 pts, 1 match = 1 pt, 0
                                         matches = 0 pts
                                     </span>
                                 </div>
                             )}
-                            <div className="d-flex flex-column flex-md-row w-100 gap-4 mt-2">
+                            <div className="flex flex-col md:flex-row w-full gap-4 mt-2">
                                 <button
                                     type="button"
                                     className="btns btn-gaints btns-secondary text-btn-500"

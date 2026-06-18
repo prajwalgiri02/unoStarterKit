@@ -23,15 +23,15 @@ const UserProfileCard = ({
         .substring(0, 2);
 
     return (
-        <div className="user-detail-sl-card d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div className="d-flex flex-column flex-md-row gap-3 align-items-center">
+        <div className="user-detail-sl-card flex flex-col md:flex-row justify-between items-center">
+            <div className="flex flex-col md:flex-row gap-3 items-center">
                 <div className="user-details-avatar subtitle-md">
                     {initials}
                 </div>
                 <div className="">
-                    <div className="d-flex gap-3 align-items-center justify-content-center">
+                    <div className="flex gap-3 items-center justify-center">
                         <p className="user-name subtitle-xs">{name}</p>
-                        <div className="badge-tiny link-sm bg-success-500 text-white d-flex align-items-center justify-content-center">
+                        <div className="badge-tiny link-sm bg-success-500 text-white flex items-center justify-center">
                             {status}
                         </div>
                     </div>
@@ -39,7 +39,7 @@ const UserProfileCard = ({
                 </div>
             </div>
 
-            <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-3">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-3">
                 <h1 className="body-sm text-neutral-900">{tier}</h1>
                 <button
                     className="btn-small btns btns-secondary"

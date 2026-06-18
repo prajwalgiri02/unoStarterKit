@@ -53,11 +53,11 @@ const FilePreviewModal = ({
             >
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content modal-content-file">
-                        <div className="modal-body view-files-details d-flex flex-column">
-                            <span className="title-ex-small text-neutral-900 text-start d-block">
+                        <div className="modal-body view-files-details flex flex-col">
+                            <span className="title-ex-small text-neutral-900 text-left block">
                                 View Files
                             </span>
-                            <div className="d-flex flex-column flex-sm-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
                                 {files.length === 0 ? (
                                     <p className="body-xs text-neutral-500">
                                         No files uploaded.
@@ -66,7 +66,7 @@ const FilePreviewModal = ({
                                     files.map((file, index) => (
                                         <div
                                             key={index}
-                                            className="d-flex align-items-center gap-2"
+                                            className="flex items-center gap-2"
                                         >
                                             <div className="file-upload-svg">
                                                 <img

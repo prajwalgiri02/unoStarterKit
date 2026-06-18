@@ -61,7 +61,7 @@ const Pagination = ({ links, meta, onPerPageChange }: PaginationProps) => {
                 )}
             </div>
 
-            <div className="pagination-controls d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
+            <div className="pagination-controls flex flex-wrap md:flex-nowrap items-center gap-2">
                 <Link
                     href={firstLink?.url || "#"}
                     className={`pagination-btn caption-md ${!firstLink?.url ? "disabled" : ""}`}

@@ -105,7 +105,7 @@ export default function DeleteModal({
             >
                 <div className="modal-dialog modal-delete-dialog modal-dialog-centered">
                     <div className="modal-content modal-content-delete text-center">
-                        <div className="modal-body modal-body-success d-flex flex-column align-items-center">
+                        <div className="modal-body modal-body-success flex flex-col items-center">
                             <div>
                                 <img
                                     src={deleteIconSrc}
@@ -115,7 +115,7 @@ export default function DeleteModal({
                                 />
                             </div>
 
-                            <div className="d-flex flex-column gap-2">
+                            <div className="flex flex-col gap-2">
                                 <h4
                                     id="deleteModalLabel"
                                     className="title-ex-small text-neutral-900"
@@ -127,10 +127,10 @@ export default function DeleteModal({
                                 </p>
                             </div>
 
-                            <div className="d-flex flex-column w-100 gap-3">
+                            <div className="flex flex-col w-full gap-3">
                                 <button
                                     type="button"
-                                    className="btns btn-gaints btns-primary text-btn-500 w-100 d-flex justify-content-center align-items-center"
+                                    className="btns btn-gaints btns-primary text-btn-500 w-full flex justify-center items-center"
                                     onClick={onConfirm}
                                     disabled={isDeleting}
                                 >
@@ -140,7 +140,7 @@ export default function DeleteModal({
                                 </button>
                                 <button
                                     type="button"
-                                    className="btns btn-gaints btns-secondary text-btn-500 w-100 d-flex justify-content-center align-items-center"
+                                    className="btns btn-gaints btns-secondary text-btn-500 w-full flex justify-center items-center"
                                     onClick={onClose}
                                     disabled={isDeleting}
                                 >

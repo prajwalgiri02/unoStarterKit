@@ -248,6 +248,7 @@ final class OtpService
 
             $otp->update([
                 'verified_at' => now(),
+                'expires_at' => now()->addMinutes(15), // Extend expiry after verification
             ]);
 
             return [

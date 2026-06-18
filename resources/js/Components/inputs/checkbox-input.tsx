@@ -23,8 +23,8 @@ export default function CheckboxInput({
         : undefined;
 
     return (
-        <div className="d-flex flex-column gap-1">
-            <div className="d-flex align-items-center gap-2">
+        <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
                 <input
                     type="checkbox"
                     className={className}
@@ -41,7 +41,7 @@ export default function CheckboxInput({
                 </label>
             </div>
             {msg ? (
-                <p id={`${id}-error`} className="caption-md text-danger mb-0">
+                <p id={`${id}-error`} className="caption-md text-red-500 mb-0">
                     {msg}
                 </p>
             ) : null}

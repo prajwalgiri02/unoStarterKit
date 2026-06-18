@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../css/styles.css";
+import "../../../../css/styles.css";
 import type { Conversation, MessageType } from "@/types/cms/message";
 
 interface SortDropdownProps {
@@ -104,7 +104,7 @@ const ConversationItem = ({
         data-type={conversation.type}
     >
         <td>
-            <div className="d-flex align-items-center gap-3">
+            <div className="flex items-center gap-3">
                 <div
                     className={`message-avatar body-sm ${conversation.avatar_color}`}
                 >
@@ -128,7 +128,7 @@ const ConversationItem = ({
             </div>
         </td>
         <td>
-            <div className="d-flex align-items-center justify-content-center">
+            <div className="flex items-center justify-center">
                 <span
                     className={`message-badge caption-md ${conversation.type === "contact" ? "contact-us" : "report"}`}
                 >
@@ -137,7 +137,7 @@ const ConversationItem = ({
             </div>
         </td>
         <td>
-            <div className="d-flex align-items-center justify-content-center">
+            <div className="flex items-center justify-center">
                 {conversation.type === "contact" ? (
                     <span className="message-date body-xs">
                         {conversation.date}
@@ -154,7 +154,7 @@ const ConversationItem = ({
             </div>
         </td>
         <td
-            className="text-end pr-4 actions-cell"
+            className="text-right pr-4 actions-cell"
             style={{ position: "relative" }}
         >
             <button

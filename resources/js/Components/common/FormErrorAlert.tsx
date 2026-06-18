@@ -25,7 +25,7 @@ export default function FormErrorAlert({
     return (
         <div
             id={id}
-            className={`alert alert-danger p-2 body-sm d-flex align-items-center ${className}`}
+            className={`alert alert-danger p-2 body-sm flex items-center ${className}`}
             role="alert"
         >
             <img
@@ -33,7 +33,7 @@ export default function FormErrorAlert({
                 alt="warning"
                 width="16"
                 height="16"
-                className="me-2"
+                className="mr-2"
             />
             <span>{message}</span>
         </div>

@@ -1,5 +1,5 @@
 import { router } from "@inertiajs/react";
-import "../../../css/styles.css";
+import "../../../../css/styles.css";
 import type { Conversation } from "@/types/cms/message";
 import { useEffect } from "react";
 
@@ -279,7 +279,7 @@ export default function MessageDetail({
                             Reported Comment
                         </h3>
                         <div className="reported-comment">
-                            <div className="d-flex flex-column gap-3">
+                            <div className="flex flex-col gap-3">
                                 <div className="reported-comment-user">
                                     <div
                                         className={`message-avatar body-sm ${conversation.avatar_color}`}

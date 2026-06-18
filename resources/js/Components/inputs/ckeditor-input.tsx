@@ -54,7 +54,7 @@ export default function CKEditorInput({
             : undefined);
 
     return (
-        <div className="form-group ckeditor-wrapper">
+        <div className="flex flex-col gap-2 ckeditor-wrapper">
             <label className="caption-md text-neutral-700 mb-2" htmlFor={id}>
                 {label}
             </label>
@@ -115,7 +115,7 @@ export default function CKEditorInput({
             {msg ? (
                 <p
                     id={`${id}-error`}
-                    className="caption-md text-danger mt-1 mb-0"
+                    className="caption-md text-red-500 mt-1 mb-0"
                 >
                     {msg}
                 </p>

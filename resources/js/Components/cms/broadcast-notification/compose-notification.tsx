@@ -16,8 +16,8 @@ const ComposeNotification: React.FC = () => {
 
     return (
         <div className="legal-content-card">
-            <div className="legal-card-content d-flex flex-column gap-4">
-                <div className="d-flex align-items-center justify-content-between">
+            <div className="legal-card-content flex flex-col gap-4">
+                <div className="flex items-center justify-between">
                     <h2 className="subtitle-md">Compose Notification</h2>
                 </div>
 

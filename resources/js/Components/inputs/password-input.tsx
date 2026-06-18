@@ -72,11 +72,11 @@ function PasswordFieldRow({
     };
 
     return (
-        <div className="d-flex flex-column gap-2">
+        <div className="flex flex-col gap-2">
             <label className="caption-md text-neutral-700" htmlFor={id}>
                 {label}
             </label>
-            <div style={{ position: "relative" }}>
+            <div className="relative">
                 <input
                     id={id}
                     name={name}
@@ -114,7 +114,7 @@ function PasswordFieldRow({
             {msg ? (
                 <p
                     id={`${id}-error`}
-                    className="caption-md text-danger mt-1 mb-0"
+                    className="caption-md text-red-500 mt-1 mb-0"
                 >
                     {msg}
                 </p>
@@ -201,7 +201,7 @@ export default function PasswordInput({
     };
 
     return (
-        <div className="d-flex flex-column gap-4">
+        <div className="flex flex-col gap-4">
             <PasswordFieldRow
                 form={form}
                 id={id}

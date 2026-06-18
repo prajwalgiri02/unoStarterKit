@@ -35,20 +35,18 @@ class EnsurePasswordResetOtpPending
             );
         }
 
+        // If it's verified and NOT expired, go to reset form
         if ($this->otpService->isValidVerifiedOtp($otp)) {
             return redirect()
                 ->route('cms.password.reset.form', ['token' => $token])
                 ->with('status', 'Your code is already verified. Create your new password.');
         }
 
-        if ($otp->isVerified()) {
-            return $this->redirectToRequest(
-                'Your verification has expired. Request a new code.',
-            );
-        }
-
+        // We allow the request to proceed even if expired or already verified (but expired)
+        // so the user can see the status on the page and use the "Resend" button.
         $request->attributes->set('passwordResetOtp', $otp);
         $request->attributes->set('otpExpired', $otp->isExpired());
+        $request->attributes->set('otpVerified', $otp->isVerified());
 
         if (! $otp->isExpired()) {
             $availableAt = $this->otpService->resendAvailableAt($otp);

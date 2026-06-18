@@ -35,7 +35,7 @@ type TextButtonButtonProps = TextButtonShared & {
 export type TextButtonProps = TextButtonLinkProps | TextButtonButtonProps;
 
 const baseClass =
-    "body-md text-primary-500 text-decoration-none d-inline-block border-0 bg-transparent p-0 cursor-pointer";
+    "body-md text-primary-500 no-underline inline-block border-0 bg-transparent p-0 cursor-pointer";
 
 export default function TextButton(props: TextButtonProps) {
     const { children, className = "" } = props;

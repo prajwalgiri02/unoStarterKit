@@ -8,10 +8,13 @@ export interface UserCms {
     id: number;
     name: string;
     email: string;
-    children_count: number;
-    subscription: string;
-    join_date: string;
-    status: string;
+    roles: string[];
+    is_blocked: boolean;
+    is_approved: boolean;
+    approved_at: string | null;
+    blocked_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 /** Mirrors ChildrenResource.php (list view) */

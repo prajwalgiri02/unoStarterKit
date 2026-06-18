@@ -150,7 +150,7 @@ export default function Sidebar({
                                 >
                                     <button
                                         type="button"
-                                        className={`nav-item body-md has-submenu border-0  w-100 text-start${activeItem ? " active" : ""}${groupOpen ? " expanded" : ""}`}
+                                        className={`nav-item body-md has-submenu border-0  w-full text-left${activeItem ? " active" : ""}${groupOpen ? " expanded" : ""}`}
                                         onClick={() => toggleGroup(index)}
                                     >
                                         <span className="nav-icon">
@@ -204,7 +204,7 @@ export default function Sidebar({
                                 <button
                                     key={item.label}
                                     type="button"
-                                    className="nav-item body-md border-0 bg-transparent w-100 text-start"
+                                    className="nav-item body-md border-0 bg-transparent w-full text-left"
                                     onClick={() =>
                                         router.post(CMS_AUTH_SIGN_OUT_PATH)
                                     }

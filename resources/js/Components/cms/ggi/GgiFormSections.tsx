@@ -61,7 +61,7 @@ export const BasicDetailsForm: React.FC<BasicDetailsProps> = ({
         </div>
         <div className="row gx-4">
             <div className="col-12">
-                <div className="d-flex flex-column gap-2">
+                <div className="flex flex-col gap-2">
                     <label className="caption-md text-neutral-700">
                         Description
                     </label>
@@ -73,7 +73,7 @@ export const BasicDetailsForm: React.FC<BasicDetailsProps> = ({
                         rows={5}
                     ></textarea>
                     {errors.description && (
-                        <p className="caption-md text-danger mt-1 mb-0">
+                        <p className="caption-md text-red-500 mt-1 mb-0">
                             {errors.description}
                         </p>
                     )}
@@ -106,8 +106,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
     return (
         <div className="ggi-question-card" data-id={q.id}>
-            <div className="ggi-question-header d-flex flex-column flex-sm-row align-items-start justify-content-between gap-3">
-                <div className="d-flex align-items-start flex-grow-1">
+            <div className="ggi-question-header flex flex-col sm:flex-row items-start justify-between gap-3">
+                <div className="flex items-start flex-grow">
                     <div className="ggi-question-drag">
                         <img
                             src="/icons/drag.svg"
@@ -194,7 +194,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                     </div>
                 </div>
                 {(onEdit || onDelete) && (
-                    <div className="ggi-question-actions ms-auto ms-sm-0 flex-shrink-0">
+                    <div className="ggi-question-actions ml-auto sm:ml-0 flex-shrink-0">
                         {onEdit && (
                             <button
                                 type="button"
@@ -255,7 +255,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 }) => (
     <>
         {!hideHeader && (
-            <div className="d-flex justify-content-between flex-column flex-md-row align-items-start align-items-md-center gap-2 mb-3">
+            <div className="flex justify-between flex-col md:flex-row items-start md:items-center gap-2 mb-3">
                 <div className="ggi-questions-header">
                     <h3 className="ggi-questions-title body-lg">
                         Questions ({questions.length})
@@ -280,7 +280,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         )}
         {errors?.questions && <FormErrorAlert message={errors.questions} />}
         <div
-            className="d-flex flex-column gap-4"
+            className="flex flex-col gap-4"
             ref={listRef}
             id="detailQuestionsList"
         >
@@ -314,14 +314,14 @@ export const QuestionPreview: React.FC<QuestionPreviewProps> = ({
     questions,
 }) => (
     <>
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-3">
             <div className="ggi-questions-header">
                 <h3 className="ggi-questions-title body-lg">
                     Preview & Publish
                 </h3>
             </div>
         </div>
-        <div className="d-flex flex-column gap-4">
+        <div className="flex flex-col gap-4">
             {questions.map((q, i) => (
                 <div key={q.id || i} className="ggi-preview-section">
                     <span className="body-md text-neutral-900">
@@ -333,18 +333,18 @@ export const QuestionPreview: React.FC<QuestionPreviewProps> = ({
                         </span>
                     </div>
                     {q.question_type === "multiple_choice" && (
-                        <div className="d-flex flex-column gap-3 mt-2">
+                        <div className="flex flex-col gap-3 mt-2">
                             {q.options?.map((opt: any, j: number) => (
                                 <div
                                     key={j}
-                                    className="d-flex align-items-center custom-radio-wrapper"
+                                    className="flex items-center custom-radio-wrapper"
                                 >
                                     <input
                                         type="radio"
                                         className="radio-lg"
                                         disabled
                                     />
-                                    <label className="body-md text-neutral-700 ms-2">
+                                    <label className="body-md text-neutral-700 ml-2">
                                         {opt.option_text}
                                     </label>
                                 </div>
@@ -371,7 +371,7 @@ export const QuestionPreview: React.FC<QuestionPreviewProps> = ({
                 width="24"
                 height="24"
             />
-            <span className="body-xs text-neutral-900 ms-2">
+            <span className="body-xs text-neutral-900 ml-2">
                 Once published, this GGI will be available for assessment in the
                 selected phase and tier.
             </span>

@@ -22,7 +22,7 @@ export default function LegalContentCard({
     return (
         <div className="legal-content-card">
             <div className="legal-card-content">
-                <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
                     <h2 className="legal-section-title subtitle-md m-0">
                         {sectionTitle}
                     </h2>

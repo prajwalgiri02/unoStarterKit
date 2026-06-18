@@ -23,10 +23,7 @@ class ForgotPasswordController extends Controller
 
     public function create(Request $request): Response
     {
-        return Inertia::render('cms/Auth/ForgotPassword', [
-            'status' => $request->session()->get('status'),
-            'error' => $request->session()->get('error'),
-        ]);
+        return Inertia::render('auth/forgot-password');
     }
 
     public function store(ForgotPasswordRequest $request): RedirectResponse
@@ -39,17 +36,15 @@ class ForgotPasswordController extends Controller
             ],
         );
 
-        $status = 'If an account exists for that email, a verification code has been sent.';
-
         if ($generated === null) {
-            return back()->with('status', $status);
+            return back()->with('error', 'We couldn\'t find an account with that email address.');
         }
 
         return redirect()
             ->route('cms.password.otp.form', [
                 'token' => $generated->flowToken,
             ])
-            ->with('status', $status);
+            ->with('success', 'A verification code has been sent to your email.');
     }
 
     public function verifyForm(Request $request, string $token): Response
@@ -57,12 +52,19 @@ class ForgotPasswordController extends Controller
         /** @var Otp $otp */
         $otp = $request->attributes->get('passwordResetOtp');
 
-        return Inertia::render('cms/Auth/VerifyPasswordOtp', [
+        return Inertia::render('auth/verify-otp', [
             'token' => $token,
             'status' => $request->session()->get('status'),
             'email' => $this->passwordResetService->maskEmail($otp->destination),
             'otpLength' => $this->passwordResetService->otpLength(),
             'isExpired' => (bool) $request->attributes->get('otpExpired', $otp->isExpired()),
+            'otp' => [
+                'requestReason' => $otp->purpose->value,
+                'createdAt' => $otp->created_at->toIso8601String(),
+                'updatedAt' => $otp->updated_at->toIso8601String(),
+                'expiresAt' => $otp->expires_at->toIso8601String(),
+                'verifiedAt' => $otp->verified_at?->toIso8601String(),
+            ],
         ]);
     }
 
@@ -78,7 +80,7 @@ class ForgotPasswordController extends Controller
 
         return redirect()
             ->route('cms.password.reset.form', ['token' => $token])
-            ->with('status', 'Verification successful. Create your new password.');
+            ->with('success', 'Verification successful. Create your new password.');
     }
 
     public function resend(Request $request, string $token): RedirectResponse
@@ -94,12 +96,12 @@ class ForgotPasswordController extends Controller
             ],
         );
 
-        return back()->with('status', 'A new verification code has been sent.');
+        return back()->with('success', 'A new verification code has been sent.');
     }
 
     public function resetForm(Request $request, string $token): Response
     {
-        return Inertia::render('cms/Auth/ResetPassword', [
+        return Inertia::render('auth/change-password', [
             'token' => $token,
             'status' => $request->session()->get('status'),
         ]);
@@ -118,14 +120,12 @@ class ForgotPasswordController extends Controller
         if (! $user) {
             return redirect()
                 ->route('cms.password.request')
-                ->withErrors([
-                    'email' => 'The account could not be found.',
-                ]);
+                ->with('error', 'The account could not be found.');
         }
 
         return redirect()
             ->route('cms.auth.login')
-            ->with('status', 'Your password has been reset. You can now sign in.');
+            ->with('success', 'Your password has been reset. You can now sign in.');
     }
 
     public function cancel(Request $request): RedirectResponse
@@ -137,6 +137,6 @@ class ForgotPasswordController extends Controller
 
         return redirect()
             ->route('cms.auth.login')
-            ->with('status', 'Password reset cancelled.');
+            ->with('success', 'Password reset cancelled.');
     }
 }

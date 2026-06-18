@@ -15,7 +15,7 @@ class LoginController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('cms/Auth/Login');
+        return Inertia::render('auth/sign-in');
     }
 
     public function store(LoginRequest $request): RedirectResponse
@@ -34,6 +34,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('cms.auth.login');
+        return redirect()->route('auth/sign-in');
     }
 }

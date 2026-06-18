@@ -14,7 +14,7 @@ export default function FormStepper({ currentStep, steps }: FormStepperProps) {
         <div className="ggi-stepper">
             {steps.map((step, index) => (
                 <React.Fragment key={step.id}>
-                    <div className="d-flex align-items-center steps-of-ggi">
+            <div className="flex items-center steps-of-ggi">
                         <div
                             id={`step${step.id}Indicator`}
                             className={`ggi-step ${currentStep > step.id ? "completed" : currentStep === step.id ? "active" : ""}`}

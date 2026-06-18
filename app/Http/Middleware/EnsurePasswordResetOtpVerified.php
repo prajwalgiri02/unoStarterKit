@@ -29,10 +29,16 @@ class EnsurePasswordResetOtpVerified
             OtpPurpose::PASSWORD_RESET,
         );
 
-        if (! $otp || $otp->isExpired()) {
+        if (! $otp) {
             return $this->redirectToRequest(
-                'Your verification link has expired. Request a new code.',
+                'Your verification link is invalid. Request a new code.',
             );
+        }
+
+        if ($otp->isExpired()) {
+            return redirect()
+                ->route('cms.password.otp.form', ['token' => $token])
+                ->with('error', 'Your verification has expired. Please request a new code.');
         }
 
         if (! $this->otpService->isValidVerifiedOtp($otp)) {

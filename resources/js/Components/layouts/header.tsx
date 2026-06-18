@@ -81,7 +81,7 @@ export default function Header({
                             className="menu-bar-icon"
                         />
                     </button>
-                    <div className="d-flex align-items-center gap-2">
+                    <div className="flex items-center gap-2">
                         {backUrl ? (
                             <Link
                                 href={backUrl}

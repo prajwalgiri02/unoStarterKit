@@ -36,7 +36,7 @@ const SuccessModal = ({
             >
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content modal-content-success text-center">
-                        <div className="modal-body modal-body-success d-flex flex-column align-items-center">
+                        <div className="modal-body modal-body-success flex flex-col items-center">
                             <div className="success-icon">
                                 <img
                                     src="/icons/success.svg"
@@ -45,7 +45,7 @@ const SuccessModal = ({
                                     height="40"
                                 />
                             </div>
-                            <div className="d-flex flex-column gap-2">
+                            <div className="flex flex-col gap-2">
                                 <h4
                                     id="successModalLabel"
                                     className="title-ex-small text-neutral-900 "
@@ -58,7 +58,7 @@ const SuccessModal = ({
                             </div>
                             <Link
                                 href={buttonLink}
-                                className="btns btn-gaints btns-primary text-btn-500 w-100 text-decoration-none d-flex justify-content-center align-items-center"
+                                className="btns btn-gaints btns-primary text-btn-500 w-full text-decoration-none flex justify-center items-center"
                             >
                                 {buttonText}
                             </Link>

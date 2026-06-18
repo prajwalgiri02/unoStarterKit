@@ -44,7 +44,7 @@ export default function EmployeeTableRow({
                 <span className="body-xs text-neutral-900">{lastActive}</span>
             </td>
             <td className={showDelete ? "" : undefined}>
-                <div className="d-flex gap-14 justify-content-end">
+                <div className="flex gap-14 justify-end">
                     <button
                         className="phase-action-btn edit"
                         data-id={id}

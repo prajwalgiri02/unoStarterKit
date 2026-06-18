@@ -1,4 +1,4 @@
-import type { PageProps } from "@/types/index";
+import type { PageProps } from "@/Pages/types/index";
 import { Link, usePage } from "@inertiajs/react";
 import { useEffect } from "react";
 import { Toaster, toast } from "sonner";
@@ -39,11 +39,11 @@ export default function AuthLayout({
     }, [props.flash]);
 
     return (
-        <div className="main container-fluid signin-container">
-            <div className="row g-0 signin-rows">
-                <div className="col-46 background-col">
+        <div className="w-full min-h-screen signin-container">
+            <div className="flex flex-wrap g-0 signin-rows">
+                <div className="w-[46%] background-col hidden lg:block">
                     <div className="background">
-                        <div className="fadedbackground d-flex justify-content-center align-items-center">
+                        <div className="fadedbackground flex justify-center items-center">
                             <div>
                                 <img src="/images/logo4.svg" alt="" />
                             </div>
@@ -56,15 +56,15 @@ export default function AuthLayout({
                         </div>
                     </div>
                 </div>
-                <div className="col d-flex justify-content-center align-items-center">
+                <div className="flex-1 flex justify-center items-center">
                     <div className="form">
                         <div>
                             <img src="/images/logo2.svg" alt="" />
                         </div>
                         <div className="mt-5">
-                            <div className="d-flex flex-column gap-3 mb-40">
+                            <div className="flex flex-col gap-3 mb-10">
                                 {goBack && (
-                                    <div className="d-flex align-items-center gap-8">
+                                    <div className="flex items-center gap-8">
                                         <Link
                                             className="body-xs text-neutral-700"
                                             style={{ textDecoration: "none" }}

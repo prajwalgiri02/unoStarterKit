@@ -57,7 +57,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
     };
 
     return (
-        <div className={`d-flex flex-column gap-2 ${className}`}>
+        <div className={`flex flex-col gap-2 ${className}`}>
             {label && (
                 <label htmlFor={id} className="caption-md text-neutral-700">
                     {label}
@@ -119,7 +119,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
                     </div>
                 </div>
             </div>
-            {error && <span className="text-danger caption-md">{error}</span>}
+            {error && <span className="text-red-500 caption-md">{error}</span>}
         </div>
     );
 };

@@ -243,7 +243,7 @@ export default function DataTable<T>({
                         </span>
                     </div>
 
-                    <div className="pagination-controls d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
+                    <div className="pagination-controls flex flex-wrap md:flex-nowrap items-center gap-2">
                         <button
                             type="button"
                             className={`pagination-btn caption-md ${currentPage === 1 ? "disabled" : ""}`}

@@ -71,7 +71,7 @@ function ColorPicker({
     return (
         <div className={`color-field${disabled ? " disabled" : ""}`}>
             <div className="color-field-label">{label}</div>
-            <div className="color-input-wrapper d-flex align-items-center gap-2">
+            <div className="color-input-wrapper flex items-center gap-2">
                 <button
                     ref={blobRef}
                     type="button"
@@ -89,7 +89,7 @@ function ColorPicker({
                     onClick={openPicker}
                     disabled={disabled}
                 />
-                <div className="w-100 color-picker-container">
+                <div className="w-full color-picker-container">
                     <input
                         type="color"
                         ref={colorInputRef}
@@ -116,7 +116,7 @@ function ColorPicker({
                     />
                     <input
                         type="text"
-                        className="color-picker-input color-value body-md text-neutral-900 w-100"
+                        className="color-picker-input color-value body-md text-neutral-900 w-full"
                         value={hexInput}
                         placeholder="#RRGGBB"
                         disabled={disabled}

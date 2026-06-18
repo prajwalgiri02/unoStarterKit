@@ -646,7 +646,7 @@ function ImageUpload({
             {displayError && (
                 <p
                     id={`${resolvedInputId}-error`}
-                    className="caption-md text-danger mt-1 mb-0"
+                    className="caption-md text-red-500 mt-1 mb-0"
                 >
                     {displayError}
                 </p>

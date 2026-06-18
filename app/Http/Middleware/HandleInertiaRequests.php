@@ -43,6 +43,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
+                'success' => fn () => $request->session()->get('success') ?? $request->session()->get('status'),
+                'error' => fn () => $request->session()->get('error'),
             ],
             'resendAvailableAt' => $request->routeIs(['cms.password.otp.*', 'cms.admin.settings.otp.*'])
                 ? $this->resolveResendAvailableAt($request)

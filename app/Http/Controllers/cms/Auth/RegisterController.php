@@ -32,7 +32,7 @@ class RegisterController extends Controller
         if ($this->userRegistrationService->requiresApproval()) {
             return redirect()
                 ->route('cms.auth.login')
-                ->with('status', 'Your account has been created and is pending admin approval.');
+                ->with('success', 'Your account has been created and is pending admin approval.');
         }
 
         Auth::login($user);

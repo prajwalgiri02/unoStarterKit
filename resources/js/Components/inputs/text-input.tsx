@@ -46,7 +46,7 @@ export default function TextInput({
             : undefined);
 
     return (
-        <div className="form-group">
+        <div className="flex flex-col gap-2">
             <label className="caption-md text-neutral-700" htmlFor={id}>
                 {label}
             </label>
@@ -75,7 +75,7 @@ export default function TextInput({
             {msg ? (
                 <p
                     id={`${id}-error`}
-                    className="caption-md text-danger mt-1 mb-0"
+                    className="caption-md text-red-500 mt-1 mb-0"
                 >
                     {msg}
                 </p>

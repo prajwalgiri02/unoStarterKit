@@ -9,7 +9,6 @@ type DashboardProps = {
         user: { id: number; name: string; email: string } | null;
     };
     cms: {
-        sessionLifetimeMinutes: number;
         sessionExpireOnBrowserClose: boolean;
     };
 };
@@ -17,7 +16,6 @@ type DashboardProps = {
 const Dashboard = () => {
     const {
         auth: { user },
-        cms: { sessionLifetimeMinutes, sessionExpireOnBrowserClose },
     } = usePage<DashboardProps>().props;
 
     return (

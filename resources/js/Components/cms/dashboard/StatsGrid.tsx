@@ -89,7 +89,7 @@ const StatCard: React.FC<StatCardProps> = ({
                 <img src={icon} alt={label} className="stat-icon-img" />
             </div>
             <p className="stat-label">{label}</p>
-            <div className="d-flex justify-content-between align-items-center">
+            <div className="flex justify-between items-center">
                 <p className="stat-value">{formatValue(value)}</p>
                 {change && <span className="stat-change">{change}</span>}
                 {linkText && <span className="view-all-link">{linkText}</span>}

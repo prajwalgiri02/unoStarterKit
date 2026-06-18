@@ -26,7 +26,7 @@ class UserManagerController extends Controller
 
         $users = $this->userManagerService->listUsers($search);
 
-        return Inertia::render('cms/Admin/UserManager/Index', [
+        return Inertia::render('cms/user-management/index', [
             'users' => $users->through(fn (User $user): array => $this->transformUser($user)),
             'filters' => [
                 'search' => $search ?? '',
@@ -38,7 +38,7 @@ class UserManagerController extends Controller
     {
         $user = $this->userManagerService->getUser($user);
 
-        return Inertia::render('cms/Admin/UserManager/Show', [
+        return Inertia::render('cms/user-management/view', [
             'user' => $this->transformUser($user),
         ]);
     }
@@ -47,7 +47,7 @@ class UserManagerController extends Controller
     {
         $user = $this->userManagerService->getUser($user);
 
-        return Inertia::render('cms/Admin/UserManager/Edit', [
+        return Inertia::render('cms/user-management/edit', [
             'user' => $this->transformUser($user),
         ]);
     }
