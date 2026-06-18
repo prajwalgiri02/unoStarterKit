@@ -15,16 +15,17 @@ class VerifyPasswordOtpRequest extends FormRequest
 
     public function rules(): array
     {
-        $length = (int) (array_replace(
-            config('otp.defaults', []),
-            config('otp.purposes.password_reset', []),
-        )['length'] ?? 6);
-
         return [
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+            ],
             'otp' => [
                 'required',
                 'string',
-                "digits:{$length}",
             ],
         ];
     }

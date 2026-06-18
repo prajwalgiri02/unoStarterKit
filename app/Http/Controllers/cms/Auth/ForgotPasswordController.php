@@ -32,7 +32,7 @@ class ForgotPasswordController extends Controller
             email: $request->validated('email'),
             metadata: [
                 'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
+                'user_agent' => $request->userAgent(), 
             ],
         );
 

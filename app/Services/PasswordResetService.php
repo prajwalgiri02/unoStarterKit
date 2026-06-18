@@ -189,6 +189,15 @@ final class PasswordResetService
             .$domain;
     }
 
+    public function findForEmail(string $email): ?Otp
+    {
+        return $this->otpService->findForDestination(
+            channel: OtpChannel::EMAIL,
+            purpose: OtpPurpose::PASSWORD_RESET,
+            destination: $email,
+        );
+    }
+
     /**
      * @param  array<string, mixed>|null  $snapshot
      */
