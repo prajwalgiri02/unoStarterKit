@@ -9,7 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserRegistrationService;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
@@ -28,7 +28,7 @@ class AuthController extends Controller
     /**
      * Register a User.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function register(RegisterRequest $request)
     {
@@ -42,7 +42,7 @@ class AuthController extends Controller
     /**
      * Get a JWT via given credentials.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function login(LoginRequest $request)
     {
@@ -57,11 +57,13 @@ class AuthController extends Controller
 
         if ($user !== null && $user->isPendingApproval()) {
             Auth::guard('api')->logout();
+
             return $this->errorResponse('Your account is pending approval.', 403);
         }
 
         if ($user !== null && $user->isBlocked()) {
             Auth::guard('api')->logout();
+
             return $this->errorResponse('Your account has been blocked.', 403);
         }
 
@@ -71,7 +73,7 @@ class AuthController extends Controller
     /**
      * Log the user out (Invalidate the token).
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function logout()
     {
@@ -83,7 +85,7 @@ class AuthController extends Controller
     /**
      * Refresh a token.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function refresh()
     {
@@ -93,9 +95,8 @@ class AuthController extends Controller
     /**
      * Get the token array structure.
      *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @param  string  $token
+     * @return JsonResponse
      */
     protected function respondWithToken($token)
     {
@@ -103,7 +104,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
-            'user' => new UserResource(Auth::guard('api')->user())
+            'user' => new UserResource(Auth::guard('api')->user()),
         ]);
     }
 }

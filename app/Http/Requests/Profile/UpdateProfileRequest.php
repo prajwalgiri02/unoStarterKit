@@ -17,11 +17,11 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'                  => ['required', 'string', 'max:255'],
-            'email'                 => ['required', 'email', 'max:255', 'unique:users,email,' . $this->user()->id],
-            'password'              => ['nullable', 'string', Password::defaults(), 'confirmed'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->user()->id],
+            'password' => ['nullable', 'string', Password::defaults(), 'confirmed'],
             'password_confirmation' => ['nullable', 'string'],
-            'avatar'                => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }
 

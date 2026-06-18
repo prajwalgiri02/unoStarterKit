@@ -50,7 +50,7 @@ class SupportTicketService
     }
 
     /**
-     * @param array{user_id?: int, name: string, email: string, message: string, type: SupportTicketType} $data
+     * @param  array{user_id?: int, name: string, email: string, message: string, type: SupportTicketType}  $data
      */
     public function create(array $data): SupportTicket
     {

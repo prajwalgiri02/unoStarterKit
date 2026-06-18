@@ -57,7 +57,7 @@ class NotificationController extends Controller
             ]);
 
             // If not scheduled for future, send it immediately
-            if (!$broadcast->scheduled_at) {
+            if (! $broadcast->scheduled_at) {
                 $this->sendBroadcast($broadcast);
             }
         });
@@ -73,7 +73,7 @@ class NotificationController extends Controller
         $query = User::query();
 
         // Apply filters if not sending to all
-        if (!$broadcast->send_to_all) {
+        if (! $broadcast->send_to_all) {
             if ($broadcast->location) {
                 $query->where('location', $broadcast->location);
             }
@@ -96,7 +96,7 @@ class NotificationController extends Controller
 
                 // 2. Send Push Notification via Firebase
                 $tokens = $user->firebaseTokens->pluck('device_token')->toArray();
-                if (!empty($tokens)) {
+                if (! empty($tokens)) {
                     $this->sendToFirebase($tokens, $broadcast);
                 }
             }
@@ -112,12 +112,12 @@ class NotificationController extends Controller
     protected function sendToFirebase(array $tokens, Notification $broadcast)
     {
         // Log the attempt
-        Log::info("Sending FCM notification to " . count($tokens) . " tokens for broadcast ID: {$broadcast->id}");
+        Log::info('Sending FCM notification to '.count($tokens)." tokens for broadcast ID: {$broadcast->id}");
 
-        // Implementation note: 
+        // Implementation note:
         // You should use a package like 'kreait/laravel-firebase' or direct HTTP calls to FCM V1 API.
         // For production, this should ideally be handled by a queued Job.
-        
+
         /* Example implementation:
         foreach ($tokens as $token) {
             // Http::withToken($fcmToken)->post('https://fcm.googleapis.com/v1/projects/my-project/messages:send', [...]);

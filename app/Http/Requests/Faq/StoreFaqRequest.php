@@ -20,7 +20,7 @@ class StoreFaqRequest extends FormRequest
     {
         return [
             'question' => ['required', 'string', 'max:500'],
-            'answer'   => ['required', 'string'],
+            'answer' => ['required', 'string'],
         ];
     }
 

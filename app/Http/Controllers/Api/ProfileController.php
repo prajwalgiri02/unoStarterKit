@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\ChangePassword;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
-use App\Models\User;
 use App\Services\ImageUploadService;
 use App\Services\UserManagerService;
 use App\Traits\ApiResponse;
@@ -23,6 +22,7 @@ class ProfileController extends Controller
     public function index()
     {
         $user = auth()->user();
+
         return $this->successResponse(new UserResource($user));
     }
 

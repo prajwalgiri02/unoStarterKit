@@ -26,7 +26,7 @@ class FaqsService
     {
         return Faq::create([
             'question' => $attributes['question'],
-            'answer'   => $attributes['answer'],
+            'answer' => $attributes['answer'],
         ]);
     }
 
@@ -37,7 +37,7 @@ class FaqsService
     {
         $faq->update([
             'question' => $attributes['question'],
-            'answer'   => $attributes['answer'],
+            'answer' => $attributes['answer'],
         ]);
 
         return $faq->refresh();

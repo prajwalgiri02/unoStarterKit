@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['question','answer'])]
-class Faq extends Model
-{
-}
+#[Fillable(['question', 'answer'])]
+class Faq extends Model {}

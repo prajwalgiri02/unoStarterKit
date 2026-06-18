@@ -91,7 +91,7 @@ final class ProfileUpdateService
 
         DB::transaction(function () use ($user, $pendingChanges, $otherChanges, $otp) {
             $data = array_merge($otherChanges, $pendingChanges);
-            
+
             if (isset($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
                 $data['remember_token'] = Str::random(60);
@@ -124,8 +124,11 @@ final class ProfileUpdateService
     public function maskEmail(string $email): string
     {
         [$username, $domain] = array_pad(explode('@', $email, 2), 2, '');
-        if ($username === '' || $domain === '') return $email;
+        if ($username === '' || $domain === '') {
+            return $email;
+        }
         $visibleCharacters = min(2, strlen($username));
-        return substr($username, 0, $visibleCharacters) . str_repeat('*', max(2, strlen($username) - $visibleCharacters)) . '@' . $domain;
+
+        return substr($username, 0, $visibleCharacters).str_repeat('*', max(2, strlen($username) - $visibleCharacters)).'@'.$domain;
     }
 }

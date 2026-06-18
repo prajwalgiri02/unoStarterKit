@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
@@ -21,7 +22,7 @@ use Illuminate\Support\Str;
  *   // Get the slug string without assigning it:
  *   $slug = $model->generateUniqueSlug('title');
  *
- * @mixin \Illuminate\Database\Eloquent\Model
+ * @mixin Model
  */
 trait HasSlug
 {
@@ -34,7 +35,7 @@ trait HasSlug
      */
     public function setSlug(string $sourceField, string $slugField = 'slug'): static
     {
-        /** @var \Illuminate\Database\Eloquent\Model $this */
+        /** @var Model $this */
         $ignoreId = $this->exists ? (int) $this->getKey() : null;
 
         $this->{$slugField} = $this->generateUniqueSlug($sourceField, $slugField, $ignoreId);
@@ -46,11 +47,11 @@ trait HasSlug
      * Generate and return a unique slug derived from $sourceField without
      * assigning it to the model.
      *
-     * @param  string   $sourceField  Model attribute to build the slug from (e.g. 'title', 'name')
-     * @param  string   $slugField    Column that will store the slug (default: 'slug')
-     * @param  int|null $ignoreId     Primary key to exclude from the uniqueness check (pass the
-     *                                model's own ID when updating so the current row is not treated
-     *                                as a conflict)
+     * @param  string  $sourceField  Model attribute to build the slug from (e.g. 'title', 'name')
+     * @param  string  $slugField  Column that will store the slug (default: 'slug')
+     * @param  int|null  $ignoreId  Primary key to exclude from the uniqueness check (pass the
+     *                              model's own ID when updating so the current row is not treated
+     *                              as a conflict)
      */
     public function generateUniqueSlug(
         string $sourceField,
@@ -58,13 +59,13 @@ trait HasSlug
         ?int $ignoreId = null,
     ): string {
         $value = (string) ($this->{$sourceField} ?? '');
-        $base  = Str::slug($value);
+        $base = Str::slug($value);
 
         if ($base === '') {
             $base = Str::lower(Str::random(8));
         }
 
-        $slug    = $base;
+        $slug = $base;
         $counter = 1;
 
         while ($this->slugAlreadyExists($slug, $slugField, $ignoreId)) {
@@ -83,7 +84,7 @@ trait HasSlug
         string $slugField,
         ?int $ignoreId,
     ): bool {
-        /** @var \Illuminate\Database\Eloquent\Model $this */
+        /** @var Model $this */
         $query = static::query()->where($slugField, $slug);
 
         if ($ignoreId !== null) {

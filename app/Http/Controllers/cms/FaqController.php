@@ -26,10 +26,10 @@ class FaqController extends Controller
         return Inertia::render('cms/faq/index', [
             'faqs' => [
                 'data' => $faqs->map(fn (Faq $faq): array => [
-                    'id'      => $faq->id,
-                    'title'   => $faq->question,
+                    'id' => $faq->id,
+                    'title' => $faq->question,
                     'content' => $faq->answer,
-                    'status'  => 'published',
+                    'status' => 'published',
                 ])->values(),
             ],
         ]);

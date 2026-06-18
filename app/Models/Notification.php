@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Notification extends Model
 {
-
     protected $fillable = [
         'title',
         'message',

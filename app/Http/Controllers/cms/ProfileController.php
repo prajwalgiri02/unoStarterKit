@@ -25,8 +25,8 @@ class ProfileController extends Controller
 
         return Inertia::render('cms/settings/index', [
             'user' => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
             ],
         ]);

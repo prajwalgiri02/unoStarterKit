@@ -3,21 +3,23 @@
 namespace App\Services;
 
 use Aws\S3\S3Client;
+use Exception;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Exception;
 
 class VideoUploadService
 {
     protected string $bucket;
+
     protected S3Client $s3Client;
 
     public function __construct()
     {
         $this->bucket = config('filesystems.disks.s3.bucket');
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
         $this->s3Client = $disk->getClient();
     }
@@ -25,8 +27,9 @@ class VideoUploadService
     /**
      * Save a video chunk and return the path if the upload is complete.
      *
-     * @param array{file_id: string, chunk_number: int, total_chunks: int, chunk: UploadedFile, file_name?: string} $data
+     * @param  array{file_id: string, chunk_number: int, total_chunks: int, chunk: UploadedFile, file_name?: string}  $data
      * @return array{file_id: string, file_name: string, progress: float, completed: bool, file_path: string|null}
+     *
      * @throws Exception
      */
     public function saveVideo(array $data): array
@@ -46,7 +49,7 @@ class VideoUploadService
 
         try {
             // Start multipart upload if it's the first chunk or we don't have an upload ID
-            if ($chunkNumber === 1 || !Cache::has($cacheKeyUploadId)) {
+            if ($chunkNumber === 1 || ! Cache::has($cacheKeyUploadId)) {
                 $result = $this->s3Client->createMultipartUpload([
                     'Bucket' => $this->bucket,
                     'Key' => $s3Key,
@@ -57,19 +60,19 @@ class VideoUploadService
 
             $uploadId = Cache::get($cacheKeyUploadId);
 
-            if (!$uploadId) {
+            if (! $uploadId) {
                 throw new Exception("UploadId missing for file {$fileId}");
             }
 
             // Track uploaded parts
             $parts = Cache::get($cacheKeyParts, []);
-            
+
             // Check if this chunk was already uploaded to avoid redundant S3 calls
             $existingPart = collect($parts)->firstWhere('PartNumber', $chunkNumber);
-            
-            if (!$existingPart) {
+
+            if (! $existingPart) {
                 Log::info("Uploading chunk {$chunkNumber}/{$totalChunks} for file {$fileId}");
-                
+
                 $uploadPart = $this->s3Client->uploadPart([
                     'Bucket' => $this->bucket,
                     'Key' => $s3Key,
@@ -82,10 +85,10 @@ class VideoUploadService
                     'PartNumber' => $chunkNumber,
                     'ETag' => $uploadPart['ETag'],
                 ];
-                
+
                 // Sort parts by PartNumber to ensure they are in order for completion
-                usort($parts, fn($a, $b) => $a['PartNumber'] <=> $b['PartNumber']);
-                
+                usort($parts, fn ($a, $b) => $a['PartNumber'] <=> $b['PartNumber']);
+
                 Cache::put($cacheKeyParts, $parts, now()->addHours(6));
             } else {
                 Log::info("Chunk {$chunkNumber} already uploaded for file {$fileId}, skipping S3 call.");
@@ -95,7 +98,7 @@ class VideoUploadService
             $progress = round((count($parts) / $totalChunks) * 100, 2);
             Cache::put($cacheKeyProgress, $progress, now()->addHours(6));
 
-                // Complete multipart upload on last chunk
+            // Complete multipart upload on last chunk
             if ($chunkNumber === $totalChunks) {
                 $this->s3Client->completeMultipartUpload([
                     'Bucket' => $this->bucket,
@@ -120,7 +123,7 @@ class VideoUploadService
             Log::error("S3 chunk upload failed for file {$fileId}: {$e->getMessage()}", [
                 'file_id' => $fileId,
                 'chunk_number' => $chunkNumber,
-                'exception' => $e
+                'exception' => $e,
             ]);
             throw $e;
         }
