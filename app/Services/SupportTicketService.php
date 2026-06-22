@@ -39,6 +39,11 @@ class SupportTicketService
         return $query->get();
     }
 
+    public function delete(SupportTicket $ticket): void
+    {
+        $ticket->delete();
+    }
+
     public function resolve(SupportTicket $ticket): SupportTicket
     {
         $ticket->update([

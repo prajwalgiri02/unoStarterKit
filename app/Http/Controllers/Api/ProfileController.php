@@ -32,20 +32,21 @@ class ProfileController extends Controller
         $attributes = $request->profileAttributes();
 
         if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                $this->imageUploadService->delete($user->avatar);
-            }
-
+            $oldAvatar = $user->avatar;
             $attributes['avatar'] = $this->imageUploadService->upload($request->file('avatar'), 'avatars');
+
+            if ($oldAvatar) {
+                $this->imageUploadService->delete($oldAvatar);
+            }
         }
 
-        $this->userManagerService->updateUser(
+        $updated = $this->userManagerService->updateUser(
             $user,
             $attributes,
             $user,
         );
 
-        return $this->successResponse(new UserResource($user), 'Profile Updated Successfully', 200);
+        return $this->successResponse(new UserResource($updated), 'Profile Updated Successfully', 200);
     }
 
     public function changePassword(ChangePassword $request)

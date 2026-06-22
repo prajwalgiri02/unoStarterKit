@@ -10,6 +10,8 @@ use App\Enums\OtpPurpose;
 use App\Exceptions\OtpException;
 use App\Models\Otp;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -19,14 +21,24 @@ final class ProfileUpdateService
     public function __construct(
         private readonly OtpService $otpService,
         private readonly OtpDeliveryService $otpDeliveryService,
+        private readonly ImageUploadService $imageUploadService,
     ) {}
 
     /**
      * @param  array<string, mixed>  $attributes
      * @return array{status: string, generated?: GeneratedOtp}
      */
-    public function initiate(User $user, array $attributes): array
+    public function initiate(User $user, array $attributes, ?UploadedFile $avatar = null): array
     {
+        if ($avatar !== null) {
+            $oldAvatar = $user->avatar;
+            $attributes['avatar'] = $this->imageUploadService->upload($avatar, 'avatars');
+
+            if ($oldAvatar) {
+                $this->imageUploadService->delete($oldAvatar);
+            }
+        }
+
         $requiresOtp = false;
         $pendingChanges = [];
 
@@ -41,7 +53,9 @@ final class ProfileUpdateService
         }
 
         if (! $requiresOtp) {
-            return ['status' => 'no_otp_required'];
+            $user->update($attributes);
+
+            return ['status' => 'updated'];
         }
 
         // We use the current email as destination for OTP
@@ -75,9 +89,11 @@ final class ProfileUpdateService
         ];
     }
 
-    public function verify(Otp $otp, string $code): void
+    public function verifyAndApply(Otp $otp, string $code): User
     {
         $this->otpService->verify($otp, $code);
+
+        return $this->applyChanges($otp);
     }
 
     public function applyChanges(Otp $otp): User
@@ -119,6 +135,11 @@ final class ProfileUpdateService
     public function findByToken(string $token): ?Otp
     {
         return $this->otpService->findByFlowToken($token, OtpPurpose::PASSWORD_CHANGE);
+    }
+
+    public function resendAvailableAt(Otp $otp): ?Carbon
+    {
+        return $this->otpService->resendAvailableAt($otp);
     }
 
     public function maskEmail(string $email): string
