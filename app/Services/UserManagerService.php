@@ -20,6 +20,10 @@ class UserManagerService
     {
         return User::query()
             ->with('roles')
+            // Exclude users with the 'admin' role
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
+            })
             ->when(
                 filled($search),
                 fn ($query) => $query->where(function ($query) use ($search): void {

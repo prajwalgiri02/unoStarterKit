@@ -56,7 +56,7 @@ class UserManagerTest extends TestCase
             ->get(route('cms.user-manager.index', ['search' => 'Jane Searchable']))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('cms/Admin/UserManager/Index')
+                ->component('cms/user-management/index')
                 ->where('filters.search', 'Jane Searchable')
                 ->has('users.data', 1)
                 ->where('users.data.0.email', 'jane-search@example.com'));
@@ -77,15 +77,15 @@ class UserManagerTest extends TestCase
             ->get(route('cms.user-manager.show', $target))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('cms/Admin/UserManager/Show')
-                ->where('user.email', 'target@example.com'));
+                ->component('cms/user-management/view')
+                ->where('user.data.email', 'target@example.com'));
 
         $this->actingAs($admin)
             ->get(route('cms.user-manager.edit', $target))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('cms/Admin/UserManager/Edit')
-                ->where('user.email', 'target@example.com'));
+                ->component('cms/user-management/edit')
+                ->where('user.data.email', 'target@example.com'));
 
         $this->actingAs($admin)
             ->put(route('cms.user-manager.update', $target), [

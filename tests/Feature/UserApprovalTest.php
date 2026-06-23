@@ -31,7 +31,7 @@ class UserApprovalTest extends TestCase
             'password_confirmation' => 'password123',
         ]);
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/cms/dashboard');
         $this->assertAuthenticatedAs(User::query()->where('email', 'jane@example.com')->first());
     }
 
@@ -48,7 +48,7 @@ class UserApprovalTest extends TestCase
 
         $response
             ->assertRedirect(route('cms.auth.login'))
-            ->assertSessionHas('status');
+            ->assertSessionHas('success');
 
         $this->assertGuest();
 
@@ -92,7 +92,7 @@ class UserApprovalTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/cms/dashboard');
         $this->assertAuthenticatedAs($admin);
     }
 
@@ -124,7 +124,7 @@ class UserApprovalTest extends TestCase
         $this->post('/cms/login', [
             'email' => 'pending@example.com',
             'password' => 'password123',
-        ])->assertRedirect('/');
+        ])->assertRedirect('/cms/dashboard');
 
         $this->assertAuthenticatedAs($pendingUser->fresh());
     }
