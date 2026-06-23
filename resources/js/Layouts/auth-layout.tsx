@@ -58,9 +58,6 @@ export default function AuthLayout({
                 </div>
                 <div className="flex-1 flex justify-center items-center">
                     <div className="form">
-                        <div>
-                            <img src="/images/logo2.svg" alt="" />
-                        </div>
                         <div className="mt-5">
                             <div className="flex flex-col gap-3 mb-10">
                                 {goBack && (

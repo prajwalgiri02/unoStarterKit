@@ -13,30 +13,31 @@ import { toast } from "sonner";
 
 function MessagesAndSupport() {
     const { props } = usePage<PageProps & MessagesProps>();
-    const { messages = [], filters = {} } = props;
+    const { tickets = { data: [] }, filters = {} } = props;
 
+    const conversations = tickets.data;
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     const activeFilter: MessageType | "all" = (filters.type as any) || "all";
 
     useEffect(() => {
-        if (messages.length > 0) {
-            if (!selectedId || !messages.find((m) => m.id === selectedId)) {
+        if (conversations.length > 0) {
+            if (!selectedId || !conversations.find((m) => m.id === selectedId)) {
                 if (window.innerWidth > 1200) {
-                    setSelectedId(messages[0].id);
+                    setSelectedId(conversations[0].id);
                 }
             }
         } else {
             setSelectedId(null);
         }
-    }, [messages, selectedId]);
+    }, [conversations, selectedId]);
 
     const selectedConversation =
-        messages.find((c) => c.id === selectedId) || null;
+        conversations.find((c) => c.id === selectedId) || null;
 
     const handleFilterChange = (filter: MessageType | "all") => {
         router.get(
-            "/cms/messages-and-support",
+            "/cms/messages",
             { ...filters, type: filter === "all" ? undefined : filter },
             { preserveState: true },
         );
@@ -44,23 +45,20 @@ function MessagesAndSupport() {
 
     const handleSortChange = (sort: string) => {
         router.get(
-            "/cms/messages-and-support",
+            "/cms/messages",
             { ...filters, sort },
             { preserveState: true },
         );
     };
 
-    const handleMarkAction = (id: number, status: string) => {
-        router.put(
-            `/cms/messages/${id}`,
-            {
-                status: status,
-                is_read: true,
-            },
+    const handleMarkAction = (id: number) => {
+        router.patch(
+            `/cms/messages/${id}/resolve`,
+            {},
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success("Mail marked as read");
+                    toast.success("Ticket marked as resolved");
                 },
             },
         );
@@ -70,7 +68,7 @@ function MessagesAndSupport() {
         router.delete(`/cms/messages/${id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success("Message deleted successfully");
+                toast.success("Ticket deleted successfully");
                 if (selectedId === id) {
                     setSelectedId(null);
                 }
@@ -81,7 +79,7 @@ function MessagesAndSupport() {
     return (
         <div className="messages-layout">
             <ConversationList
-                conversations={messages}
+                conversations={conversations}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 activeFilter={activeFilter}
@@ -94,7 +92,7 @@ function MessagesAndSupport() {
             <MessageDetail
                 conversation={selectedConversation}
                 onBack={() => setSelectedId(null)}
-                onMarkAction={handleMarkAction}
+                onMarkResolved={handleMarkAction}
                 onDelete={handleDelete}
             />
         </div>

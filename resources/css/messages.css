@@ -202,19 +202,19 @@
     }
 
     .message-avatar.orange {
-        background: #ffebd4;
+        background: var(--avatar-orange-bg);
     }
 
     .message-avatar.teal {
-        background: #d1fae5;
+        background: var(--avatar-green-bg);
     }
 
     .message-avatar.blue {
-        background: #dbeafe;
+        background: var(--avatar-blue-bg);
     }
 
     .message-avatar.pink {
-        background: #fce7f3;
+        background: var(--avatar-pink-bg);
     }
 
     /* Message Info */
@@ -251,7 +251,7 @@
         color: var(--primary-500);
     }
 
-    .message-badge.report {
+    .message-badge.dispute {
         background: var(--primary-50);
         color: var(--primary-500);
     }
@@ -262,8 +262,8 @@
     }
 
     .message-badge.resolved {
-        background: #d1fae5;
-        color: #059669;
+        background: var(--avatar-green-bg);
+        color: var(--avatar-green-text);
     }
 
     /* Message Date */
@@ -384,7 +384,7 @@
     /* Reported Comment */
     .reported-comment {
         border-radius: 16px;
-        background-color: #ffffff;
+        background-color: var(--white);
         padding: 12px 22px;
         margin-bottom: 16px;
         box-shadow: 0px 4px 62px 0px rgba(116, 182, 196, 0.14);
@@ -400,12 +400,12 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #dbeafe;
+        background: var(--avatar-blue-bg);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: "Poppins", sans-serif;
-        color: #2563eb;
+        color: var(--avatar-blue-text);
     }
 
     .reported-comment-name {
@@ -418,53 +418,8 @@
         color: var(--neutral-600);
     }
 
-    /* Report Actions */
-    .report-actions {
-        display: flex;
-        gap: 12px;
-    }
-
-    .btn-delete-comment {
-        font-family: "Poppins", sans-serif;
-        color: var(--error-500);
-        cursor: pointer;
-        transition: all 0.2s;
-        background: var(--error-50);
-    }
-
-    .btn-delete-comment:hover {
-        background: #fee2e2;
-    }
-
-    .btn-delete-user {
-        background: var(--white);
-        border: 1px solid var(--error-500);
-        font-family: "Poppins", sans-serif;
-        color: var(--error-500);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-delete-user:hover {
-        background: #fee2e2;
-    }
-
     /* Action Buttons */
-    .btn-mark-read {
-        padding: 16px 32px;
-        background: var(--primary-500);
-        border: none;
-        border-radius: 24px;
-        font-family: "Poppins", sans-serif;
-        color: var(--white);
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .btn-mark-read:hover {
-        background: var(--primary-600);
-    }
-
+    .btn-mark-read,
     .btn-mark-resolved {
         padding: 16px 32px;
         background: var(--primary-500);
@@ -476,6 +431,7 @@
         transition: background 0.2s;
     }
 
+    .btn-mark-read:hover,
     .btn-mark-resolved:hover {
         background: var(--primary-600);
     }

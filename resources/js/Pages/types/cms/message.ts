@@ -1,29 +1,35 @@
-/** Mirrors ContactMessageResource.php */
-export type MessageType = "contact" | "report";
+/** Mirrors SupportTicketResource.php */
+export type MessageType = "contact_us" | "dispute";
 export type MessageStatus = "pending" | "resolved";
 
-export interface ContactMessage {
+export interface Conversation {
     id: number;
     name: string;
     email: string;
-    subject?: string;
     message: string;
-    is_read: boolean;
-    status: MessageStatus;
     type: MessageType;
+    type_label: string;
+    type_badge_class: string;
+    status: MessageStatus;
+    status_label: string;
+    status_badge_class: string;
+    resolved_at: string | null;
     date: string;
-    avatar_text: string;
-    avatar_color: "orange" | "teal" | "blue" | "pink";
+    created_at: string;
+}
+
+export interface TicketType {
+    value: string;
+    label: string;
+    badge_class: string;
 }
 
 export interface MessagesPageProps {
-    messages: ContactMessage[];
+    tickets: { data: Conversation[] };
+    ticket_types: TicketType[];
     filters: {
         type?: string;
-        status?: string;
-        search?: string;
         sort?: string;
     };
 }
-export type Conversation = ContactMessage;
 export type MessageListPageProps = MessagesPageProps;
