@@ -44,9 +44,6 @@ export default function AuthLayout({
                 <div className="w-[46%] background-col hidden lg:block">
                     <div className="background">
                         <div className="fadedbackground flex justify-center items-center">
-                            <div>
-                                <img src="/images/logo4.svg" alt="" />
-                            </div>
                             <div className="dotsposition">
                                 <img src="/icons/dots.svg" alt="" />
                             </div>

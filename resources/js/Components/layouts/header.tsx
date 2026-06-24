@@ -2,6 +2,7 @@ import { Link, router, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
 import PrimaryButton from "../buttons/primary-button";
 import type { ActionButtonConfig } from "@/layouts/cms-layout";
+import NotificationModal from "../modals/notification-modal";
 
 interface HeaderProps {
     children: React.ReactNode;
@@ -34,6 +35,7 @@ export default function Header({
 }: HeaderProps) {
     const { url } = usePage();
     const [search, setSearch] = useState("");
+    const [notificationOpen, setNotificationOpen] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -180,7 +182,10 @@ export default function Header({
                     )}
 
                     {showNotificationButton && (
-                        <button className="notification-btn">
+                        <button
+                            className="notification-btn"
+                            onClick={() => setNotificationOpen(true)}
+                        >
                             <img
                                 src="/icons/notification1.svg"
                                 alt="notification"
@@ -191,6 +196,24 @@ export default function Header({
                 </div>
             </header>
             <div className="dashboard-content">{children}</div>
+            {notificationOpen && (
+                <NotificationModal
+                    onClose={() => setNotificationOpen(false)}
+                    onMarkAllAsRead={() =>
+                        router.patch(
+                            "/cms/notifications/mark-all-read",
+                            {},
+                            { preserveState: true, preserveScroll: true },
+                        )
+                    }
+                    onClearAll={() =>
+                        router.delete("/cms/notifications/clear-all", {
+                            preserveState: true,
+                            preserveScroll: true,
+                        })
+                    }
+                />
+            )}
         </>
     );
 }

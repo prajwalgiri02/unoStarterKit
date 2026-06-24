@@ -1,6 +1,6 @@
 import Header from "@/components/layouts/header";
 import Sidebar from "@/components/layouts/sidebar";
-import type { PageProps } from "@/types/index";
+import type { PageProps } from "../Pages/types/index";
 import { usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";

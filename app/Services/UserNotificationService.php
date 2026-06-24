@@ -31,4 +31,11 @@ class UserNotificationService
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
     }
+
+    public function clearAll(User $user): void
+    {
+        UserNotification::where('notifiable_id', $user->id)
+            ->where('notifiable_type', User::class)
+            ->delete();
+    }
 }
