@@ -28,6 +28,22 @@ interface CmsLayoutProps {
     actionButton?: ActionButtonConfig;
 }
 
+const STORAGE_KEY = "sidebarCollapsed";
+
+function readCollapsed(): boolean {
+    try {
+        return localStorage.getItem(STORAGE_KEY) === "1";
+    } catch {
+        return false;
+    }
+}
+
+function persistCollapsed(value: boolean): void {
+    try {
+        localStorage.setItem(STORAGE_KEY, value ? "1" : "0");
+    } catch { /* quota / private mode */ }
+}
+
 export default function CmsLayout({
     children,
     headerLabel,
@@ -42,30 +58,45 @@ export default function CmsLayout({
     actionButton,
 }: CmsLayoutProps) {
     const { url, props } = usePage<PageProps>();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const [collapsed, setCollapsed] = useState<boolean>(() => readCollapsed());
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
-        setMobileMenuOpen(false);
+        setMobileOpen(false);
     }, [url]);
 
     useEffect(() => {
         if (props.flash?.success) {
-            toast.success(props.flash.success, {
-                id: props.flash.success,
-            });
+            toast.success(props.flash.success, { id: props.flash.success });
         }
         if (props.flash?.error) {
-            toast.error(props.flash.error, {
-                id: props.flash.error,
-            });
+            toast.error(props.flash.error, { id: props.flash.error });
         }
     }, [props.flash]);
 
+    function handleDesktopToggle() {
+        setCollapsed((prev) => {
+            const next = !prev;
+            persistCollapsed(next);
+            return next;
+        });
+    }
+
+    const shellClass = [
+        "app-shell",
+        collapsed ? "is-collapsed" : "",
+        mobileOpen ? "show-sidebar" : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
+
     return (
-        <div className="app-shell">
+        <div className={shellClass}>
             <Sidebar
-                mobileMenuOpen={mobileMenuOpen}
-                onCloseMobile={() => setMobileMenuOpen(false)}
+                mobileOpen={mobileOpen}
+                onMobileToggle={() => setMobileOpen((prev) => !prev)}
+                onCloseMobile={() => setMobileOpen(false)}
             />
             <main
                 className={`main-content ${wrapperClass || ""}`}
@@ -79,8 +110,8 @@ export default function CmsLayout({
                     actionButtonLabel={actionButtonLabel}
                     actionButtonRoute={actionButtonRoute}
                     showNotificationButton={showNotificationButton}
-                    mobileMenuOpen={mobileMenuOpen}
-                    onMenuToggle={() => setMobileMenuOpen((open) => !open)}
+                    sidebarOpen={!collapsed}
+                    onSidebarToggle={handleDesktopToggle}
                     onBackButton={onBackButton}
                     backUrl={backUrl}
                     actionButton={actionButton}

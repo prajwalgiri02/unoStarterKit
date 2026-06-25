@@ -1,223 +1,90 @@
 import { Link, router, usePage } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-import { STORAGE_KEYS } from "@/lib/constants/storage-keys";
-import { CMS_AUTH_SIGN_OUT_PATH, sidebar } from "@/lib/constants/sidebar";
-import { getItem, saveItem } from "@/services/storage.service";
+import { useEffect, useRef, forwardRef } from "react";
+import { createPortal } from "react-dom";
+import { sidebar, CMS_AUTH_SIGN_OUT_PATH } from "@/lib/constants/sidebar";
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const MOBILE_BREAKPOINT = 720;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function isMobile() {
+    return window.innerWidth <= MOBILE_BREAKPOINT;
+}
 
 function isPathActive(currentPath: string, path?: string): boolean {
     if (!path) return false;
     return currentPath === path || currentPath.startsWith(`${path}/`);
 }
 
-/** Index of the sidebar group whose sub-items include the current route, if any. */
-function activeSubmenuParentIndex(currentPath: string): number | null {
-    for (let i = 0; i < sidebar.length; i++) {
-        const item = sidebar[i];
-        if (!item.sub_items?.length) continue;
-        if (item.sub_items.some((sub) => isPathActive(currentPath, sub.path))) {
-            return i;
-        }
-    }
-    return null;
+// ─── Component ───────────────────────────────────────────────────────────────
+
+interface SidebarProps {
+    mobileOpen: boolean;
+    onMobileToggle: () => void;
+    onCloseMobile: () => void;
 }
 
-function openGroupsForPath(currentPath: string): Set<number> {
-    const parent = activeSubmenuParentIndex(currentPath);
-    return parent !== null ? new Set([parent]) : new Set();
-}
-
-function readSidebarCollapsed(): boolean {
-    return getItem<boolean>(STORAGE_KEYS.SIDEBAR_COLLAPSED) === true;
-}
-
-function persistSidebarCollapsed(collapsed: boolean): void {
-    try {
-        saveItem(STORAGE_KEYS.SIDEBAR_COLLAPSED, collapsed);
-    } catch {
-        /* quota / private mode */
-    }
-}
-
-function persistSidebarOpenGroups(groups: Set<number>): void {
-    try {
-        saveItem(STORAGE_KEYS.SIDEBAR_OPEN_GROUPS, [...groups]);
-    } catch {
-        /* quota / private mode */
-    }
-}
-
-type SidebarProps = {
-    mobileMenuOpen?: boolean;
-    onCloseMobile?: () => void;
-};
-
-export default function Sidebar({
-    mobileMenuOpen = false,
-    onCloseMobile,
-}: SidebarProps) {
+export default function Sidebar({ mobileOpen, onMobileToggle, onCloseMobile }: SidebarProps) {
     const { url } = usePage();
     const currentPath = url.split("?")[0];
 
-    const [collapsed, setCollapsed] = useState(() => readSidebarCollapsed());
-
-    const [openGroups, setOpenGroups] = useState<Set<number>>(() => {
-        if (typeof window === "undefined") {
-            return new Set();
-        }
-        const path = window.location.pathname.split("?")[0];
-        return openGroupsForPath(path);
-    });
+    const sidebarRef = useRef<HTMLElement>(null);
+    const menuBtnRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        const next = openGroupsForPath(currentPath);
-        setOpenGroups((prev) => {
+        function handleOutsideClick(e: MouseEvent) {
+            if (!isMobile()) return;
+            const target = e.target as Node;
             if (
-                prev.size === next.size &&
-                [...prev].every((i) => next.has(i))
+                !sidebarRef.current?.contains(target) &&
+                !menuBtnRef.current?.contains(target)
             ) {
-                return prev;
+                onCloseMobile();
             }
-            persistSidebarOpenGroups(next);
-            return next;
-        });
-    }, [currentPath]);
-
-    const toggleCollapsed = () => {
-        setCollapsed((prev) => {
-            const next = !prev;
-            persistSidebarCollapsed(next);
-            return next;
-        });
-    };
-
-    const toggleGroup = (index: number) => {
-        setOpenGroups((prev) => {
-            const next = new Set(prev);
-            if (next.has(index)) {
-                next.delete(index);
-            } else {
-                next.add(index);
-            }
-            persistSidebarOpenGroups(next);
-            return next;
-        });
-    };
+        }
+        document.addEventListener("click", handleOutsideClick);
+        return () => document.removeEventListener("click", handleOutsideClick);
+    }, [onCloseMobile]);
 
     return (
         <>
-            <div
-                className={`sidebar-overlay${mobileMenuOpen ? " active" : ""}`}
-                id="sidebarOverlay"
-                onClick={onCloseMobile}
-                role="presentation"
-                aria-hidden={!mobileMenuOpen}
-            />
+            {/* ── Mobile overlay ── */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 z-20 bg-black/40"
+                    onClick={onCloseMobile}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* ── Sidebar ── */}
             <aside
-                className={`sidebar${collapsed ? " collapsed" : ""}${mobileMenuOpen ? " active" : ""}`}
+                ref={sidebarRef}
                 id="sidebar"
+                className="sidebar"
             >
-                <div className="sidebar-header">
-                    <img src="/images/logo3.svg" alt="Logo" className="logo" />
-                    <button
-                        className="sidebar-collapse-btn"
-                        id="sidebarCollapseBtn"
-                        type="button"
-                        onClick={toggleCollapsed}
-                    >
-                        <img
-                            src="/icons/chevron-left.svg"
-                            alt="Sidebar collapse"
-                            style={{ width: "20px", height: "20px" }}
-                        />
-                    </button>
+                {/* Header */}
+                <div className="sidebar-head">
+                    <img className="logo-mark" src="/images/logo.svg" alt="Logo" />
                 </div>
 
-                <nav className="nav-menu no-scrollbar">
-                    {sidebar.map((item, index) => {
-                        const hasSubmenu = Boolean(item.sub_items?.length);
-                        const groupOpen = openGroups.has(index);
-                        const activeItem =
-                            isPathActive(currentPath, item.path) ||
-                            item.sub_items?.some((sub) =>
-                                isPathActive(currentPath, sub.path),
-                            );
-
-                        if (hasSubmenu) {
-                            return (
-                                <div
-                                    className="nav-item-group"
-                                    key={item.label}
-                                >
-                                    <button
-                                        type="button"
-                                        className={`nav-item body-md has-submenu border-0  w-full text-left${activeItem ? " active" : ""}${groupOpen ? " expanded" : ""}`}
-                                        onClick={() => toggleGroup(index)}
-                                    >
-                                        <span className="nav-icon">
-                                            <item.icon
-                                                className="nav-icon-img"
-                                                size={20}
-                                            />
-                                        </span>
-                                        <span className="nav-text">
-                                            {item.label}
-                                        </span>
-                                        <span className="nav-arrow">
-                                            <img
-                                                src="/icons/dropdown.svg"
-                                                alt="Arrow Down"
-                                                style={{
-                                                    transform: groupOpen
-                                                        ? "rotate(180deg)"
-                                                        : "none",
-                                                }}
-                                            />
-                                        </span>
-                                    </button>
-                                    {groupOpen && (
-                                        <div className="nav-submenu">
-                                            {item.sub_items?.map((subItem) => (
-                                                <Link
-                                                    key={subItem.label}
-                                                    href={subItem.path ?? "#"}
-                                                    className={`nav-item body-md${isPathActive(currentPath, subItem.path) ? " active" : ""}`}
-                                                >
-                                                    <span className="nav-icon">
-                                                        <subItem.icon
-                                                            className="nav-icon-img"
-                                                            size={20}
-                                                        />
-                                                    </span>
-                                                    <span className="nav-text">
-                                                        {subItem.label}
-                                                    </span>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        }
+                {/* Nav */}
+                <nav className="sidebar-nav" aria-label="Main">
+                    {sidebar.map((item) => {
+                        const active = isPathActive(currentPath, item.path);
 
                         if (item.path === CMS_AUTH_SIGN_OUT_PATH) {
                             return (
                                 <button
                                     key={item.label}
                                     type="button"
-                                    className="nav-item body-md border-0 bg-transparent w-full text-left"
-                                    onClick={() =>
-                                        router.post(CMS_AUTH_SIGN_OUT_PATH)
-                                    }
+                                    className="nav-item logout w-full cursor-pointer border-0 bg-transparent text-left"
+                                    onClick={() => router.post(CMS_AUTH_SIGN_OUT_PATH)}
                                 >
-                                    <span className="nav-icon">
-                                        <item.icon
-                                            className="nav-icon-img"
-                                            size={20}
-                                        />
-                                    </span>
-                                    <span className="nav-text">
-                                        {item.label}
-                                    </span>
+                                    <img className="nav-icon" src={item.icon} alt={item.label} />
+                                    <span>{item.label}</span>
                                 </button>
                             );
                         }
@@ -226,20 +93,50 @@ export default function Sidebar({
                             <Link
                                 key={item.label}
                                 href={item.path ?? "#"}
-                                className={`nav-item body-md${activeItem ? " active" : ""}`}
+                                className={`nav-item${active ? " active" : ""}`}
                             >
-                                <span className="nav-icon">
-                                    <item.icon
-                                        className="nav-icon-img"
-                                        size={20}
-                                    />
-                                </span>
-                                <span className="nav-text">{item.label}</span>
+                                <img className="nav-icon" src={item.icon} alt={item.label} />
+                                <span>{item.label}</span>
                             </Link>
                         );
                     })}
                 </nav>
             </aside>
+
+            {/* ── Mobile menu button ── */}
+            <MobileMenuButton ref={menuBtnRef} onClick={onMobileToggle} />
         </>
     );
 }
+
+// ─── Mobile menu button ───────────────────────────────────────────────────────
+
+const MobileMenuButton = forwardRef<HTMLButtonElement, { onClick: () => void }>(
+    ({ onClick }, ref) => {
+        const topbar = typeof document !== "undefined"
+            ? document.querySelector(".topbar")
+            : null;
+
+        if (!topbar) return null;
+
+        return createPortal(
+            <button
+                ref={ref}
+                type="button"
+                className="menu-btn cursor-pointer border-0 bg-transparent p-0"
+                aria-label="Open menu"
+                onClick={onClick}
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2">
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6"  x2="21" y2="6"  />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>,
+            topbar,
+        );
+    }
+);
+
+MobileMenuButton.displayName = "MobileMenuButton";

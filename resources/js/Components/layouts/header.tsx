@@ -1,38 +1,29 @@
 import { Link, router, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
-import PrimaryButton from "../buttons/primary-button";
 import type { ActionButtonConfig } from "@/layouts/cms-layout";
 import NotificationModal from "../modals/notification-modal";
 
-interface HeaderProps {
-    children: React.ReactNode;
-    showSearchBar?: boolean;
-    showActionButton?: boolean;
-    actionButtonLabel?: string;
-    actionButtonRoute?: string;
+interface TopBarProps {
+    children?: React.ReactNode;
     headerLabel: string;
+    showSearchBar?: boolean;
+    searchPlaceholder?: string;
     showNotificationButton?: boolean;
-    mobileMenuOpen?: boolean;
-    onMenuToggle?: () => void;
+    sidebarOpen?: boolean;
+    onSidebarToggle?: () => void;
     onBackButton?: (() => void) | null;
-    backUrl?: string;
-    actionButton?: ActionButtonConfig;
 }
 
-export default function Header({
+export default function TopBar({
     children,
-    showSearchBar = true,
-    showActionButton = false,
-    actionButtonLabel = "",
-    actionButtonRoute = "#",
     headerLabel = "",
+    showSearchBar = true,
+    searchPlaceholder = "Search",
     showNotificationButton = false,
-    mobileMenuOpen = false,
-    onMenuToggle,
+    sidebarOpen = false,
+    onSidebarToggle,
     onBackButton,
-    backUrl,
-    actionButton,
-}: HeaderProps) {
+}: TopBarProps) {
     const { url } = usePage();
     const [search, setSearch] = useState("");
     const [notificationOpen, setNotificationOpen] = useState(false);
@@ -67,113 +58,42 @@ export default function Header({
 
     return (
         <>
-            <header className="header">
-                <div className="header-left">
+            <header className="topbar">
+                <h1 className="page-title">
                     <button
                         type="button"
-                        className="menu-toggle"
-                        id="menuToggle"
-                        aria-label="Toggle navigation menu"
-                        aria-expanded={mobileMenuOpen}
-                        onClick={onMenuToggle}
+                        className="sidebar-toggle"
+                        id="sidebarToggle"
+                        aria-label="Toggle sidebar"
+                        aria-expanded={sidebarOpen}
+                        onClick={onSidebarToggle}
                     >
-                        <img
-                            src="/icons/menubar.svg"
-                            alt=""
-                            className="menu-bar-icon"
-                        />
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                        >
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
                     </button>
-                    <div className="flex items-center gap-2">
-                        {backUrl ? (
-                            <Link
-                                href={backUrl}
-                                className="back-arrow-container"
-                            >
-                                <img
-                                    src="/icons/back-arrow1.svg"
-                                    alt="back-arrow"
-                                    className="back-arrow-icon"
-                                />
-                            </Link>
-                        ) : onBackButton ? (
-                            <div
-                                className="back-arrow-container"
-                                onClick={() => onBackButton()}
-                                style={{ cursor: "pointer" }}
-                            >
-                                <img
-                                    src="/icons/back-arrow1.svg"
-                                    alt="back-arrow"
-                                    className="back-arrow-icon"
-                                />
-                            </div>
-                        ) : null}
-                        <h1 className="header-title mb-0">{headerLabel}</h1>
-                    </div>
-                </div>
-                <div className="header-right">
-                    {/* New structured Action Button */}
-                    {actionButton?.show && (
-                        <div>
-                            <PrimaryButton
-                                size={actionButton.size || "giant"}
-                                textSize={actionButton.textSize}
-                                onClick={() =>
-                                    actionButton.route &&
-                                    router.get(actionButton.route)
-                                }
-                                className="text-nowrap"
-                            >
-                                {actionButton.showIcon !== false && (
-                                    <img
-                                        src="/icons/plus.svg"
-                                        alt="plus"
-                                        width="24"
-                                        height="24"
-                                    />
-                                )}
-                                <span className="body-sm">
-                                    {actionButton.label}
-                                </span>
-                            </PrimaryButton>
-                        </div>
-                    )}
 
-                    {/* Legacy Action Button */}
-                    {!actionButton?.show &&
-                        showActionButton &&
-                        actionButtonLabel &&
-                        actionButtonRoute && (
-                            <div>
-                                <PrimaryButton
-                                    size="giant"
-                                    onClick={() =>
-                                        router.get(actionButtonRoute)
-                                    }
-                                    className="text-nowrap"
-                                >
-                                    <img
-                                        src="/icons/plus.svg"
-                                        alt="plus"
-                                        width="24"
-                                        height="24"
-                                    />
-                                    {actionButtonLabel}
-                                </PrimaryButton>
-                            </div>
-                        )}
 
+                    {headerLabel}
+                </h1>
+
+                <div className="topbar-actions">
                     {showSearchBar && (
                         <div className="search-box">
                             <img
-                                src="/icons/search.svg"
+                                src="/images/Search.png"
                                 alt="search"
-                                className="search-icon-header"
                             />
                             <input
-                                className="header-search-inputs"
-                                type="text"
-                                placeholder="Search"
+                                type="search"
+                                placeholder={searchPlaceholder}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 onKeyDown={handleSearch}
@@ -183,37 +103,42 @@ export default function Header({
 
                     {showNotificationButton && (
                         <button
-                            className="notification-btn"
+                            className="bell-btn"
+                            id="bellBtn"
+                            aria-label="Notifications"
                             onClick={() => setNotificationOpen(true)}
                         >
                             <img
-                                src="/icons/notification1.svg"
+                                src="/images/notification.png"
                                 alt="notification"
-                                className="notification-icon"
+                                width="20"
+                                height="20"
                             />
                         </button>
                     )}
                 </div>
             </header>
-            <div className="dashboard-content">{children}</div>
-            {notificationOpen && (
-                <NotificationModal
-                    onClose={() => setNotificationOpen(false)}
-                    onMarkAllAsRead={() =>
-                        router.patch(
-                            "/cms/notifications/mark-all-read",
-                            {},
-                            { preserveState: true, preserveScroll: true },
-                        )
-                    }
-                    onClearAll={() =>
-                        router.delete("/cms/notifications/clear-all", {
-                            preserveState: true,
-                            preserveScroll: true,
-                        })
-                    }
-                />
-            )}
         </>
     );
 }
+
+          {/* <div className="dashboard-content">{children}</div> */}
+
+        //   {notificationOpen && (
+        //     <NotificationModal
+        //         onClose={() => setNotificationOpen(false)}
+        //         onMarkAllAsRead={() =>
+        //             router.patch(
+        //                 "/cms/notifications/mark-all-read",
+        //                 {},
+        //                 { preserveState: true, preserveScroll: true },
+        //             )
+        //         }
+        //         onClearAll={() =>
+        //             router.delete("/cms/notifications/clear-all", {
+        //                 preserveState: true,
+        //                 preserveScroll: true,
+        //             })
+        //         }
+        //     />
+        // )}
