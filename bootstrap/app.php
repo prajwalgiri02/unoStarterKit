@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'password-reset.verified' => EnsurePasswordResetOtpVerified::class,
             'approved' => EnsureUserApproved::class,
             'role' => RoleMiddleware::class,
+            'precognitive' => \App\Http\Middleware\HandlePrecognitiveRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -1,8 +1,7 @@
 import PrimaryButton from "@/components/buttons/primary-button";
 import TextButton from "@/components/buttons/text-button";
 import CheckboxInput from "@/components/inputs/checkbox-input";
-import EmailInput from "@/components/inputs/email-input";
-import PasswordInput from "@/components/inputs/password-input";
+import FormInput from "@/components/inputs/email-input";
 import AuthLayout from "@/layouts/auth-layout";
 import { Form } from "@inertiajs/react";
 
@@ -18,12 +17,9 @@ const SignIn = () => {
             {({ processing }) => (
                 <>
                     <div className="flex flex-col gap-4">
-                        <EmailInput
-                            className="input-giant body-xs"
-                            skipBlurValidation
-                        />
-                        <PasswordInput skipBlurValidation />
-                        <div className="flex justify-between items-start">
+                        <FormInput name="email" type="email" skipBlurValidation />
+                        <FormInput name="password" type="password" skipBlurValidation />
+                        <div className="auth-row">
                             <CheckboxInput
                                 id="rememberme"
                                 name="remember"
@@ -37,7 +33,7 @@ const SignIn = () => {
                             </TextButton>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-4 mt-10">
+                    <div className="flex flex-col gap-4 mt-3">
                         <PrimaryButton type="submit" disabled={processing}>
                             {processing ? "Logging in..." : "Login"}
                         </PrimaryButton>

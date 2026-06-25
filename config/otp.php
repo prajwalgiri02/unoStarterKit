@@ -39,6 +39,7 @@ return [
 
     'purposes' => [
         'password_reset' => [
+            'length' => 5,
             'expires_in_minutes' => 10,
             'delivery' => [
                 'channels' => env('OTP_DELIVERY_CHANNELS', 'mail'),
@@ -50,11 +51,11 @@ return [
         ],
 
         'email_verification' => [
-            'expires_in_minutes' => 15,
+            'expires_in_minutes' => 0.5,
         ],
 
         'phone_verification' => [
-            'expires_in_minutes' => 10,
+            'expires_in_minutes' => 0.5,
             'delivery' => [
                 'channels' => 'sms',
             ],

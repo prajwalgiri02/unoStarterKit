@@ -1,9 +1,7 @@
 import React from "react";
 import CmsLayout from "@/layouts/cms-layout";
 import { useForm, Link } from "@inertiajs/react";
-import TextInput from "@/components/inputs/text-input";
-import EmailInput from "@/components/inputs/email-input";
-import PasswordInput from "@/components/inputs/password-input";
+import FormInput from "@/components/inputs/email-input";
 import PrimaryButton from "@/components/buttons/primary-button";
 
 import type { UserCms } from "@/types/cms/user";
@@ -42,7 +40,7 @@ function UserEdit({ user }: UserEditProps) {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <TextInput
+                        <FormInput
                             id="name"
                             name="name"
                             label="Full Name"
@@ -51,7 +49,8 @@ function UserEdit({ user }: UserEditProps) {
                             onChange={(e) => setData("name", e.target.value)}
                             error={errors.name}
                         />
-                        <EmailInput
+                        <FormInput
+                            type="email"
                             id="email"
                             name="email"
                             label="Email"
@@ -63,7 +62,8 @@ function UserEdit({ user }: UserEditProps) {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <PasswordInput
+                        <FormInput
+                            type="password"
                             id="password"
                             name="password"
                             label="New Password"
@@ -74,7 +74,8 @@ function UserEdit({ user }: UserEditProps) {
                             }
                             error={errors.password}
                         />
-                        <PasswordInput
+                        <FormInput
+                            type="password"
                             id="password_confirmation"
                             name="password_confirmation"
                             label="Confirm New Password"

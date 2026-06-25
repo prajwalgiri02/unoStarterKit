@@ -37,7 +37,7 @@ class ForgotPasswordController extends Controller
         );
 
         if ($generated === null) {
-            return back()->with('error', 'We couldn\'t find an account with that email address.');
+            return back()->withErrors(['email' => 'We couldn\'t find an account with that email address.']);
         }
 
         return redirect()
@@ -101,13 +101,17 @@ class ForgotPasswordController extends Controller
 
     public function resetForm(Request $request, string $token): Response
     {
+        /** @var Otp $otp */
+        $otp = $request->attributes->get('passwordResetOtp');
+
         return Inertia::render('auth/change-password', [
             'token' => $token,
+            'email' => $otp->destination,
             'status' => $request->session()->get('status'),
         ]);
     }
 
-    public function reset(ResetPasswordRequest $request, string $token): RedirectResponse
+    public function reset(ResetPasswordRequest $request, string $token): Response|RedirectResponse
     {
         /** @var Otp $otp */
         $otp = $request->attributes->get('passwordResetOtp');
@@ -123,9 +127,10 @@ class ForgotPasswordController extends Controller
                 ->with('error', 'The account could not be found.');
         }
 
-        return redirect()
-            ->route('cms.auth.login')
-            ->with('success', 'Your password has been reset. You can now sign in.');
+        return Inertia::render('auth/change-password', [
+            'token' => $token,
+            'passwordChanged' => true,
+        ]);
     }
 
     public function cancel(Request $request): RedirectResponse

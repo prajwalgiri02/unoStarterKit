@@ -35,7 +35,7 @@ type TextButtonButtonProps = TextButtonShared & {
 export type TextButtonProps = TextButtonLinkProps | TextButtonButtonProps;
 
 const baseClass =
-    "body-md text-primary-500 no-underline inline-block border-0 bg-transparent p-0 cursor-pointer";
+    "auth-link";
 
 export default function TextButton(props: TextButtonProps) {
     const { children, className = "" } = props;

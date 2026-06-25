@@ -61,16 +61,8 @@ export default function CmsLayout({
         }
     }, [props.flash]);
 
-    // useEffect(() => {
-    //     if (props.errors && Object.keys(props.errors).length > 0) {
-    //         Object.values(props.errors).forEach((error: any) => {
-    //             toast.error(error);
-    //         });
-    //     }
-    // }, [props.errors]);
-
     return (
-        <div className="app-container">
+        <div className="app-shell">
             <Sidebar
                 mobileMenuOpen={mobileMenuOpen}
                 onCloseMobile={() => setMobileMenuOpen(false)}

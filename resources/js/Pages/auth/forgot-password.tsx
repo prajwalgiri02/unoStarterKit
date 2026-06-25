@@ -1,6 +1,5 @@
 import PrimaryButton from "@/components/buttons/primary-button";
-import EmailInput from "@/components/inputs/email-input";
-import PasswordInput from "@/components/inputs/password-input";
+import FormInput from "@/components/inputs/email-input";
 import AuthLayout from "@/layouts/auth-layout";
 import { Form } from "@inertiajs/react";
 
@@ -16,16 +15,13 @@ const ForgotPassword = () => {
             {({ processing }) => (
                 <>
                     <div className="flex flex-col gap-4">
-                        <EmailInput
-                            className="input-giant body-xs"
-                            skipBlurValidation
-                        />
+                    <FormInput name="email" type="email" skipBlurValidation />
                     </div>
                     <div className="flex flex-col gap-4 mt-10">
                         <PrimaryButton type="submit" disabled={processing}>
                             {processing
-                                ? "Sending reset link..."
-                                : "Send Reset Link"}
+                                ? "Sending verification code..."
+                                : "Send Verification Code"}
                         </PrimaryButton>
                     </div>
                 </>
@@ -36,10 +32,10 @@ const ForgotPassword = () => {
 
 ForgotPassword.layout = (page: React.ReactNode) => (
     <AuthLayout
-        headerTitle="Forgot Your Password?"
-        headerDescription="Don’t worry, it happens to all of us. Enter your email below to recover your password."
+        headerTitle="Forgot Password"
+        headerDescription="Enter your email address to reset your password. We'll send you a verification code to proceed."
         goBack={true}
-        goBackLabelText="Back to Login"
+        goBackLabelText="Back"
         goBackUrl="/cms/login"
     >
         {page}
