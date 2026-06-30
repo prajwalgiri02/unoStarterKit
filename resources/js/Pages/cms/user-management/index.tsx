@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import CmsLayout from "@/layouts/cms-layout";
 import { router, Link } from "@inertiajs/react";
-import "../../../../css/user-management.css";
 import Pagination from "@/components/table/Pagination";
 import DeleteModal from "@/components/modals/DeleteModal";
 import FilterRow from "@/components/common/FilterRow";
@@ -27,7 +26,7 @@ function UserManagement({
     const handleDelete = () => {
         if (!userToDelete) return;
         setIsDeleting(true);
-        router.delete(`/cms/user/${userToDelete.id}`, {
+        router.delete(`/cms/user-manager/${userToDelete.id}`, {
             onSuccess: () => {
                 setUserToDelete(null);
                 setIsDeleting(false);
@@ -66,7 +65,7 @@ function UserManagement({
                 delete query[key as keyof UserFilterState],
         );
 
-        router.get("/cms/user", query, {
+        router.get("/cms/user-manager", query, {
             preserveState: true,
             preserveScroll: true,
             replace: true,
@@ -294,19 +293,19 @@ function UserManagement({
                                             </button>
                                             <div className="context-menu">
                                                 <Link
-                                                    href={`/cms/user/${user.id}`}
+                                                    href={`/cms/user-manager/${user.id}`}
                                                     className="context-menu-item body-xs"
                                                     data-action="view"
                                                 >
                                                     View Details
                                                 </Link>
-                                                <a
-                                                    href="#"
+                                                <Link
+                                                    href={`/cms/user-manager/${user.id}/edit`}
                                                     className="context-menu-item body-xs"
                                                     data-action="edit"
                                                 >
                                                     Edit
-                                                </a>
+                                                </Link>
                                                 <a
                                                     href="#"
                                                     className="context-menu-item body-xs"

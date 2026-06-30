@@ -1,92 +1,26 @@
 import React from "react";
+import { router } from "@inertiajs/react";
+import type { BroadcastNotification } from "@/types/cms/notification";
 
-const SentNotifications: React.FC = () => {
-    const notifications = [
-        {
-            id: 1,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Monthly",
-            allUsers: "All users",
-        },
-        {
-            id: 2,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Monthly",
-            allUsers: "--",
-        },
-        {
-            id: 3,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Yearly",
-            allUsers: "--",
-        },
-        {
-            id: 4,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Monthly",
-            allUsers: "All users",
-        },
-        {
-            id: 5,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Monthly",
-            allUsers: "--",
-        },
-        {
-            id: 6,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Yearly",
-            allUsers: "All users",
-        },
-        {
-            id: 7,
-            message:
-                "This is placeholder text only, intended for visual demonstration purposes only.",
-            locations: [
-                { label: "QLD", color: "primary" },
-                { label: "NSW", color: "warning" },
-                { label: "+2", color: "more" },
-            ],
-            subscriptionType: "Monthly",
-            allUsers: "All users",
-        },
-    ];
+interface SentNotificationsProps {
+    notifications: {
+        data: BroadcastNotification[];
+        current_page: number;
+        last_page: number;
+        total: number;
+        per_page: number;
+    };
+}
+
+const SentNotifications: React.FC<SentNotificationsProps> = ({
+    notifications,
+}) => {
+    const items = notifications?.data ?? [];
+
+    const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return "—";
+        return new Date(dateStr).toLocaleDateString();
+    };
 
     return (
         <div className="notification-card">
@@ -97,62 +31,54 @@ const SentNotifications: React.FC = () => {
                 <table className="notification-table">
                     <thead>
                         <tr>
+                            <th>Title</th>
                             <th>Message</th>
                             <th>Location</th>
-                            <th>Subscription Type</th>
-                            <th>All users</th>
-                            <th></th>
+                            <th>Subscription</th>
+                            <th>All Users</th>
+                            <th>Sent At</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {notifications.map((n) => (
-                            <tr key={n.id}>
-                                <td className="body-xs text-neutral-700">
-                                    {n.message}
-                                </td>
-                                <td className="location-lists">
-                                    {n.locations.map((loc, idx) => (
-                                        <span
-                                            key={idx}
-                                            className={`location-badge ${
-                                                loc.color === "more"
-                                                    ? "more-location"
-                                                    : `bg-${loc.color}-50 text-${loc.color}-500`
-                                            } caption-md`}
-                                        >
-                                            {loc.label}
-                                        </span>
-                                    ))}
-                                </td>
-                                <td className="body-xs text-neutral-700">
-                                    {n.subscriptionType}
-                                </td>
-                                <td className="body-xs text-neutral-700">
-                                    {n.allUsers}
-                                </td>
-                                <td className="actions-cell-notify">
-                                    <button>
-                                        <img
-                                            src="/icons/edit-notify.svg"
-                                            alt="Edit"
-                                            width="17"
-                                            height="17"
-                                        />
-                                    </button>
-                                    <button
-                                        className="actions-btn"
-                                        data-id={n.id}
-                                    >
-                                        <img
-                                            src="/icons/delete-notify.svg"
-                                            alt="Delete"
-                                            width="17"
-                                            height="17"
-                                        />
-                                    </button>
+                        {items.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={6}
+                                    className="text-center py-4 body-xs text-neutral-500"
+                                >
+                                    No notifications sent yet.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            items.map((n) => (
+                                <tr key={n.id}>
+                                    <td className="body-xs text-neutral-700 font-medium">
+                                        {n.title}
+                                    </td>
+                                    <td className="body-xs text-neutral-700">
+                                        {n.message}
+                                    </td>
+                                    <td className="body-xs text-neutral-700">
+                                        {n.location ? (
+                                            <span className="location-badge caption-md">
+                                                {n.location}
+                                            </span>
+                                        ) : (
+                                            "—"
+                                        )}
+                                    </td>
+                                    <td className="body-xs text-neutral-700">
+                                        {n.subscription_type || "—"}
+                                    </td>
+                                    <td className="body-xs text-neutral-700">
+                                        {n.send_to_all ? "Yes" : "No"}
+                                    </td>
+                                    <td className="body-xs text-neutral-700">
+                                        {formatDate(n.sent_at)}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

@@ -190,12 +190,6 @@
     }
 
     /* User Cell with Avatar */
-    .user-cell {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
     .user-avatar {
         width: 32px;
         height: 32px;
@@ -210,28 +204,32 @@
         flex-shrink: 0;
     }
 
+    .user-avatar.orange {
+        background: var(--avatar-bg-orange);
+    }
+
     .user-avatar.pink {
-        background: #ffe4e8;
+        background: var(--avatar-bg-pink);
     }
 
     .user-avatar.blue {
-        background: #e4f0ff;
+        background: var(--avatar-bg-blue);
     }
 
     .user-avatar.green {
-        background: #e4ffe8;
+        background: var(--avatar-bg-green);
     }
 
     .user-avatar.purple {
-        background: #f0e4ff;
+        background: var(--avatar-bg-purple);
     }
 
     .user-avatar.yellow {
-        background: #fff4e4;
+        background: var(--avatar-bg-yellow);
     }
 
     .user-avatar.teal {
-        background: #e4fff8;
+        background: var(--avatar-bg-teal);
     }
 
     .user-info {
@@ -285,38 +283,38 @@
     }
 
     .badge.freemium {
-        background: #fff3c4;
-        color: #987d0f;
+        background: var(--tertiary-100);
+        color: var(--tertiary-800);
     }
 
     .badge.active {
-        background: #d8f7e6;
-        color: #3cd984;
+        background: var(--success-100);
+        color: var(--success-500);
     }
 
     .badge.inactive {
-        background: #ffdcdf;
-        color: #ff4e60;
+        background: var(--error-100);
+        color: var(--error-500);
     }
 
     .badge.spark {
-        background: #d8f7e6;
-        color: #3cd984;
+        background: var(--success-100);
+        color: var(--success-500);
     }
 
     .badge.beacon {
-        background: #ffe0c7;
-        color: #f79138;
+        background: var(--warning-100);
+        color: var(--chart-orange);
     }
 
     .badge.completed {
-        background: #d8f7e6;
-        color: #3cd984;
+        background: var(--success-100);
+        color: var(--success-500);
     }
 
     .badge.pending {
-        background: #ffe0c7;
-        color: #f79138;
+        background: var(--warning-100);
+        color: var(--chart-orange);
     }
 
     /* ============================================
@@ -443,8 +441,8 @@
 
     /* Alert Banner */
     .alert-banner {
-        background: #fff5f5;
-        border: 1px solid #ffdcdf;
+        background: var(--alert-error-bg);
+        border: 1px solid var(--error-100);
         border-radius: 12px;
         padding: 16px 20px;
         display: flex;
@@ -466,7 +464,7 @@
     .alert-icon svg {
         width: 24px;
         height: 24px;
-        stroke: #ff4e60;
+        stroke: var(--error-500);
     }
 
     .alert-content {
@@ -486,7 +484,7 @@
         font-family: "Poppins", sans-serif;
         font-size: 14px;
         font-weight: 500;
-        color: #ff4e60;
+        color: var(--error-500);
         cursor: pointer;
         text-decoration: none;
     }
@@ -611,190 +609,6 @@
     }
 
     /* ============================================
-    Modal Styles
-    ============================================ */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .modal-overlay.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    /* Delete Confirmation Modal */
-    .delete-modal {
-        background: var(--white);
-        border-radius: 20px;
-        padding: 40px;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-    }
-
-    .delete-modal-icon {
-        width: 64px;
-        height: 64px;
-        margin: 0 auto 24px;
-    }
-
-    .delete-modal-icon svg {
-        width: 64px;
-        height: 64px;
-        stroke: var(--primary-500);
-    }
-
-    .delete-modal-title {
-        font-family: "Poppins", sans-serif;
-        font-size: 20px;
-        font-weight: 500;
-        color: var(--neutral-900);
-        line-height: 28px;
-        margin-bottom: 12px;
-    }
-
-    .delete-modal-text {
-        font-family: "Poppins", sans-serif;
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--neutral-600);
-        line-height: 22px;
-        margin-bottom: 32px;
-    }
-
-    .delete-modal-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .btn-delete {
-        width: 100%;
-        padding: 14px 24px;
-        background: var(--primary-500);
-        border: none;
-        border-radius: 24px;
-        font-family: "Poppins", sans-serif;
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--white);
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .btn-delete:hover {
-        background: var(--primary-600);
-    }
-
-    .btn-cancel {
-        width: 100%;
-        padding: 14px 24px;
-        background: var(--white);
-        border: 1px solid var(--primary-500);
-        border-radius: 24px;
-        font-family: "Poppins", sans-serif;
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--primary-500);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-cancel:hover {
-        background: var(--primary-25);
-    }
-
-    /* File Preview Modal */
-    .file-preview-modal {
-        background: var(--white);
-        border-radius: 20px;
-        max-width: 700px;
-        width: 90%;
-        max-height: 90vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .file-preview-header {
-        padding: 24px;
-        border-bottom: 1px solid var(--neutral-100);
-    }
-
-    .file-preview-title {
-        font-family: "Poppins", sans-serif;
-        font-size: 20px;
-        font-weight: 500;
-        color: var(--neutral-900);
-        line-height: 28px;
-        margin-bottom: 16px;
-    }
-
-    .file-tabs {
-        display: flex;
-        gap: 24px;
-    }
-
-    .file-tab {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 0;
-        font-family: "Poppins", sans-serif;
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--neutral-600);
-        cursor: pointer;
-        border-bottom: 2px solid transparent;
-        transition: all 0.2s;
-    }
-
-    .file-tab:hover {
-        color: var(--primary-500);
-    }
-
-    .file-tab.active {
-        color: var(--primary-500);
-        border-bottom-color: var(--primary-500);
-    }
-
-    .file-tab svg {
-        width: 20px;
-        height: 20px;
-        stroke: currentColor;
-    }
-
-    .file-preview-content {
-        flex: 1;
-        padding: 24px;
-        overflow-y: auto;
-    }
-
-    .file-preview-area {
-        background: var(--primary-25);
-        border-radius: 12px;
-        min-height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: "Poppins", sans-serif;
-        font-size: 14px;
-        color: var(--neutral-600);
-    }
-
-    /* ============================================
     Responsive Styles
     ============================================ */
     @media (min-width: 768px) {
@@ -883,6 +697,6 @@
         font-weight: 400;
         font-style: Regular;
         font-size: 14px;
-        color: #99a1af;
+        color: var(--neutral-400);
     }
 }

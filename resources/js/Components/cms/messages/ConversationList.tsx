@@ -1,6 +1,20 @@
 import { useState, useEffect } from "react";
-import "../../../../css/styles.css";
 import type { Conversation, MessageType } from "@/types/cms/message";
+
+const AVATAR_COLORS = ["orange", "teal", "blue", "pink"] as const;
+
+function getAvatarText(name: string): string {
+    return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+}
+
+function getAvatarColor(id: number): string {
+    return AVATAR_COLORS[id % AVATAR_COLORS.length];
+}
 
 interface SortDropdownProps {
     currentSort: string;
@@ -16,9 +30,9 @@ const SortDropdown = ({ currentSort, onSortChange }: SortDropdownProps) => {
                 return "Newest to Oldest";
             case "oldest":
                 return "Oldest to Newest";
-            case "name-asc":
+            case "name_asc":
                 return "Name (A-Z)";
-            case "name-desc":
+            case "name_desc":
                 return "Name (Z-A)";
             default:
                 return "Sort by";
@@ -39,7 +53,7 @@ const SortDropdown = ({ currentSort, onSortChange }: SortDropdownProps) => {
                 className="sort-menu"
                 style={{ display: isOpen ? "block" : "none" }}
             >
-                {["newest", "oldest", "name-asc", "name-desc"].map((sort) => (
+                {["newest", "oldest", "name_asc", "name_desc"].map((sort) => (
                     <li
                         key={sort}
                         className="sort-item body-xs"
@@ -70,16 +84,16 @@ const FilterTabs = ({ activeFilter, onFilterChange }: FilterTabsProps) => (
             <span className="body-xs">All</span>
         </button>
         <button
-            className={`filter-tab ${activeFilter === "contact" ? "active" : ""}`}
-            onClick={() => onFilterChange("contact")}
+            className={`filter-tab ${activeFilter === "contact_us" ? "active" : ""}`}
+            onClick={() => onFilterChange("contact_us")}
         >
             <span className="body-xs">Contact Us</span>
         </button>
         <button
-            className={`filter-tab ${activeFilter === "report" ? "active" : ""}`}
-            onClick={() => onFilterChange("report")}
+            className={`filter-tab ${activeFilter === "dispute" ? "active" : ""}`}
+            onClick={() => onFilterChange("dispute")}
         >
-            <span className="body-xs">Reports</span>
+            <span className="body-xs">Disputes</span>
         </button>
     </div>
 );
@@ -106,17 +120,18 @@ const ConversationItem = ({
         <td>
             <div className="flex items-center gap-3">
                 <div
-                    className={`message-avatar body-sm ${conversation.avatar_color}`}
+                    className={`message-avatar body-sm ${getAvatarColor(conversation.id)}`}
                 >
-                    {conversation.avatar_text}
+                    {getAvatarText(conversation.name)}
                 </div>
                 <div className="message-info">
                     <div
                         className="message-name body-sm"
                         style={{
-                            fontWeight: conversation.is_read
-                                ? "normal"
-                                : "bold",
+                            fontWeight:
+                                conversation.status !== "resolved"
+                                    ? "bold"
+                                    : "normal",
                         }}
                     >
                         {conversation.name}
@@ -130,15 +145,15 @@ const ConversationItem = ({
         <td>
             <div className="flex items-center justify-center">
                 <span
-                    className={`message-badge caption-md ${conversation.type === "contact" ? "contact-us" : "report"}`}
+                    className={`message-badge caption-md ${conversation.type === "contact_us" ? "contact-us" : "report"}`}
                 >
-                    {conversation.type === "contact" ? "Contact Us" : "Report"}
+                    {conversation.type_label}
                 </span>
             </div>
         </td>
         <td>
             <div className="flex items-center justify-center">
-                {conversation.type === "contact" ? (
+                {conversation.type === "contact_us" ? (
                     <span className="message-date body-xs">
                         {conversation.date}
                     </span>
@@ -146,9 +161,7 @@ const ConversationItem = ({
                     <span
                         className={`message-badge caption-md ${conversation.status === "pending" ? "pending" : "resolved"}`}
                     >
-                        {conversation.status === "pending"
-                            ? "Pending"
-                            : "Resolved"}
+                        {conversation.status_label}
                     </span>
                 )}
             </div>
@@ -165,7 +178,6 @@ const ConversationItem = ({
                     if (menu) {
                         menu.classList.toggle("active");
                     }
-                    // Close other menus
                     document
                         .querySelectorAll(".context-menu.active")
                         .forEach((m) => {
@@ -181,7 +193,6 @@ const ConversationItem = ({
                     onClick={(e) => {
                         e.stopPropagation();
                         onDelete(conversation.id);
-                        // Close menu
                         e.currentTarget.parentElement?.classList.remove(
                             "active",
                         );
@@ -276,9 +287,7 @@ export default function ConversationList({
                                     conversation={conv}
                                     isSelected={selectedId === conv.id}
                                     onSelect={onSelect}
-                                    onDelete={(id) => {
-                                        onDelete(id);
-                                    }}
+                                    onDelete={onDelete}
                                 />
                             ))
                         )}

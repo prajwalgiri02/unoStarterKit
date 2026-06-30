@@ -1,5 +1,5 @@
 import PrimaryButton from "@/components/buttons/primary-button";
-import TextInput from "@/components/inputs/text-input";
+import FormInput from "@/components/inputs/email-input";
 import TextareaInput from "@/components/inputs/textarea-input";
 
 type FaqFormProps = {
@@ -29,7 +29,7 @@ export default function FaqForm({
 }: FaqFormProps) {
     return (
         <>
-            <TextInput
+            <FormInput
                 name="title"
                 label="Enter Question"
                 placeholder="Enter Question"

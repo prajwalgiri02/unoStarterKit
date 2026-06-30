@@ -6,6 +6,8 @@
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])
         @inertiaHead
+        <link rel="icon" type="image/svg+xml" href="{{ asset('/images/logo.svg') }}" />
+
     </head>
     <body>
         @inertia

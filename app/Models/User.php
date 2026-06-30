@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'avatar', 'location', 'subscription_type'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'avatar', 'location', 'subscription_type'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements JWTSubject
 {

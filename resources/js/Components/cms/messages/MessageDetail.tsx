@@ -1,37 +1,27 @@
-import { router } from "@inertiajs/react";
-import "../../../../css/styles.css";
 import type { Conversation } from "@/types/cms/message";
 import { useEffect } from "react";
 
+const AVATAR_COLORS = ["orange", "teal", "blue", "pink"] as const;
+
+function getAvatarText(name: string): string {
+    return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+}
+
+function getAvatarColor(id: number): string {
+    return AVATAR_COLORS[id % AVATAR_COLORS.length];
+}
+
 interface DetailHeaderProps {
     conversation: Conversation;
-    typeLabel: string;
-    typeClass: string;
-    showStatus?: boolean;
-    avatarId?: string;
-    nameId?: string;
-    emailId?: string;
-    dateId?: string;
-    badgeId?: string;
-    typeBadgeId?: string;
-    statusBadgeId?: string;
     onDelete: (id: number) => void;
 }
 
-const DetailHeader = ({
-    conversation,
-    typeLabel,
-    typeClass,
-    showStatus,
-    avatarId,
-    nameId,
-    emailId,
-    dateId,
-    badgeId,
-    typeBadgeId,
-    statusBadgeId,
-    onDelete,
-}: DetailHeaderProps) => {
+const DetailHeader = ({ conversation, onDelete }: DetailHeaderProps) => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (!(event.target as Element).closest(".actions-btn")) {
@@ -50,16 +40,15 @@ const DetailHeader = ({
         <div className="message-detail-header">
             <div className="message-detail-user">
                 <div
-                    className={`message-avatar caption-md ${conversation.avatar_color}`}
-                    id={avatarId}
+                    className={`message-avatar caption-md ${getAvatarColor(conversation.id)}`}
                 >
-                    {conversation.avatar_text}
+                    {getAvatarText(conversation.name)}
                 </div>
                 <div className="message-detail-info">
-                    <div className="message-detail-name body-sm" id={nameId}>
+                    <div className="message-detail-name body-sm">
                         {conversation.name}
                     </div>
-                    <div className="message-detail-email body-xs" id={emailId}>
+                    <div className="message-detail-email body-xs">
                         {conversation.email}
                     </div>
                 </div>
@@ -70,22 +59,19 @@ const DetailHeader = ({
                 style={{ position: "relative" }}
             >
                 <span
-                    className={`message-badge caption-md ${typeClass}`}
-                    id={badgeId || typeBadgeId}
+                    className={`message-badge caption-md ${conversation.type === "contact_us" ? "contact-us" : "report"}`}
                 >
-                    {typeLabel}
+                    {conversation.type_label}
                 </span>
-                {showStatus && (
+                {conversation.type === "dispute" && (
                     <span
                         className={`message-badge caption-md ${conversation.status}`}
-                        id={statusBadgeId}
                     >
-                        {conversation.status.charAt(0).toUpperCase() +
-                            conversation.status.slice(1)}
+                        {conversation.status_label}
                     </span>
                 )}
-                {!showStatus && (
-                    <span className="message-date body-xs" id={dateId}>
+                {conversation.type === "contact_us" && (
+                    <span className="message-date body-xs">
                         {conversation.date}
                     </span>
                 )}
@@ -97,7 +83,6 @@ const DetailHeader = ({
                         if (menu) {
                             menu.classList.toggle("active");
                         }
-                        // Close other menus
                         document
                             .querySelectorAll(".context-menu.active")
                             .forEach((m) => {
@@ -143,14 +128,14 @@ const DetailHeader = ({
 interface MessageDetailProps {
     conversation: Conversation | null;
     onBack: () => void;
-    onMarkAction: (id: number, status: string) => void;
+    onMarkResolved: (id: number) => void;
     onDelete: (id: number) => void;
 }
 
 export default function MessageDetail({
     conversation,
     onBack,
-    onMarkAction,
+    onMarkResolved,
     onDelete,
 }: MessageDetailProps) {
     if (!conversation) {
@@ -170,25 +155,6 @@ export default function MessageDetail({
             </div>
         );
     }
-
-    const handleDeleteComment = () => {
-        if (confirm("Are you sure you want to delete this comment?")) {
-            router.delete(`/cms/comments/${conversation.id}`, {
-                preserveScroll: true,
-                onSuccess: () => onBack(),
-            });
-        }
-    };
-
-    const handleDeleteUser = () => {
-        if (confirm("Are you sure you want to delete this user?")) {
-            router.delete(`/cms/users/${conversation.id}`, {
-                // Assuming this is the endpoint
-                preserveScroll: true,
-                onSuccess: () => onBack(),
-            });
-        }
-    };
 
     return (
         <div
@@ -211,17 +177,10 @@ export default function MessageDetail({
                 Back
             </button>
 
-            {conversation.type === "contact" ? (
+            {conversation.type === "contact_us" ? (
                 <div className="contact-detail-view" id="contactDetailView">
                     <DetailHeader
                         conversation={conversation}
-                        typeLabel="Contact Us"
-                        typeClass="contact-us"
-                        avatarId="detailAvatar"
-                        nameId="detailName"
-                        emailId="detailEmail"
-                        dateId="detailDate"
-                        badgeId="detailBadge"
                         onDelete={onDelete}
                     />
                     <div className="message-content body-xs" id="detailContent">
@@ -229,15 +188,13 @@ export default function MessageDetail({
                             <p key={i}>{line}</p>
                         ))}
                     </div>
-                    {!conversation.is_read && (
+                    {conversation.status !== "resolved" && (
                         <button
                             className="btns btn-gaints btns-primary"
                             id="markReadBtn"
-                            onClick={() =>
-                                onMarkAction(conversation.id, "resolved")
-                            }
+                            onClick={() => onMarkResolved(conversation.id)}
                         >
-                            <span className="text-btn-500">Mark as read</span>
+                            <span className="text-btn-500">Mark as Resolved</span>
                         </button>
                     )}
                 </div>
@@ -245,27 +202,8 @@ export default function MessageDetail({
                 <div className="report-detail-view" id="reportDetailView">
                     <DetailHeader
                         conversation={conversation}
-                        typeLabel="Report"
-                        typeClass="report"
-                        showStatus
-                        avatarId="reportAvatar"
-                        nameId="reportName"
-                        emailId="reportEmail"
-                        typeBadgeId="reportTypeBadge"
-                        statusBadgeId="reportStatusBadge"
                         onDelete={onDelete}
                     />
-                    <div className="report-section">
-                        <h3 className="report-section-title body-lg">
-                            Report Subject
-                        </h3>
-                        <p
-                            className="report-section-content body-xs"
-                            id="reportSubject"
-                        >
-                            {conversation.subject || "No Subject"}
-                        </p>
-                    </div>
                     <div className="report-section">
                         <h3 className="report-section-title body-lg">
                             Reported Date
@@ -276,51 +214,24 @@ export default function MessageDetail({
                     </div>
                     <div className="report-section">
                         <h3 className="report-section-title body-sm">
-                            Reported Comment
+                            Message
                         </h3>
                         <div className="reported-comment">
                             <div className="flex flex-col gap-3">
                                 <div className="reported-comment-user">
                                     <div
-                                        className={`message-avatar body-sm ${conversation.avatar_color}`}
-                                        id="reportAvatar"
+                                        className={`message-avatar body-sm ${getAvatarColor(conversation.id)}`}
                                     >
-                                        {conversation.avatar_text}
+                                        {getAvatarText(conversation.name)}
                                     </div>
                                     <div>
-                                        <span
-                                            className="reported-comment-name body-sm"
-                                            id="reportedUserName"
-                                        >
+                                        <span className="reported-comment-name body-sm">
                                             {conversation.name}
                                         </span>
-                                        <p
-                                            className="reported-comment-text body-xs"
-                                            id="reportedCommentText"
-                                        >
+                                        <p className="reported-comment-text body-xs">
                                             {conversation.message}
                                         </p>
                                     </div>
-                                </div>
-                                <div className="report-actions">
-                                    <button
-                                        className="btns btn-small btn-delete-comment"
-                                        id="deleteCommentBtn"
-                                        onClick={handleDeleteComment}
-                                    >
-                                        <span className="link-sm">
-                                            Delete Comment
-                                        </span>
-                                    </button>
-                                    <button
-                                        className="btns btn-small btn-delete-user"
-                                        id="deleteUserBtn"
-                                        onClick={handleDeleteUser}
-                                    >
-                                        <span className="link-sm">
-                                            Delete User
-                                        </span>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -330,9 +241,7 @@ export default function MessageDetail({
                             <button
                                 className="btns btn-gaints btns-primary"
                                 id="markResolvedBtn"
-                                onClick={() =>
-                                    onMarkAction(conversation.id, "resolved")
-                                }
+                                onClick={() => onMarkResolved(conversation.id)}
                             >
                                 <span className="text-btn-500">
                                     Mark Resolved

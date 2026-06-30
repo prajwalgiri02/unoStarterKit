@@ -15,59 +15,36 @@ const SuccessModal = ({
     buttonLink,
 }: SuccessModalProps) => {
     useEffect(() => {
-        document.body.classList.add("modal-open");
-        const prevOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
+        document.body.classList.add("overflow-hidden");
         return () => {
-            document.body.classList.remove("modal-open");
-            document.body.style.overflow = prevOverflow;
+            document.body.classList.remove("overflow-hidden");
         };
     }, []);
 
     return (
-        <>
-            <div
-                className="modal fade show d-block"
-                id="successModal"
-                tabIndex={-1}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="successModalLabel"
-            >
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content modal-content-success text-center">
-                        <div className="modal-body modal-body-success flex flex-col items-center">
-                            <div className="success-icon">
-                                <img
-                                    src="/icons/success.svg"
-                                    alt="Success"
-                                    width="40"
-                                    height="40"
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <h4
-                                    id="successModalLabel"
-                                    className="title-ex-small text-neutral-900 "
-                                >
-                                    {title}
-                                </h4>
-                                <p className="body-md text-neutral-700">
-                                    {description}
-                                </p>
-                            </div>
-                            <Link
-                                href={buttonLink}
-                                className="btns btn-gaints btns-primary text-btn-500 w-full text-decoration-none flex justify-center items-center"
-                            >
-                                {buttonText}
-                            </Link>
-                        </div>
-                    </div>
+        <div className="success-overlay" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
+            <div className="success-modal">
+                <div className="success-modal__icon">
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
                 </div>
+                <h3 id="successModalTitle" className="success-modal__title">{title}</h3>
+                <p className="success-modal__description">{description}</p>
+                <Link href={buttonLink} className="btn btn-primary success-modal__btn">
+                    {buttonText}
+                </Link>
             </div>
-            <div className="modal-backdrop fade show" aria-hidden="true" />
-        </>
+        </div>
     );
 };
 

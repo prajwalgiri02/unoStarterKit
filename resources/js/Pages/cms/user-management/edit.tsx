@@ -1,100 +1,125 @@
-import { Form, Link, usePage } from '@inertiajs/react'
+import React from "react";
+import CmsLayout from "@/layouts/cms-layout";
+import { useForm, Link } from "@inertiajs/react";
+import FormInput from "@/components/inputs/email-input";
+import PrimaryButton from "@/components/buttons/primary-button";
 
-import AdminLayout from '@/Layouts/AdminLayout'
-import Button from '@/Components/Form/Button'
-import Input from '@/Components/Form/Input'
+import type { UserCms } from "@/types/cms/user";
 
-type ManagedUser = {
-  id: number
-  name: string
-  email: string
-  roles: string[]
-  is_blocked: boolean
-  is_approved: boolean
+interface UserEditProps {
+    user: UserCms;
 }
 
-type PageProps = {
-  user: ManagedUser
-}
+function UserEdit({ user }: UserEditProps) {
+    const { data, setData, put, processing, errors } = useForm({
+        name: user.name,
+        email: user.email,
+        password: "",
+        password_confirmation: "",
+    });
 
-export default function UserManagerEdit() {
-  const { user } = usePage<PageProps>().props
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        put(`/cms/user-manager/${user.id}`, {
+            preserveScroll: true,
+        });
+    };
 
-  return (
-    <AdminLayout headerLabel="Edit User" backUrl={`/cms/user-manager/${user.id}`}>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Edit user</h2>
-          <p className="text-sm text-gray-500">Update account details for {user.email}.</p>
+    return (
+        <div className="legal-content-card">
+            <div className="legal-card-content flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                    <h2 className="subtitle-md text-neutral-900">Edit User</h2>
+                    <Link
+                        href={`/cms/user-manager/${user.id}`}
+                        className="body-xs text-neutral-500 hover:text-neutral-700"
+                    >
+                        Cancel
+                    </Link>
+                </div>
+
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormInput
+                            id="name"
+                            name="name"
+                            label="Full Name"
+                            placeholder="Enter full name"
+                            value={data.name}
+                            onChange={(e) => setData("name", e.target.value)}
+                            error={errors.name}
+                        />
+                        <FormInput
+                            type="email"
+                            id="email"
+                            name="email"
+                            label="Email"
+                            placeholder="Enter email"
+                            value={data.email}
+                            onChange={(e) => setData("email", e.target.value)}
+                            error={errors.email}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormInput
+                            type="password"
+                            id="password"
+                            name="password"
+                            label="New Password"
+                            placeholder="Leave blank to keep current"
+                            value={data.password}
+                            onChange={(e) =>
+                                setData("password", e.target.value)
+                            }
+                            error={errors.password}
+                        />
+                        <FormInput
+                            type="password"
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            label="Confirm New Password"
+                            placeholder="Confirm new password"
+                            value={data.password_confirmation}
+                            onChange={(e) =>
+                                setData("password_confirmation", e.target.value)
+                            }
+                            error={errors.password_confirmation}
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-2">
+                        <PrimaryButton
+                            type="submit"
+                            disabled={processing}
+                            size="giant"
+                        >
+                            {processing ? "Saving..." : "Save Changes"}
+                        </PrimaryButton>
+                        <Link
+                            href={`/cms/user-manager/${user.id}`}
+                            className="btns btn-large btns-secondary"
+                        >
+                            Cancel
+                        </Link>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <Link
-          href={`/cms/user-manager/${user.id}`}
-          className="text-sm font-medium text-gray-900 hover:underline"
-        >
-          Back to user
-        </Link>
-      </div>
-
-      <Form
-        action={`/cms/user-manager/${user.id}`}
-        method="put"
-        resetOnSuccess={['password', 'password_confirmation']}
-      >
-        {({ errors, processing }) => (
-          <div className="space-y-4">
-            <Input
-              name="name"
-              label="Full name"
-              defaultValue={user.name}
-              error={errors.name}
-              required
-            />
-
-            <Input
-              name="email"
-              type="email"
-              label="Email"
-              defaultValue={user.email}
-              error={errors.email}
-              required
-            />
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Input
-                name="password"
-                type="password"
-                label="New password"
-                placeholder="Leave blank to keep current password"
-                autoComplete="new-password"
-                error={errors.password}
-              />
-
-              <Input
-                name="password_confirmation"
-                type="password"
-                label="Confirm new password"
-                placeholder="Confirm new password"
-                autoComplete="new-password"
-                error={errors.password_confirmation}
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <Button type="submit" loading={processing} loadingText="Saving...">
-                Save changes
-              </Button>
-
-              <Link
-                href={`/cms/user-manager/${user.id}`}
-                className="inline-flex items-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </Link>
-            </div>
-          </div>
-        )}
-      </Form>
-    </AdminLayout>
-  )
+    );
 }
+
+UserEdit.layout = (page: React.ReactNode) => (
+    <CmsLayout
+        headerLabel="Edit User"
+        showSearchBar={false}
+        showActionButton={false}
+        showNotificationButton={true}
+        backUrl="/cms/user-manager"
+        wrapperClass="user-management-content-wrapper"
+    >
+        {page}
+    </CmsLayout>
+);
+
+export default UserEdit;

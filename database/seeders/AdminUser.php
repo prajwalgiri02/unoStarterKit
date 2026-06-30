@@ -12,7 +12,7 @@ class AdminUser extends Seeder
     {
         $user = User::updateOrCreate(
             [
-                'email' => 'admin@appifany.com.au',
+                'email' => 'developers@appifany.com.au',
             ],
             [
                 'name' => 'Admin',

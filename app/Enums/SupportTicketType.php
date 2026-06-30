@@ -24,4 +24,17 @@ enum SupportTicketType: string
             self::Dispute => 'badge-primary-outline',
         };
     }
+
+    /** @return list<array{value: string, label: string, badge_class: string}> */
+    public static function options(): array
+    {
+        return array_map(
+            fn (self $type): array => [
+                'value' => $type->value,
+                'label' => $type->label(),
+                'badge_class' => $type->badgeClass(),
+            ],
+            self::cases(),
+        );
+    }
 }

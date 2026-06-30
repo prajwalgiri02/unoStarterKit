@@ -1,7 +1,5 @@
 import { useForm, router, usePage } from "@inertiajs/react";
-import TextInput from "@/components/inputs/text-input";
-import EmailInput from "@/components/inputs/email-input";
-import PasswordInput from "@/components/inputs/password-input";
+import FormInput from "@/components/inputs/email-input";
 import PrimaryButton from "@/components/buttons/primary-button";
 import ConfirmationAccountModal from "./ConfirmationAccountModal";
 import { useState, useEffect } from "react";
@@ -160,7 +158,7 @@ export default function EditProfileForm({
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <TextInput
+                        <FormInput
                             id="name"
                             name="name"
                             label="Full Name"
@@ -169,7 +167,8 @@ export default function EditProfileForm({
                             onChange={(e) => setData("name", e.target.value)}
                             error={errors.name}
                         />
-                        <EmailInput
+                        <FormInput
+                            type="email"
                             id="email"
                             name="email"
                             label="Email"
@@ -185,7 +184,8 @@ export default function EditProfileForm({
                             Change Password
                         </span>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <PasswordInput
+                            <FormInput
+                                type="password"
                                 id="password"
                                 name="password"
                                 label="Create New Password"
@@ -196,7 +196,8 @@ export default function EditProfileForm({
                                 }
                                 error={errors.password}
                             />
-                            <PasswordInput
+                            <FormInput
+                                type="password"
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 label="Confirm New Password"

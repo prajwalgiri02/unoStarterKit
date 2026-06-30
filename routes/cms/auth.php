@@ -30,7 +30,7 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/forgot-password/verify/{token}', [ForgotPasswordController::class, 'verify'])
         ->where('token', '[A-Za-z0-9]{64}')
-        ->middleware(['password-reset.pending', 'throttle:6,1'])
+        ->middleware(['precognitive', 'password-reset.pending', 'throttle:6,1'])
         ->name('password.otp.verify');
 
     Route::post('/forgot-password/resend/{token}', [ForgotPasswordController::class, 'resend'])
@@ -45,7 +45,7 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/reset-password/{token}', [ForgotPasswordController::class, 'reset'])
         ->where('token', '[A-Za-z0-9]{64}')
-        ->middleware('password-reset.verified')
+        ->middleware(['precognitive', 'password-reset.verified'])
         ->name('password.reset');
 
     Route::post('/forgot-password/cancel/{token}', [ForgotPasswordController::class, 'cancel'])

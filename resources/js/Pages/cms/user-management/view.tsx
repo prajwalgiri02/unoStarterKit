@@ -1,12 +1,16 @@
 import React from "react";
 import CmsLayout from "@/layouts/cms-layout";
-import "../../../../css/user-management.css";
 import UserProfileCard from "@/components/cms/user/UserProfileCard";
 import ChildrenTable from "@/components/cms/user/ChildrenTable";
+import { Link } from "@inertiajs/react";
 
-import type { UserDetailPageProps } from "@/types/cms/user";
+import type { UserCms } from "@/types/cms/user";
 
-const UserView = ({ user }: { user: UserCms }) => {
+interface UserViewProps {
+    user: UserCms;
+}
+
+const UserView = ({ user }: UserViewProps) => {
     return (
         <>
             <UserProfileCard
@@ -14,7 +18,9 @@ const UserView = ({ user }: { user: UserCms }) => {
                 email={user.email}
                 status={user.is_blocked ? "Blocked" : "Active"}
                 tier={user.roles.join(", ")}
-                onEdit={() => {}}
+                onEdit={() => {
+                    window.location.href = `/cms/user-manager/${user.id}/edit`;
+                }}
             />
 
             <div>
@@ -31,10 +37,10 @@ const UserView = ({ user }: { user: UserCms }) => {
 UserView.layout = (page: React.ReactNode) => (
     <CmsLayout
         headerLabel="User Details"
-        showSearchBar={true}
+        showSearchBar={false}
         showActionButton={false}
         showNotificationButton={true}
-        backUrl="/cms/user"
+        backUrl="/cms/user-manager"
         wrapperClass="user-management-content-wrapper"
     >
         {page}

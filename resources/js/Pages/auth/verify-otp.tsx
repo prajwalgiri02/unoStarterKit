@@ -1,9 +1,7 @@
 import PrimaryButton from "@/components/buttons/primary-button";
-import TextButton from "@/components/buttons/text-button";
-import TextInput from "@/components/inputs/text-input";
 import AuthLayout from "@/layouts/auth-layout";
 import { Form, router, usePage } from "@inertiajs/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { secondsUntil, formatCountdown } from "@/lib/helper";
 
 export type OtpPayload = {
@@ -18,14 +16,89 @@ type VerifyOtpPageProps = {
     otp: OtpPayload;
     email: string;
     token: string;
+    otpLength: number;
+};
+
+type OtpInputProps = {
+    digitCount: number;
+    value: string;
+    onChange: (val: string) => void;
+    hasError?: boolean;
+};
+
+const OtpInput = ({ digitCount, value, onChange, hasError }: OtpInputProps) => {
+    const digits = Array.from({ length: digitCount }, (_, i) => value[i] ?? "");
+    const refs = useRef<Array<HTMLInputElement | null>>([]);
+
+    const focus = (index: number) => {
+        refs.current[index]?.focus();
+    };
+
+    const handleChange = (index: number, char: string) => {
+        if (!/^\d$/.test(char)) return;
+        const next = digits.map((d, i) => (i === index ? char : d));
+        onChange(next.join("").trimEnd());
+        if (index < digitCount - 1) focus(index + 1);
+    };
+
+    const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Backspace") {
+            e.preventDefault();
+            if (digits[index]) {
+                const next = digits.map((d, i) => (i === index ? "" : d));
+                onChange(next.join("").trimEnd());
+            } else if (index > 0) {
+                const next = digits.map((d, i) => (i === index - 1 ? "" : d));
+                onChange(next.join("").trimEnd());
+                focus(index - 1);
+            }
+        } else if (e.key === "ArrowLeft" && index > 0) {
+            focus(index - 1);
+        } else if (e.key === "ArrowRight" && index < digitCount - 1) {
+            focus(index + 1);
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent) => {
+        e.preventDefault();
+        const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, digitCount);
+        onChange(pasted);
+        focus(Math.min(pasted.length, digitCount - 1));
+    };
+
+    return (
+        <div className="code-input-row" id="codeRow">
+            {Array.from({ length: digitCount }, (_, i) => (
+                <input
+                    key={i}
+                    ref={(el) => { refs.current[i] = el; }}
+                    className={`code-input${hasError ? " is-error" : ""}`}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digits[i] ?? ""}
+                    aria-label={`Digit ${i + 1}`}
+                    onChange={(e) => handleChange(i, e.target.value.slice(-1))}
+                    onKeyDown={(e) => handleKeyDown(i, e)}
+                    onPaste={handlePaste}
+                    onFocus={(e) => e.target.select()}
+                />
+            ))}
+        </div>
+    );
 };
 
 const VerifyOTP = () => {
-    const { otp, email, token } = usePage<VerifyOtpPageProps>().props;
-    const [secondsLeft, setSecondsLeft] = useState(() =>
-        otp ? secondsUntil(otp.expiresAt) : 0,
-    );
+    const { otp, email, token, otpLength } = usePage<VerifyOtpPageProps>().props;
+    const [otpValue, setOtpValue] = useState("");
+    const [secondsLeft, setSecondsLeft] = useState(() => (otp ? secondsUntil(otp.expiresAt) : 0));
     const [resendProcessing, setResendProcessing] = useState(false);
+    const [errorSuppressed, setErrorSuppressed] = useState(false);
+
+    const handleOtpChange = (val: string) => {
+        setOtpValue(val);
+        setErrorSuppressed(true);
+    };
 
     useEffect(() => {
         if (!otp?.expiresAt) return;
@@ -38,9 +111,7 @@ const VerifyOTP = () => {
     const canResend = secondsLeft <= 0 && !resendProcessing;
 
     const handleResend = useCallback(() => {
-        if (!canResend) {
-            return;
-        }
+        if (!canResend) return;
         setResendProcessing(true);
         router.post(
             `/cms/forgot-password/resend/${token}`,
@@ -59,70 +130,77 @@ const VerifyOTP = () => {
             id="verifyCodeForm"
             action={`/cms/forgot-password/verify/${token}`}
             method="post"
-            validationTimeout={500}
             disableWhileProcessing
+            onError={() => setErrorSuppressed(false)}
         >
-            {({ processing }) => (
+            {({ processing, errors }) => {
+                const showError = !!errors.otp && !errorSuppressed;
+                return (
                 <>
-                    <input type="hidden" name="email" value={email} />
-                    <div className="flex flex-col gap-4">
-                        <TextInput
-                            id="otp"
-                            name="otp"
-                            label="Code"
-                            autoComplete="one-time-code"
-                            placeholder="Enter code"
-                        />
-                    </div>
-                    <p className="caption-md text-neutral-600 mt-2 mb-0">
-                        {secondsLeft < 0 && (
-                            <span className="text-neutral-700">
-                                This code has expired. Resend a new code.
-                            </span>
-                        )}
-                    </p>
-                    <div className="flex flex-col gap-4 mt-10">
-                        <PrimaryButton type="submit" disabled={processing}>
-                            {processing ? "Verifying..." : "Verify"}
-                        </PrimaryButton>
+                    <input type="hidden" name="otp" value={otpValue} />
 
-                        <p className="body-sm text-neutral-600 text-center mb-0">
-                            Didn&apos;t receive a code?{" "}
-                            <TextButton
-                                type="button"
-                                disabled={resendDisabled}
-                                onClick={handleResend}
-                                className={resendDisabled ? "opacity-50" : ""}
-                                aria-label={
-                                    secondsLeft > 0
-                                        ? `Resend available in ${formatCountdown(secondsLeft)}`
-                                        : "Resend code"
-                                }
-                            >
-                                {resendProcessing
-                                    ? "Sending..."
-                                    : secondsLeft > 0
-                                      ? `Resend in ${formatCountdown(secondsLeft)}`
-                                      : "Resend code"}
-                            </TextButton>
+                    <OtpInput digitCount={otpLength} value={otpValue} onChange={handleOtpChange} hasError={showError} />
+
+                    {showError && (
+                        <p className="caption-md text-red-500 mt-2 mb-0">{errors.otp}</p>
+                    )}
+
+                    {!showError && secondsLeft < 0 && (
+                        <p className="caption-md text-neutral-700 mt-2 mb-0">
+                            This code has expired. Resend a new code.
                         </p>
+                    )}
+
+                    <div className="flex flex-col gap-4 mt-10">
+                        <p className="resend-text">
+                            {resendProcessing ? (
+                                "Sending new code..."
+                            ) : secondsLeft > 0 ? (
+                                <>Resend code in <strong>{formatCountdown(secondsLeft)}</strong></>
+                            ) : (
+                                <>
+                                    Didn&apos;t receive a code?{" "}
+                                    <a type="button" onClick={handleResend}>
+                                     <strong className="cursor-pointer">Resend</strong>   
+                                    </a>
+                                </>
+                            )}  
+                        </p>
+
+                        <PrimaryButton
+                            type="submit"
+                            disabled={processing || otpValue.length < otpLength}
+                        >
+                            {processing ? "Confirming..." : "Confirm"}
+                        </PrimaryButton>
                     </div>
                 </>
-            )}
+                );
+            }}
         </Form>
     );
 };
 
-VerifyOTP.layout = (page: React.ReactNode) => (
-    <AuthLayout
-        headerTitle="Verify Code"
-        headerDescription="An authentication code has been sent to your email."
-        goBack={true}
-        goBackLabelText="Back to signin"
-        goBackUrl="/cms/login"
-    >
-        {page}
-    </AuthLayout>
-);
+const VerifyOTPLayout = ({ children }: { children: React.ReactNode }) => {
+    const { email } = usePage<VerifyOtpPageProps>().props;
+    return (
+        <AuthLayout
+            headerTitle="Enter Code"
+            headerDescription={
+                <>
+                    Please enter the code we&apos;ve sent to{" "}
+                    <strong>{email ?? "your email"}</strong>
+                </>
+            }
+            goBack={true}
+            goBackLabelText="Back"
+            goBackUrl="/cms/login"
+        >
+            {children}
+        </AuthLayout>
+    );
+};
+
+VerifyOTP.layout = (page: React.ReactNode) => <VerifyOTPLayout>{page}</VerifyOTPLayout>;
 
 export default VerifyOTP;

@@ -16,13 +16,6 @@ class VerifyPasswordOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-            ],
             'otp' => [
                 'required',
                 'string',

@@ -1,5 +1,5 @@
 import PrimaryButton from "@/components/buttons/primary-button";
-import PasswordInput from "@/components/inputs/password-input";
+import FormInput from "@/components/inputs/email-input";
 import SuccessModal from "@/components/modals/success-modal";
 import AuthLayout from "@/layouts/auth-layout";
 import { Form, usePage } from "@inertiajs/react";
@@ -14,50 +14,48 @@ const ChangePassword = () => {
     const { passwordChanged, email, token } =
         usePage<ChangePasswordPageProps>().props;
 
-    if (passwordChanged) {
-        return (
-            <SuccessModal
-                title="Password changed"
-                description="Your password has been changed successfully."
-                buttonText="Back to Sign In"
-                buttonLink="/cms/login"
-            />
-        );
-    }
-
     return (
-        <Form
-            id="changePasswordForm"
-            action={`/cms/reset-password/${token}`}
-            method="post"
-            validationTimeout={500}
-            disableWhileProcessing
-        >
-            {({ processing }) => (
-                <>
-                    <input type="hidden" name="email" value={email} />
-                    <div className="flex flex-col gap-4">
-                        <PasswordInput confirmed />
-                    </div>
-                    <div className="flex flex-col gap-4 mt-10">
-                        <PrimaryButton type="submit" disabled={processing}>
-                            {processing
-                                ? "Resetting password..."
-                                : "Reset password"}
-                        </PrimaryButton>
-                    </div>
-                </>
+        <>
+            {passwordChanged && (
+                <SuccessModal
+                    title="Password Reset"
+                    description="Your password has been updated. You can now log in using your new password."
+                    buttonText="Go Back to Log In"
+                    buttonLink="/cms/login"
+                />
             )}
-        </Form>
+            <Form
+                id="changePasswordForm"
+                action={`/cms/reset-password/${token}`}
+                method="post"
+                disableWhileProcessing
+            >
+                {({ processing }) => (
+                    <>
+                        <input type="hidden" name="email" value={email} />
+                        <div className="flex flex-col gap-4">
+                            <FormInput type="password" name="password" confirmed label="New Password" confirmLabel="Confirm New Password" skipBlurValidation />
+                        </div>
+                        <div className="flex flex-col gap-4 mt-10">
+                            <PrimaryButton type="submit" disabled={processing}>
+                                {processing
+                                    ? "Resetting password..."
+                                    : "Reset password"}
+                            </PrimaryButton>
+                        </div>
+                    </>
+                )}
+            </Form>
+        </>
     );
 };
 
 ChangePassword.layout = (page: React.ReactNode) => (
     <AuthLayout
-        headerTitle="Set new password"
-        headerDescription="Your previous password has been reseted. Please set a new password for your account."
+        headerTitle="Reset Password"
+        headerDescription=""
         goBack={true}
-        goBackLabelText="Back to signin"
+        goBackLabelText="Back"
         goBackUrl="/cms/login"
     >
         {page}

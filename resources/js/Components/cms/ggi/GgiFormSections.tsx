@@ -1,5 +1,5 @@
 import React from "react";
-import TextInput from "@/components/inputs/text-input";
+import FormInput from "@/components/inputs/email-input";
 import SelectInput from "@/components/inputs/select-input";
 import FormErrorAlert from "@/components/common/FormErrorAlert";
 
@@ -21,7 +21,7 @@ export const BasicDetailsForm: React.FC<BasicDetailsProps> = ({
     <>
         <div className="row gx-4 mb-3">
             <div className="col-md-6">
-                <TextInput
+                <FormInput
                     id="name"
                     name="name"
                     label="Name"
