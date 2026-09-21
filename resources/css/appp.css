@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+/* Theme must come first — defines all CSS variables and Tailwind @theme mapping */
+@import "./theme.css";
+
+@import "tailwindcss";
+@import "./styles.css";
+@import "./responsive.css";
+
+
+.a:hover {
+    color: inherit !important;
+}

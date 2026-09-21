@@ -118,11 +118,10 @@ export default function TopBar({
                     )}
                 </div>
             </header>
+            <div className="dashboard-content">{children}</div>
         </>
     );
 }
-
-          {/* <div className="dashboard-content">{children}</div> */}
 
         //   {notificationOpen && (
         //     <NotificationModal

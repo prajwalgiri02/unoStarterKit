@@ -1,13 +1,23 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-
-/* Theme must come first — defines all CSS variables and Tailwind @theme mapping */
-@import "./theme.css";
-
-@import "tailwindcss";
+@import "flatpickr/dist/flatpickr.min.css";
+@import "./flatpickr-theme.css";
+@import "../../public/assets/bootstrap/css/bootstrap.min.css";
+@import "./access-control.css";
+@import "./community.css";
+@import "./forgotpassword.css";
+@import "./ggi.css";
+@import "./legal-help.css";
+@import "./messages.css";
+@import "./phase.css";
+@import "./pillar.css";
+@import "./setnewpassword.css";
+@import "./signin.css";
+@import "./signin1.css";
 @import "./styles.css";
-@import "./responsive.css";
-
+@import "./subscriptions.css";
+@import "./user-management.css";
+@import "./verifycode.css";
+@import "./waypoints.css";
+@import "./waypoint-details.css";
 
 .a:hover {
     color: inherit !important;

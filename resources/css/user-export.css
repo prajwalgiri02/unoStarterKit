@@ -1,0 +1,545 @@
+/* ============================================
+   Parent Export Flow (User Management)
+   Export options modal, PDF preview modal and
+   the printable parent account report (.uxr-*)
+   ============================================ */
+
+/* ---------- Step 1: Export User Report modal ---------- */
+
+.export-report-dialog {
+    max-width: 480px;
+}
+
+.export-report-content,
+.export-preview-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0px 16px 44px rgba(0, 0, 0, 0.07);
+    background: var(--white);
+}
+
+.export-report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px 12px 24px;
+}
+
+.export-close-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    line-height: 0;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.export-close-btn:hover {
+    background: var(--neutral-50);
+}
+
+.export-report-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 24px;
+    max-height: min(56vh, 520px);
+    overflow-y: auto;
+}
+
+.export-option-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--neutral-100);
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.export-option-card.selected {
+    border-color: var(--primary-500);
+    background: var(--primary-25);
+}
+
+.export-option-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.export-option-includes {
+    margin: 0;
+    padding-left: 28px;
+}
+
+.export-child-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px 4px 14px;
+    border-top: 1px solid var(--neutral-100);
+}
+
+.export-child-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.export-report-footer {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 16px 24px 24px 24px;
+}
+
+/* ---------- Step 2: PDF preview modal ---------- */
+
+.export-preview-dialog {
+    max-width: 900px;
+    width: calc(100vw - 48px);
+}
+
+.export-preview-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.export-preview-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.export-preview-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 24px;
+    border-top: 1px solid var(--neutral-100);
+    border-bottom: 1px solid var(--neutral-100);
+    background: var(--neutral-25);
+}
+
+.export-filename-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid var(--neutral-100);
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--neutral-700);
+}
+
+.export-zoom-select {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: 1px solid var(--neutral-100);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--neutral-700);
+}
+
+.export-preview-viewport {
+    background: var(--neutral-100);
+    max-height: 60vh;
+    overflow: auto;
+    padding: 24px;
+}
+
+.export-preview-scale {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.export-preview-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+}
+
+.export-preview-note {
+    max-width: 440px;
+}
+
+.export-preview-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* ---------- Report document ---------- */
+
+.uxr-document {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.uxr-page {
+    width: 794px; /* A4 @ 96dpi */
+    min-height: 1123px;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 40px 44px;
+    display: flex;
+    flex-direction: column;
+}
+
+/*
+ * Pagination support (see ParentAccountReport.tsx): the report is split into
+ * fixed-height pages in JS by measuring blocks, so header and footer are
+ * plain flex children on every page — header at the top, footer pinned to
+ * the bottom — and only body blocks move between pages.
+ */
+
+/* body area between the repeated header and footer */
+.uxr-page-body {
+    flex: 1 0 auto;
+}
+
+/* flow-root keeps each block's margins inside it, so the heights measured
+   in .uxr-measure match the rendered heights exactly */
+.uxr-block {
+    display: flow-root;
+}
+
+/* hidden off-screen container the paginator measures blocks in; width must
+   equal the .uxr-page content width (794px − 2 × 44px side padding) */
+.uxr-measure {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 706px;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* table fragments freeze their measured column widths via <colgroup>, so a
+   table split across pages keeps an identical column layout */
+.uxr-table-fixed {
+    table-layout: fixed;
+}
+
+.uxr-brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--neutral-100);
+    margin-bottom: 20px;
+}
+
+.uxr-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.uxr-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.uxr-brand-name {
+    color: var(--primary-600);
+    font-weight: 600;
+}
+
+.uxr-meta {
+    text-align: right;
+}
+
+.uxr-title {
+    color: var(--primary-600);
+    margin-bottom: 4px;
+}
+
+.uxr-subtitle {
+    margin-bottom: 8px;
+}
+
+.uxr-section-heading {
+    color: var(--neutral-900);
+    margin: 20px 0 10px 0;
+}
+
+.uxr-strong {
+    color: var(--neutral-900);
+    font-weight: 500;
+}
+
+.uxr-tier {
+    color: var(--primary-600);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Profile card */
+
+.uxr-profile-card {
+    padding: 16px;
+    background: var(--neutral-10);
+}
+
+.uxr-profile-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--neutral-100);
+    margin-bottom: 12px;
+}
+
+.uxr-profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.uxr-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.uxr-profile-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+/* Billing cards */
+
+.uxr-billing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.uxr-billing-card {
+    border: 1px solid var(--neutral-100);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Avatars (self-contained: also used inside the print iframe) */
+
+.uxr-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--neutral-800);
+    flex-shrink: 0;
+}
+
+.uxr-avatar-sm {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+}
+
+.uxr-avatar.orange {
+    background: #ffeadd;
+}
+
+.uxr-avatar.teal {
+    background: #e4fff8;
+}
+
+.uxr-avatar.pink {
+    background: #ffe4e8;
+}
+
+.uxr-avatar.blue {
+    background: #e4f0ff;
+}
+
+.uxr-avatar.purple {
+    background: #f0e4ff;
+}
+
+.uxr-avatar.yellow {
+    background: #fff4e4;
+}
+
+/* Badges */
+
+.uxr-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 18px;
+    white-space: nowrap;
+}
+
+.uxr-badge-success {
+    background: var(--success-50);
+    color: var(--success-700);
+}
+
+.uxr-badge-warning {
+    background: var(--warning-50);
+    color: var(--warning-700);
+}
+
+.uxr-badge-danger {
+    background: var(--error-50);
+    color: var(--error-700);
+}
+
+.uxr-badge-info {
+    background: var(--info-50);
+    color: var(--info-700);
+}
+
+/* Tables */
+
+.uxr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: var(--neutral-800);
+}
+
+.uxr-table th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--neutral-500);
+    background: var(--neutral-25);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--neutral-100);
+}
+
+.uxr-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--neutral-50);
+    vertical-align: middle;
+}
+
+.uxr-child-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.uxr-child-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    width: fit-content;
+    margin-bottom: 14px;
+}
+
+/* Child history chips: spacing between one child's table and the next chip;
+   the paginator keeps a chip with its table via keep-with-next */
+.uxr-history-chip {
+    margin: 20px 0 10px;
+}
+
+.uxr-child-empty {
+    margin: 0;
+    padding: 8px 14px;
+    border: 1px dashed var(--neutral-100);
+    border-radius: 8px;
+    background: var(--neutral-25);
+}
+
+.uxr-page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+    .uxr-print-body {
+        margin: 0;
+        background: var(--white);
+    }
+
+    /*
+     * Force badge/avatar/card background colours to print. Without this the
+     * browser drops them unless the user ticks "Background graphics" in the
+     * print dialog (off by default). print-color-adjust is inherited, so
+     * setting it on the body cascades to every element; the explicit `*`
+     * selector guards against any element that resets the property.
+     */
+    .uxr-print-body,
+    .uxr-print-body * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .uxr-print-body .uxr-document {
+        display: block;
+    }
+
+    /*
+     * Pagination is computed in JS (ParentAccountReport) by measuring blocks
+     * in px at 96dpi, guaranteeing every .uxr-page fits one sheet with the
+     * footer pinned to the bottom via flex. The sheet is declared in the
+     * same px units (794×1123 ≈ A4) so preview and print geometry are
+     * identical; overflow:hidden guards against sub-pixel rounding ever
+     * spilling into an extra blank sheet.
+     */
+    .uxr-print-body .uxr-page {
+        width: 794px;
+        height: 1123px;
+        box-sizing: border-box;
+        padding: 40px 44px;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .uxr-print-body .uxr-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+}
+
+/* Sheet size matches .uxr-page exactly (≈ A4); margin: 0 because the page's
+   own padding provides the visible margins consistently. */
+@page {
+    size: 794px 1123px;
+    margin: 0;
+}
