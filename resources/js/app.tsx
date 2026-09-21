@@ -3,8 +3,8 @@ import { createInertiaApp } from '@inertiajs/react'
 
 createInertiaApp({
     resolve: name => {
-        const pages = import.meta.glob('./pages/**/*.tsx', { eager: true }) as Record<string, { default: any }>
-        const page = pages[`./pages/${name}.tsx`]
+        const pages = import.meta.glob('./Pages/**/*.tsx', { eager: true }) as Record<string, { default: any }>
+        const page = pages[`./Pages/${name}.tsx`]
         if (!page) {
             throw new Error(`Page not found: Pages/${name}.tsx — check filename and casing`)
         }

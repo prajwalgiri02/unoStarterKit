@@ -18,26 +18,6 @@ export const sidebar: SidebarItem[] = [
         path: '/cms/user-manager',
     },
     {
-        label: 'Delivery Manager',
-        icon: "/images/sidebar/delivery-manager.svg",
-        path: '/cms/delivery-manager',
-    },
-    {
-        label: 'Category Manager',
-        icon: "/images/sidebar/category-manager.svg",
-        path: '/cms/category-manager',
-    },
-    {
-        label: 'Vehicle Manager',
-        icon: "/images/sidebar/vehicle-manager.svg",
-        path: '/cms/vehicle-manager',
-    },
-    {
-        label: 'Subscription',
-        icon: "/images/sidebar/subscription.svg",
-        path: '/cms/subscription',
-    },
-    {
         label: 'Messages & Support',
         icon: "/images/sidebar/message-support.svg",
         path: '/cms/messages',
