@@ -10,7 +10,7 @@ export default function AuthLayout({
   goBack = false,
   goBackLabelText = "Go Back",
   goBackUrl = "/",
-}: {
+}: { 
   children: React.ReactNode;
   headerTitle?: string;
   headerDescription?: React.ReactNode;
