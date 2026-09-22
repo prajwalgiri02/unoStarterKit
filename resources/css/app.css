@@ -1,39 +1,9 @@
-/* Google Fonts MUST stay the first statement in this file.
-   Tailwind v4 takes over @import resolution and silently drops remote
-   @import url(...) rules that appear after its own imports (or nested
-   inside the feature stylesheets below), so the families are consolidated
-   into this single request. */
+
 @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Homenaje&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Prata&display=swap");
 
-/* Tailwind v4 — imported WITHOUT preflight on purpose.
-   Bootstrap still styles the existing CMS pages, and Tailwind's reset
-   would clash with it. Once the pages are migrated to Tailwind-only,
-   replace the three lines below with a plain `@import "tailwindcss";`
-   to pull in preflight, then drop the bootstrap import. */
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+@import "tailwindcss";
 
 @import "flatpickr/dist/flatpickr.min.css";
 @import "./flatpickr-theme.css";
-@import "../../public/assets/bootstrap/css/bootstrap.min.css";
 
-/* Design tokens — single source of truth for colors. Must stay ahead of the
-   feature stylesheets below so they can consume its CSS variables, and it
-   carries the @theme block that exposes those tokens to Tailwind utilities. */
 @import "./theme.css";
-
-@import "./access-control.css";
-@import "./forgotpassword.css";
-@import "./legal-help.css";
-@import "./messages.css";
-@import "./setnewpassword.css";
-@import "./signin.css";
-@import "./styles.css";
-@import "./subscriptions.css";
-@import "./user-management.css";
-@import "./verifycode.css";
-
-.a:hover {
-    color: inherit !important;
-}
