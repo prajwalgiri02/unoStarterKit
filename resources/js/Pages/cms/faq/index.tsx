@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 import { useForm, router, usePage } from "@inertiajs/react";
 import FaqForm from "./components/faq-form";
 import FaqItem from "./components/faq-item";
-import DeleteModal from "@/components/modals/DeleteModal";
+import DeleteModal from "@/Components/modals/DeleteModal";
 import { z } from "zod";
 
 import type {
     Faq as FaqData,
     FaqListPageProps as Props,
-} from "@/types/cms/faq";
+} from "@/Pages/types/cms/faq";
 
 const faqSchema = z.object({
     title: z

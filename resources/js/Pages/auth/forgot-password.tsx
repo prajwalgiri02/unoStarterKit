@@ -1,6 +1,6 @@
-import PrimaryButton from "@/components/buttons/primary-button";
-import FormInput from "@/components/inputs/email-input";
-import AuthLayout from "@/layouts/auth-layout";
+import PrimaryButton from "@/Components/buttons/primary-button";
+import FormInput from "@/Components/inputs/email-input";
+import AuthLayout from "@/Layouts/auth-layout";
 import { Form } from "@inertiajs/react";
 
 const ForgotPassword = () => {

@@ -1,5 +1,5 @@
-import DeleteModal from "@/components/modals/DeleteModal";
-import type { PageProps } from "@/types/index";
+import DeleteModal from "@/Components/modals/DeleteModal";
+import type { PageProps } from "@/Pages/types/index";
 import { router, usePage } from "@inertiajs/react";
 import { useState } from "react";
 

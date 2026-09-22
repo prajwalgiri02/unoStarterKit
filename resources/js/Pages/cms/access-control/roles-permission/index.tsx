@@ -1,4 +1,4 @@
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 
 function RolesPermission() {
     return (

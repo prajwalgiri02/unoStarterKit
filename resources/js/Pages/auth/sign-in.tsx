@@ -1,8 +1,8 @@
-import PrimaryButton from "@/components/buttons/primary-button";
-import TextButton from "@/components/buttons/text-button";
-import CheckboxInput from "@/components/inputs/checkbox-input";
-import FormInput from "@/components/inputs/email-input";
-import AuthLayout from "@/layouts/auth-layout";
+import PrimaryButton from "@/Components/buttons/primary-button";
+import TextButton from "@/Components/buttons/text-button";
+import CheckboxInput from "@/Components/inputs/checkbox-input";
+import FormInput from "@/Components/inputs/email-input";
+import AuthLayout from "@/Layouts/auth-layout";
 import { Form } from "@inertiajs/react";
 
 const SignIn = () => {

@@ -1,0 +1,100 @@
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[40px] border border-transparent outline-none cursor-pointer transition-all duration-200;
+    }
+
+    .btn svg {
+        width: var(--btn-icon);
+        height: var(--btn-icon);
+        flex-shrink: 0;
+    }
+
+    .btn-giant {
+        --btn-icon: 1.5rem;
+        @apply h-14 px-6 text-subtitle-xs;
+    }
+
+    .btn-large {
+        --btn-icon: 1.5rem;
+        @apply h-12 px-5 text-body-lg;
+    }
+
+    .btn-medium {
+        --btn-icon: 1.125rem;
+        @apply h-10 px-4 text-body-sm;
+    }
+
+    .btn-small {
+        --btn-icon: 1rem;
+        @apply h-8 px-3 text-link-sm;
+    }
+
+    .btn-tiny {
+        --btn-icon: 1rem;
+        @apply h-6 px-2 text-link-sm;
+    }
+
+    .btn-icon-only {
+        @apply px-0 aspect-square;
+    }
+
+    .btn-filled {
+        @apply bg-primary-500 text-base-white border-transparent;
+    }
+
+    .btn-filled:hover:not(:disabled) {
+        @apply bg-primary-400;
+    }
+
+    .btn-filled:focus-visible:not(:disabled) {
+        @apply bg-primary-500 ring-[3px] ring-primary-50;
+    }
+
+    .btn-filled:active:not(:disabled) {
+        @apply bg-primary-600;
+    }
+
+    .btn-filled:disabled {
+        @apply bg-primary-200 text-base-white border-transparent cursor-not-allowed pointer-events-none;
+    }
+
+    .btn-outline {
+        @apply bg-transparent border-[1.5px] border-primary-500 text-primary-500;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+        @apply bg-primary-50;
+    }
+
+    .btn-outline:focus-visible:not(:disabled) {
+        @apply bg-base-white shadow-[0_0_0_3px_#dfecee];
+    }
+
+    .btn-outline:active:not(:disabled) {
+        @apply bg-primary-100;
+    }
+
+    .btn-outline:disabled {
+        @apply bg-primary-200 border-primary-200 text-base-white cursor-not-allowed pointer-events-none;
+    }
+
+    .btn-clear {
+        @apply bg-transparent border-transparent text-primary-500;
+    }
+
+    .btn-clear:hover:not(:disabled) {
+        @apply bg-primary-50;
+    }
+
+    .btn-clear:focus-visible:not(:disabled) {
+        @apply bg-base-white shadow-[0_0_0_3px_#dfecee];
+    }
+
+    .btn-clear:active:not(:disabled) {
+        @apply bg-primary-100;
+    }
+
+    .btn-clear:disabled {
+        @apply bg-transparent text-primary-200 cursor-not-allowed pointer-events-none;
+    }
+}

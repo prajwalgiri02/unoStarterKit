@@ -1,9 +1,9 @@
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 import { useForm } from "@inertiajs/react";
 import { useState } from "react";
-import FormInput from "@/components/inputs/email-input";
-import TextareaInput from "@/components/inputs/textarea-input";
-import PrimaryButton from "@/components/buttons/primary-button";
+import FormInput from "@/Components/inputs/email-input";
+import TextareaInput from "@/Components/inputs/textarea-input";
+import PrimaryButton from "@/Components/buttons/primary-button";
 
 interface StaticContent {
     id: number;

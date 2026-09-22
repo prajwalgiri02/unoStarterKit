@@ -1,8 +1,8 @@
 import React from "react";
-import CmsLayout from "@/layouts/cms-layout";
-import ComposeNotification from "@/components/cms/broadcast-notification/compose-notification";
-import SentNotifications from "@/components/cms/broadcast-notification/sent-notifications";
-import type { BroadcastNotificationPageProps } from "@/types/cms/notification";
+import CmsLayout from "@/Layouts/cms-layout";
+import ComposeNotification from "@/Components/cms/broadcast-notification/compose-notification";
+import SentNotifications from "@/Components/cms/broadcast-notification/sent-notifications";
+import type { BroadcastNotificationPageProps } from "@/Pages/types/cms/notification";
 
 function BroadcastNotification({ notifications }: BroadcastNotificationPageProps) {
     return (

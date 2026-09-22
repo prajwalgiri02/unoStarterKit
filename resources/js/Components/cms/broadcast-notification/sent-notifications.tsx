@@ -1,6 +1,6 @@
 import React from "react";
 import { router } from "@inertiajs/react";
-import type { BroadcastNotification } from "@/types/cms/notification";
+import type { BroadcastNotification } from "@/Pages/types/cms/notification";
 
 interface SentNotificationsProps {
     notifications: {

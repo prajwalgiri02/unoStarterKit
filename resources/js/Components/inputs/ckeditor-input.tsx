@@ -22,7 +22,7 @@ import {
 } from "ckeditor5";
 
 import "ckeditor5/ckeditor5.css";
-import { fieldError } from "@/components/inputs/first-error-message";
+import { fieldError } from "@/Components/inputs/first-error-message";
 import { useFormContext } from "@inertiajs/react";
 
 type CKEditorInputProps = {

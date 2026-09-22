@@ -1,10 +1,10 @@
 import React from "react";
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 import { useForm, Link } from "@inertiajs/react";
-import FormInput from "@/components/inputs/email-input";
-import PrimaryButton from "@/components/buttons/primary-button";
+import FormInput from "@/Components/inputs/email-input";
+import PrimaryButton from "@/Components/buttons/primary-button";
 
-import type { UserCms } from "@/types/cms/user";
+import type { UserCms } from "@/Pages/types/cms/user";
 
 interface UserEditProps {
     user: UserCms;

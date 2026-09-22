@@ -1,10 +1,10 @@
 import React from "react";
-import CmsLayout from "@/layouts/cms-layout";
-import UserProfileCard from "@/components/cms/user/UserProfileCard";
-import ChildrenTable from "@/components/cms/user/ChildrenTable";
+import CmsLayout from "@/Layouts/cms-layout";
+import UserProfileCard from "@/Components/cms/user/UserProfileCard";
+import ChildrenTable from "@/Components/cms/user/ChildrenTable";
 import { Link } from "@inertiajs/react";
 
-import type { UserCms } from "@/types/cms/user";
+import type { UserCms } from "@/Pages/types/cms/user";
 
 interface UserViewProps {
     user: UserCms;

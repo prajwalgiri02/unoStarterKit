@@ -1,9 +1,9 @@
 import React from "react";
 import { useForm } from "@inertiajs/react";
-import SelectInput from "@/components/inputs/select-input";
-import TextareaInput from "@/components/inputs/textarea-input";
-import FormInput from "@/components/inputs/email-input";
-import PrimaryButton from "@/components/buttons/primary-button";
+import SelectInput from "@/Components/inputs/select-input";
+import TextareaInput from "@/Components/inputs/textarea-input";
+import FormInput from "@/Components/inputs/email-input";
+import PrimaryButton from "@/Components/buttons/primary-button";
 
 const ComposeNotification: React.FC = () => {
     const { data, setData, post, processing, errors, reset } = useForm({

@@ -1,6 +1,6 @@
 import { Link, router, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
-import type { ActionButtonConfig } from "@/layouts/cms-layout";
+import type { ActionButtonConfig } from "@/Layouts/cms-layout";
 import NotificationModal from "../modals/notification-modal";
 
 interface TopBarProps {

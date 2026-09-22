@@ -1,4 +1,4 @@
-import { fieldError } from "@/components/inputs/first-error-message";
+import { fieldError } from "@/Components/inputs/first-error-message";
 import { useFormContext } from "@inertiajs/react";
 
 type CheckboxInputProps = {

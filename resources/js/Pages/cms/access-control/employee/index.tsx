@@ -1,5 +1,5 @@
-import CmsLayout from "@/layouts/cms-layout";
-import EmployeeTableRow from "@/components/cms/access-control/EmployeeTableRow";
+import CmsLayout from "@/Layouts/cms-layout";
+import EmployeeTableRow from "@/Components/cms/access-control/EmployeeTableRow";
 
 const employees = [
     {

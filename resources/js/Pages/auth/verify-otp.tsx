@@ -1,5 +1,5 @@
-import PrimaryButton from "@/components/buttons/primary-button";
-import AuthLayout from "@/layouts/auth-layout";
+import PrimaryButton from "@/Components/buttons/primary-button";
+import AuthLayout from "@/Layouts/auth-layout";
 import { Form, router, usePage } from "@inertiajs/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { secondsUntil, formatCountdown } from "@/lib/helper";

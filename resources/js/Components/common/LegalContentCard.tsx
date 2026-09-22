@@ -1,4 +1,4 @@
-import SanitizedHtml from "@/components/common/SanitizedHtml";
+import SanitizedHtml from "@/Components/common/SanitizedHtml";
 
 type LegalContentCardProps = {
     sectionTitle: string;

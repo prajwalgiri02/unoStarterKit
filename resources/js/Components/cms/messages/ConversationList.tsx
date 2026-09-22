@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Conversation, MessageType } from "@/types/cms/message";
+import type { Conversation, MessageType } from "@/Pages/types/cms/message";
 
 const AVATAR_COLORS = ["orange", "teal", "blue", "pink"] as const;
 

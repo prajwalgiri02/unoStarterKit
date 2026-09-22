@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 import { router, Link } from "@inertiajs/react";
-import Pagination from "@/components/table/Pagination";
-import DeleteModal from "@/components/modals/DeleteModal";
-import FilterRow from "@/components/common/FilterRow";
+import Pagination from "@/Components/table/Pagination";
+import DeleteModal from "@/Components/modals/DeleteModal";
+import FilterRow from "@/Components/common/FilterRow";
 
-import type { UserCms, UserListPageProps } from "@/types/cms/user";
-import type { UserFilterState } from "@/types/ui/filters";
+import type { UserCms, UserListPageProps } from "@/Pages/types/cms/user";
+import type { UserFilterState } from "@/Pages/types/ui/filters";
 
 function UserManagement({
     users,

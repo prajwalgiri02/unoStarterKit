@@ -1,4 +1,4 @@
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 import { useState, useEffect } from "react";
 import ProfileDetails from "./components/ProfileDetails";
 import EditProfileForm from "./components/EditProfileForm";
@@ -7,7 +7,7 @@ import { usePage } from "@inertiajs/react";
 import type {
     SettingsUser as User,
     SettingsPageProps as SettingsProps,
-} from "@/types/cms/settings";
+} from "@/Pages/types/cms/settings";
 
 function Settings({ user, flash }: SettingsProps) {
     const [isEditing, setIsEditing] = useState(false);

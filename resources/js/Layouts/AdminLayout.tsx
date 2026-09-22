@@ -1,6 +1,6 @@
 import React from 'react';
-import CmsLayout from '@/layouts/cms-layout';
-import type { ActionButtonConfig } from '@/layouts/cms-layout';
+import CmsLayout from '@/Layouts/cms-layout';
+import type { ActionButtonConfig } from '@/Layouts/cms-layout';
 
 type AdminLayoutProps = {
     children: React.ReactNode;

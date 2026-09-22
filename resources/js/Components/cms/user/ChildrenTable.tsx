@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, router } from "@inertiajs/react";
-import DeleteModal from "@/components/modals/DeleteModal";
+import DeleteModal from "@/Components/modals/DeleteModal";
 
 interface Child {
     id: number;

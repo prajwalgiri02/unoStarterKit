@@ -1,14 +1,14 @@
-import CmsLayout from "@/layouts/cms-layout";
+import CmsLayout from "@/Layouts/cms-layout";
 import { useState, useEffect } from "react";
-import ConversationList from "@/components/cms/messages/ConversationList";
-import MessageDetail from "@/components/cms/messages/MessageDetail";
+import ConversationList from "@/Components/cms/messages/ConversationList";
+import MessageDetail from "@/Components/cms/messages/MessageDetail";
 import type {
     Conversation,
     MessageType,
     MessageListPageProps as MessagesProps,
-} from "@/types/cms/message";
+} from "@/Pages/types/cms/message";
 import { router, usePage } from "@inertiajs/react";
-import type { PageProps } from "@/types";
+import type { PageProps } from "@/Pages/types";
 import { toast } from "sonner";
 
 function MessagesAndSupport() {

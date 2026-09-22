@@ -1,9 +1,9 @@
 import React from "react";
-import CmsLayout from "@/layouts/cms-layout";
-import SubscriptionStats from "@/components/cms/subscription/SubscriptionStats";
-import SubscriptionCharts from "@/components/cms/subscription/SubscriptionCharts";
-import SubscriptionTableRow from "@/components/cms/subscription/SubscriptionTableRow";
-import FilterRow from "@/components/common/FilterRow";
+import CmsLayout from "@/Layouts/cms-layout";
+import SubscriptionStats from "@/Components/cms/subscription/SubscriptionStats";
+import SubscriptionCharts from "@/Components/cms/subscription/SubscriptionCharts";
+import SubscriptionTableRow from "@/Components/cms/subscription/SubscriptionTableRow";
+import FilterRow from "@/Components/common/FilterRow";
 
 const subscriptionRows = [
     {

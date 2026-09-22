@@ -1,8 +1,8 @@
-import DashboardCharts from "@/components/cms/dashboard/DashboardCharts";
-import StatsGrid from "@/components/cms/dashboard/StatsGrid";
-import CmsLayout from "@/layouts/cms-layout";
+import DashboardCharts from "@/Components/cms/dashboard/DashboardCharts";
+import StatsGrid from "@/Components/cms/dashboard/StatsGrid";
+import CmsLayout from "@/Layouts/cms-layout";
 import { router, usePage } from "@inertiajs/react";
-import FilterRow from "@/components/common/FilterRow";
+import FilterRow from "@/Components/common/FilterRow";
 
 type DashboardProps = {
     auth: {

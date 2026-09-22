@@ -1,4 +1,4 @@
-import type { SettingsUser as User } from "@/types/cms/settings";
+import type { SettingsUser as User } from "@/Pages/types/cms/settings";
 
 interface ProfileDetailsProps {
     user: User;

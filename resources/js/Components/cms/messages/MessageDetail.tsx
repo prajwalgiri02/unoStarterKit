@@ -1,4 +1,4 @@
-import type { Conversation } from "@/types/cms/message";
+import type { Conversation } from "@/Pages/types/cms/message";
 import { useEffect } from "react";
 
 const AVATAR_COLORS = ["orange", "teal", "blue", "pink"] as const;

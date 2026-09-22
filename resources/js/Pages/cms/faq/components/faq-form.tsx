@@ -1,6 +1,6 @@
-import PrimaryButton from "@/components/buttons/primary-button";
-import FormInput from "@/components/inputs/email-input";
-import TextareaInput from "@/components/inputs/textarea-input";
+import PrimaryButton from "@/Components/buttons/primary-button";
+import FormInput from "@/Components/inputs/email-input";
+import TextareaInput from "@/Components/inputs/textarea-input";
 
 type FaqFormProps = {
     title: string;

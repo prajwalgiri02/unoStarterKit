@@ -1,6 +1,6 @@
 import { useForm, router, usePage } from "@inertiajs/react";
-import FormInput from "@/components/inputs/email-input";
-import PrimaryButton from "@/components/buttons/primary-button";
+import FormInput from "@/Components/inputs/email-input";
+import PrimaryButton from "@/Components/buttons/primary-button";
 import ConfirmationAccountModal from "./ConfirmationAccountModal";
 import { useState, useEffect } from "react";
 import { z } from "zod";
@@ -44,7 +44,7 @@ const profileSchema = z
         },
     );
 
-import type { SettingsUser as User } from "@/types/cms/settings";
+import type { SettingsUser as User } from "@/Pages/types/cms/settings";
 
 interface EditProfileFormProps {
     user: User;
