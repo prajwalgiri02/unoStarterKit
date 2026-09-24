@@ -26,42 +26,41 @@ Included out of the box:
 
 ## Creating a new project
 
-You need SSH access to the GitHub repository. The installer asks all its questions first and installs the Composer packages afterwards, so you are not waiting on a long download before you can answer.
+You need SSH access to the GitHub repository. Creating a project is two commands, like `laravel new`:
 
 ```bash
-composer create-project prajwalgiri02/unostarterkit my-project --remove-vcs \
-  --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git","no-api":true}'
+composer create-project prajwalgiri02/unostarterkit grocery-go --no-install --no-scripts --remove-vcs --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git","no-api":true}'
+cd grocery-go
+php installer/setup.php
 ```
 
-`--remove-vcs` makes every new project start fresh, without the kit's `.git` history, and stops Composer from asking about it. Always include it.
-
-In PowerShell, escape the JSON quotes:
+In PowerShell, escape the JSON quotes in the first command:
 
 ```powershell
-composer create-project prajwalgiri02/unostarterkit my-project --remove-vcs --repository='{\"type\":\"vcs\",\"url\":\"git@github.com:prajwalgiri02/unoStarterKit.git\",\"no-api\":true}'
+composer create-project prajwalgiri02/unostarterkit grocery-go --no-install --no-scripts --remove-vcs --repository='{\"type\":\"vcs\",\"url\":\"git@github.com:prajwalgiri02/unoStarterKit.git\",\"no-api\":true}'
 ```
+
+What happens:
+
+1. **Command 1** downloads only the kit's files, which takes a few seconds. `--no-install` skips the Composer packages, `--no-scripts` stops Composer from running anything, and `--remove-vcs` gives the project a fresh start without the kit's `.git` history and without Composer asking about it.
+2. **Command 2** runs the installer in your own terminal, so it can read your keyboard. It asks every question first, then installs the Composer packages, then finishes setup (keys, database, seeding, npm).
 
 Composer installs the latest tagged release (`v1.0.0`, `v1.1.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
 
-### If the questions do not appear
+### Why not one command?
 
-Some terminals do not pass your keyboard through to Composer scripts. When that happens the installer skips setup so Composer can finish, and prints what to do. Finish setup yourself from the project folder:
-
-```bash
-cd my-project
-php artisan uno:install
-```
+Composer runs scripts without connecting your keyboard on Windows, so a script cannot ask questions there. Running the installer yourself as the second command avoids that. (`composer create-project` without the flags still works: the installer skips its questions when it detects it cannot read input and tells you to run `php installer/setup.php`.)
 
 ### Cloning instead
 
 ```bash
-git clone git@github.com:prajwalgiri02/unoStarterKit.git my-project
-cd my-project
+git clone git@github.com:prajwalgiri02/unoStarterKit.git grocery-go
+cd grocery-go
 rm -rf .git          # PowerShell: Remove-Item -Recurse -Force .git
-composer install
-php artisan uno:install
+php installer/setup.php
 ```
 
+`php installer/setup.php` works without `vendor/`; it installs the packages itself after the questions. Inside an existing project you can also use `php artisan uno:install`.
 ### Publishing a new version of the kit
 
 ```bash

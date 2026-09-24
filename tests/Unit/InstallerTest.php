@@ -16,6 +16,8 @@ class InstallerTest extends TestCase
     /** @var list<list<string>> */
     private array $commands = [];
 
+    private bool $failComposer = false;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -78,7 +80,7 @@ class InstallerTest extends TestCase
     {
         unlink($this->base.'/vendor/autoload.php');
 
-        [$code, $output] = $this->install("1\nGrocery Go\nhttp://grocery.test\n2\n2\n0\ny\n");
+        [$code, $output] = $this->install("1\nGrocery Go\nhttp://grocery.test\n2\n2\n0\ny\n", fromComposer: true);
 
         $this->assertSame(0, $code, $output);
         $this->assertSame([], $this->commands);
@@ -90,6 +92,33 @@ class InstallerTest extends TestCase
         $this->assertSame(0, $code, $output);
         $this->assertNotEmpty($this->commands);
         $this->assertFileDoesNotExist($this->base.'/.uno-install.json');
+    }
+
+    public function test_outside_composer_it_installs_packages_after_the_questions(): void
+    {
+        unlink($this->base.'/vendor/autoload.php');
+
+        [$code, $output] = $this->install("1\nGrocery Go\nhttp://grocery.test\n2\n2\n0\ny\n");
+
+        $this->assertSame(0, $code, $output);
+        $this->assertSame('composer', $this->commands[0][0]);
+        $this->assertSame('install', $this->commands[0][1]);
+        $this->assertGreaterThan(1, count($this->commands));
+        $this->assertLessThan(strpos($output, 'Installing packages'), strpos($output, 'Application name'));
+        $this->assertFileDoesNotExist($this->base.'/.uno-install.json');
+    }
+
+    public function test_a_failed_package_install_stops_before_the_setup_steps(): void
+    {
+        unlink($this->base.'/vendor/autoload.php');
+        $this->failComposer = true;
+
+        [$code, $output] = $this->install("1\nGrocery Go\nhttp://grocery.test\n2\n2\n0\ny\n");
+
+        $this->assertSame(1, $code);
+        $this->assertCount(1, $this->commands);
+        $this->assertStringContainsString('composer install failed', $output);
+        $this->assertFileExists($this->base.'/.uno-install.json');
     }
 
     public function test_invalid_answers_are_reasked_then_the_installer_stops(): void
@@ -115,7 +144,7 @@ class InstallerTest extends TestCase
         [$code, $output] = $this->install('', fromComposer: true);
 
         $this->assertSame(0, $code);
-        $this->assertStringContainsString('php artisan uno:install', $output);
+        $this->assertStringContainsString('php installer/setup.php', $output);
     }
 
     public function test_finish_without_saved_answers_under_composer_is_a_no_op(): void
@@ -124,7 +153,7 @@ class InstallerTest extends TestCase
 
         $this->assertSame(0, $code);
         $this->assertSame([], $this->commands);
-        $this->assertStringContainsString('php artisan uno:install', $output);
+        $this->assertStringContainsString('php installer/setup.php', $output);
     }
 
     public function test_only_updates_the_selected_section_and_keeps_secrets(): void
@@ -218,7 +247,7 @@ class InstallerTest extends TestCase
         $installer = new Installer($this->base, $config, new Prompter($in, $out), function (array $command): array {
             $this->commands[] = $command;
 
-            return [0, ''];
+            return [$this->failComposer && $command[0] === 'composer' ? 1 : 0, ''];
         });
 
         $code = $installer->run($only, $finishOnly, $fromComposer);

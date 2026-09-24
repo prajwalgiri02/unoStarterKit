@@ -46,7 +46,7 @@ final class Installer
                 $choices = $this->loadState();
 
                 if ($choices === null && $fromComposer) {
-                    $this->io->warning('Setup has not been completed yet. Run it now: php artisan uno:install');
+                    $this->io->warning('Setup has not been completed yet. Run it now: php installer/setup.php');
 
                     return 0;
                 }
@@ -54,18 +54,18 @@ final class Installer
                 return $this->finish($choices ?? $this->askSteps());
             }
 
-            return $this->ask($only);
+            return $this->ask($only, $fromComposer);
         } catch (InstallAborted $exception) {
             $this->io->line();
             $this->io->error($exception->getMessage());
 
             if ($fromComposer) {
-                $this->io->warning('Setup was skipped so Composer can finish installing. Run it in your terminal afterwards: php artisan uno:install');
+                $this->io->warning('Setup was skipped so Composer can finish installing. Run it in your terminal: php installer/setup.php');
 
                 return 0;
             }
 
-            $this->io->warning('Run the installer again: php artisan uno:install (or: php installer/setup.php)');
+            $this->io->warning('Run the installer again: php installer/setup.php');
 
             return 1;
         }
@@ -74,7 +74,7 @@ final class Installer
     /**
      * @param  list<string>|null  $only
      */
-    private function ask(?array $only): int
+    private function ask(?array $only, bool $fromComposer): int
     {
         $valid = ['modules', ...array_keys($this->config['sections'])];
         $unknown = $only === null ? [] : array_diff($only, $valid);
@@ -119,11 +119,45 @@ final class Installer
         }
 
         $this->saveState($choices);
-        $this->io->line();
-        $this->io->success('All answers saved. Dependencies install next, then setup finishes automatically.');
-        $this->io->info('If it does not, run: php installer/setup.php --finish');
 
-        return 0;
+        if ($fromComposer) {
+            $this->io->line();
+            $this->io->success('All answers saved. Dependencies install next, then setup finishes automatically.');
+            $this->io->info('If it does not, run: php artisan uno:install --finish');
+
+            return 0;
+        }
+
+        return $this->installDependencies() ? $this->finish($choices) : 1;
+    }
+
+    private function installDependencies(): bool
+    {
+        $this->io->heading('Installing packages');
+        $this->io->info('All questions are answered. This step takes a few minutes.');
+        $this->io->line();
+
+        [$code] = $this->execute(['composer', 'install', '--no-interaction', '--prefer-dist'], stream: true);
+
+        if ($code !== 0) {
+            $this->io->error('composer install failed.');
+            $this->io->warning('Fix the problem above, then run: composer install && php artisan uno:install --finish');
+
+            return false;
+        }
+
+        $this->io->success('Composer packages installed.');
+
+        return true;
+    }
+
+    /**
+     * @param  list<string>  $command
+     * @return array{0: int, 1: string}
+     */
+    private function execute(array $command, bool $stream = false): array
+    {
+        return ($this->runner ?? $this->defaultRunner(...))($command, $this->basePath, $stream);
     }
 
     private function ensureEnvFile(): void
@@ -592,7 +626,7 @@ final class Installer
             }
 
             $this->io->info("→ {$step['label']}...");
-            [$code, $output] = ($this->runner ?? $this->defaultRunner(...))($command, $this->basePath);
+            [$code, $output] = $this->execute($command);
 
             if ($code !== 0) {
                 $this->io->error("{$step['label']} failed.");
@@ -620,9 +654,18 @@ final class Installer
      * @param  list<string>  $command
      * @return array{0: int, 1: string}
      */
-    private function defaultRunner(array $command, string $cwd): array
+    private function defaultRunner(array $command, string $cwd, bool $stream = false): array
     {
-        $line = implode(' ', array_map('escapeshellarg', $command)).' 2>&1';
+        $line = $this->commandLine($command);
+
+        if ($stream) {
+            chdir($cwd);
+            passthru($line, $code);
+
+            return [$code, ''];
+        }
+
+        $line .= ' 2>&1';
         $process = proc_open($line, [0 => ['pipe', 'r'], 1 => ['pipe', 'w']], $pipes, $cwd);
 
         if (! is_resource($process)) {
@@ -634,6 +677,20 @@ final class Installer
         fclose($pipes[1]);
 
         return [proc_close($process), $output];
+    }
+
+    /**
+     * @param  list<string>  $command
+     */
+    private function commandLine(array $command): string
+    {
+        $program = array_shift($command);
+
+        if (preg_match('/[\s\\\\\/]/', $program) === 1) {
+            $program = escapeshellarg($program);
+        }
+
+        return implode(' ', [$program, ...array_map('escapeshellarg', $command)]);
     }
 
     private function summary(): void
