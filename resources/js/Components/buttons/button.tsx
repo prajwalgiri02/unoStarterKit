@@ -17,7 +17,7 @@ const variantClasses = {
     ghost: "btn-clear",
 } as const;
 
-type PrimaryButtonProps = Omit<
+type ButtonProps = Omit<
     ButtonHTMLAttributes<HTMLButtonElement>,
     "type"
 > & {
@@ -25,19 +25,31 @@ type PrimaryButtonProps = Omit<
     size?: keyof typeof sizeClasses;
     type?: "button" | "submit" | "reset";
     iconOnly?: boolean;
+    startIcon?: ReactNode;
+    endIcon?: ReactNode;
     children: ReactNode;
 };
 
-export default function PrimaryButton({
+function ButtonIcon({ children }: { children: ReactNode }) {
+    return (
+        <span className="btn-icon" aria-hidden="true">
+            {children}
+        </span>
+    );
+}
+
+export default function Button({
     variant = "filled",
     size = "giant",
     type = "button",
     iconOnly = false,
+    startIcon,
+    endIcon,
     className = "",
     disabled,
     children,
     ...rest
-}: PrimaryButtonProps) {
+}: ButtonProps) {
     const composed = [
         "btn",
         sizeClasses[size],
@@ -51,7 +63,15 @@ export default function PrimaryButton({
 
     return (
         <button type={type} className={composed} disabled={disabled} {...rest}>
-            {children}
+            {iconOnly ? (
+                <ButtonIcon>{children}</ButtonIcon>
+            ) : (
+                <>
+                    {startIcon && <ButtonIcon>{startIcon}</ButtonIcon>}
+                    {children}
+                    {endIcon && <ButtonIcon>{endIcon}</ButtonIcon>}
+                </>
+            )}
         </button>
     );
 }

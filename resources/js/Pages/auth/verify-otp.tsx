@@ -1,4 +1,4 @@
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 import AuthLayout from "@/Layouts/auth-layout";
 import { Form, router, usePage } from "@inertiajs/react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -167,12 +167,12 @@ const VerifyOTP = () => {
                             )}  
                         </p>
 
-                        <PrimaryButton
+                        <Button
                             type="submit"
                             disabled={processing || otpValue.length < otpLength}
                         >
                             {processing ? "Confirming..." : "Confirm"}
-                        </PrimaryButton>
+                        </Button>
                     </div>
                 </>
                 );

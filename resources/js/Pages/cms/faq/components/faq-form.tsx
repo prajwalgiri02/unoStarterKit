@@ -1,4 +1,4 @@
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 import FormInput from "@/Components/inputs/email-input";
 import TextareaInput from "@/Components/inputs/textarea-input";
 

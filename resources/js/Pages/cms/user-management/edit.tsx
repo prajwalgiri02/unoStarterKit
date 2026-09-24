@@ -2,7 +2,7 @@ import React from "react";
 import CmsLayout from "@/Layouts/cms-layout";
 import { useForm, Link } from "@inertiajs/react";
 import FormInput from "@/Components/inputs/email-input";
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 
 import type { UserCms } from "@/Pages/types/cms/user";
 
@@ -89,13 +89,13 @@ function UserEdit({ user }: UserEditProps) {
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
-                        <PrimaryButton
+                        <Button
                             type="submit"
                             disabled={processing}
                             size="giant"
                         >
                             {processing ? "Saving..." : "Save Changes"}
-                        </PrimaryButton>
+                        </Button>
                         <Link
                             href={`/cms/user-manager/${user.id}`}
                             className="btns btn-large btns-secondary"

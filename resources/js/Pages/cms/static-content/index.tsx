@@ -3,7 +3,7 @@ import { useForm } from "@inertiajs/react";
 import { useState } from "react";
 import FormInput from "@/Components/inputs/email-input";
 import TextareaInput from "@/Components/inputs/textarea-input";
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 
 interface StaticContent {
     id: number;
@@ -59,9 +59,9 @@ function EditForm({ content, onCancel }: EditFormProps) {
                 error={errors.description}
             />
             <div className="flex items-center gap-3">
-                <PrimaryButton type="submit" size="giant" disabled={processing}>
+                <Button type="submit" size="giant" disabled={processing}>
                     {processing ? "Saving..." : "Save"}
-                </PrimaryButton>
+                </Button>
                 <button
                     type="button"
                     className="btns btn-large btns-secondary"

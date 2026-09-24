@@ -3,7 +3,7 @@ import { useForm } from "@inertiajs/react";
 import SelectInput from "@/Components/inputs/select-input";
 import TextareaInput from "@/Components/inputs/textarea-input";
 import FormInput from "@/Components/inputs/email-input";
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 
 const ComposeNotification: React.FC = () => {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -100,13 +100,13 @@ const ComposeNotification: React.FC = () => {
                     />
 
                     <div className="form-buttons">
-                        <PrimaryButton
+                        <Button
                             type="submit"
                             size="giant"
                             disabled={processing}
                         >
                             {processing ? "Sending..." : "Send Notification"}
-                        </PrimaryButton>
+                        </Button>
                     </div>
                 </form>
             </div>

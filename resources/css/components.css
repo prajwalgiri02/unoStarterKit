@@ -3,10 +3,12 @@
         @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[40px] border border-transparent outline-none cursor-pointer transition-all duration-200;
     }
 
-    .btn svg {
-        width: var(--btn-icon);
-        height: var(--btn-icon);
-        flex-shrink: 0;
+    .btn-icon {
+        @apply inline-flex shrink-0 items-center justify-center size-(--btn-icon);
+    }
+
+    .btn-icon > :is(svg, img) {
+        @apply size-full;
     }
 
     .btn-giant {

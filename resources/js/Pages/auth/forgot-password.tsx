@@ -1,4 +1,4 @@
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 import FormInput from "@/Components/inputs/email-input";
 import AuthLayout from "@/Layouts/auth-layout";
 import { Form } from "@inertiajs/react";
@@ -18,11 +18,11 @@ const ForgotPassword = () => {
                     <FormInput name="email" type="email" skipBlurValidation />
                     </div>
                     <div className="flex flex-col gap-4 mt-10">
-                        <PrimaryButton type="submit" disabled={processing}>
+                        <Button type="submit" disabled={processing}>
                             {processing
                                 ? "Sending verification code..."
                                 : "Send Verification Code"}
-                        </PrimaryButton>
+                        </Button>
                     </div>
                 </>
             )}

@@ -1,6 +1,6 @@
 import { useForm, router, usePage } from "@inertiajs/react";
 import FormInput from "@/Components/inputs/email-input";
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 import ConfirmationAccountModal from "./ConfirmationAccountModal";
 import { useState, useEffect } from "react";
 import { z } from "zod";
@@ -215,14 +215,14 @@ export default function EditProfileForm({
                     </div>
 
                     <div className="flex items-center gap-3 pt-4">
-                        <PrimaryButton
+                        <Button
                             type="submit"
                             disabled={processing}
                             size="giant"
                             className="px-8"
                         >
                             {processing ? "Saving..." : "Save Details"}
-                        </PrimaryButton>
+                        </Button>
                         <button
                             type="button"
                             className="px-6 py-3 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors"

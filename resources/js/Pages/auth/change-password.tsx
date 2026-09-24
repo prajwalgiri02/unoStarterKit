@@ -1,4 +1,4 @@
-import PrimaryButton from "@/Components/buttons/primary-button";
+import Button from "@/Components/buttons/button";
 import FormInput from "@/Components/inputs/email-input";
 import SuccessModal from "@/Components/modals/success-modal";
 import AuthLayout from "@/Layouts/auth-layout";
@@ -37,11 +37,11 @@ const ChangePassword = () => {
                             <FormInput type="password" name="password" confirmed label="New Password" confirmLabel="Confirm New Password" skipBlurValidation />
                         </div>
                         <div className="flex flex-col gap-4 mt-10">
-                            <PrimaryButton type="submit" disabled={processing}>
+                            <Button type="submit" disabled={processing}>
                                 {processing
                                     ? "Resetting password..."
                                     : "Reset password"}
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </>
                 )}
