@@ -13,7 +13,12 @@
 |           "required_when" forces an optional section on.
 | steps     Run after .env is written, each in a fresh process.
 |
-| Field options: type (text|password|select|confirm|file), label, default,
+| ask       (top level) set modules or services to false to skip that question:
+|           every module stays installed, optional services are not asked.
+|
+| Field options: ask (false uses the default without asking), default_from
+| (default is the snake_case of another answer), type (text|password|select|
+| confirm|file), label, default,
 | default_by [FIELD, [value => default]], options, required, rules,
 | when [FIELD => value|values], when_module, hidden_value,
 | remove_when_hidden, store and hint (file).
@@ -21,6 +26,11 @@
 */
 
 return [
+
+    'ask' => [
+        'modules' => false,
+        'services' => false,
+    ],
 
     'fixed' => [
         'APP_ENV' => 'local',
@@ -136,7 +146,7 @@ return [
             'label' => 'Application',
             'fields' => [
                 'APP_NAME' => ['type' => 'text', 'label' => 'Application name', 'required' => true],
-                'APP_URL' => ['type' => 'text', 'label' => 'Application URL', 'default' => 'http://localhost', 'required' => true, 'rules' => 'url'],
+                'APP_URL' => ['ask' => false, 'type' => 'text', 'label' => 'Application URL', 'default' => 'http://localhost', 'required' => true, 'rules' => 'url'],
             ],
         ],
 
@@ -148,11 +158,11 @@ return [
                     'pgsql' => 'PostgreSQL',
                     'sqlite' => 'SQLite',
                 ]],
-                'DB_HOST' => ['type' => 'text', 'label' => 'Database host', 'default' => '127.0.0.1', 'required' => true, 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
-                'DB_PORT' => ['type' => 'text', 'label' => 'Database port', 'default_by' => ['DB_CONNECTION', ['mysql' => '3306', 'pgsql' => '5432']], 'required' => true, 'rules' => 'integer', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
-                'DB_DATABASE' => ['type' => 'text', 'label' => 'Database name', 'required' => true, 'rules' => 'regex:/^[A-Za-z0-9_]+$/', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
-                'DB_USERNAME' => ['type' => 'text', 'label' => 'Database username', 'default' => 'root', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
-                'DB_PASSWORD' => ['type' => 'password', 'label' => 'Database password', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
+                'DB_HOST' => ['ask' => false, 'type' => 'text', 'label' => 'Database host', 'default' => '127.0.0.1', 'required' => true, 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
+                'DB_PORT' => ['ask' => false, 'type' => 'text', 'label' => 'Database port', 'default_by' => ['DB_CONNECTION', ['mysql' => '3306', 'pgsql' => '5432']], 'required' => true, 'rules' => 'integer', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
+                'DB_DATABASE' => ['ask' => false, 'default_from' => 'APP_NAME', 'type' => 'text', 'label' => 'Database name', 'required' => true, 'rules' => 'regex:/^[A-Za-z0-9_]+$/', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
+                'DB_USERNAME' => ['ask' => false, 'type' => 'text', 'label' => 'Database username', 'default' => 'root', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
+                'DB_PASSWORD' => ['ask' => false, 'type' => 'password', 'label' => 'Database password', 'when' => ['DB_CONNECTION' => ['mysql', 'pgsql']], 'remove_when_hidden' => true],
             ],
         ],
 

@@ -121,6 +121,28 @@ class InstallerTest extends TestCase
         $this->assertFileExists($this->base.'/.uno-install.json');
     }
 
+    public function test_prompts_switched_off_in_config_use_defaults_and_keep_every_module(): void
+    {
+        [$code, $output] = $this->install("Grocery Go\n2\n1\ny\n", tweak: function (array $config): array {
+            $config['ask'] = ['modules' => false, 'services' => false];
+            $config['sections']['app']['fields']['APP_URL']['ask'] = false;
+            $config['sections']['app']['fields']['APP_SLUG'] = ['ask' => false, 'default_from' => 'APP_NAME', 'type' => 'text', 'label' => 'Slug'];
+
+            return $config;
+        });
+
+        $env = new EnvEditor($this->base.'/.env');
+
+        $this->assertSame(0, $code, $output);
+        $this->assertSame('http://localhost', $env->get('APP_URL'));
+        $this->assertSame('grocery_go', $env->get('APP_SLUG'));
+        $this->assertStringNotContainsString('sidebar modules', $output);
+        $this->assertStringNotContainsString('Which services', $output);
+        $this->assertStringNotContainsString('Application URL', $output);
+        $this->assertFileExists($this->base.'/routes/faq.php');
+        $this->assertContains('migrate', array_map(fn (array $command): string => $command[2] ?? '', $this->commands));
+    }
+
     public function test_invalid_answers_are_reasked_then_the_installer_stops(): void
     {
         [$code, $output] = $this->install("n\nn\nn\nn\nn\n", only: ['auth']);
@@ -204,7 +226,7 @@ class InstallerTest extends TestCase
      * @param  list<string>|null  $only
      * @return array{0: int, 1: string}
      */
-    private function install(string $input, ?array $only = null, bool $finishOnly = false, bool $fromComposer = false): array
+    private function install(string $input, ?array $only = null, bool $finishOnly = false, bool $fromComposer = false, ?\Closure $tweak = null): array
     {
         $in = fopen('php://memory', 'r+');
         fwrite($in, $input);
@@ -243,6 +265,8 @@ class InstallerTest extends TestCase
                 ['id' => 'npm_install', 'label' => 'npm', 'command' => ['npm', 'install'], 'confirm' => 'Install npm packages?'],
             ],
         ];
+
+        $config = $tweak === null ? $config : $tweak($config);
 
         $installer = new Installer($this->base, $config, new Prompter($in, $out), function (array $command): array {
             $this->commands[] = $command;

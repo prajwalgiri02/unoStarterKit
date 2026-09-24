@@ -93,7 +93,7 @@ final class Installer
         $installed = $this->installedModules();
         $this->keptModules = $installed;
 
-        if ($only === null || in_array('modules', $only, true)) {
+        if ($only !== null ? in_array('modules', $only, true) : ($this->config['ask']['modules'] ?? true)) {
             $this->keptModules = $this->askModules($installed);
         }
 
@@ -245,6 +245,14 @@ final class Installer
             return array_values(array_intersect(array_keys($optional), $only));
         }
 
+        if (! ($this->config['ask']['services'] ?? true)) {
+            $this->io->line();
+            $this->io->info('Mail, file uploads, SMS and Firebase are not asked. Set them in .env (see .env.example),');
+            $this->io->info('or run later: php artisan uno:install --only=mail,storage,sms,firebase');
+
+            return [];
+        }
+
         $forced = array_keys(array_filter($optional, fn (array $section): bool => isset($section['required_when']) && $this->matches($section['required_when'])));
         $choices = array_diff_key($optional, array_flip($forced));
 
@@ -302,6 +310,13 @@ final class Installer
 
         $current = $this->env->get($key);
         $default = $current !== null && $current !== '' ? $current : $this->defaultFor($field);
+
+        if (($field['ask'] ?? true) === false) {
+            $this->answers[$key] = $default ?? '';
+
+            return;
+        }
+
         $label = $field['label'];
         $required = (bool) ($field['required'] ?? false);
         $validate = fn (string $value): ?string => $this->checkRules($label, $field['rules'] ?? null, $value);
@@ -439,6 +454,12 @@ final class Installer
             return $map[$this->current($dependsOn)] ?? ($field['default'] ?? null);
         }
 
+        if (isset($field['default_from'])) {
+            $slug = trim((string) preg_replace('/[^a-z0-9]+/', '_', strtolower((string) $this->current($field['default_from']))), '_');
+
+            return $slug === '' ? 'laravel' : $slug;
+        }
+
         return $field['default'] ?? null;
     }
 
@@ -466,14 +487,26 @@ final class Installer
         } catch (Throwable $exception) {
             $this->io->error('Could not connect to the database: '.$exception->getMessage());
 
-            if ($this->io->confirm('Re-enter the database details?', true)) {
+            if ($this->databaseCredentialsAreAsked() && $this->io->confirm('Re-enter the database details?', true)) {
                 return false;
             }
 
-            $this->io->warning('Continuing without a working database. Migrations will fail until it is fixed (php artisan uno:install --only=database).');
+            $this->io->warning('Set the DB_* values in .env. Migrations will fail until the database is reachable;');
+            $this->io->warning('after fixing it, run: php installer/setup.php --finish');
 
             return true;
         }
+    }
+
+    private function databaseCredentialsAreAsked(): bool
+    {
+        foreach (['DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'] as $key) {
+            if (($this->config['sections']['database']['fields'][$key]['ask'] ?? true) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function createDatabase(string $driver, string $name): void
