@@ -33,7 +33,7 @@ return [
     'modules' => [
 
         'user_manager' => [
-            'label' => 'User Manager (list, edit, block and approve users)',
+            'label' => 'User Manager - view, edit, block and approve users',
             'paths' => [
                 'routes/cms/user-manager.php',
                 'routes/cms/users.php',
@@ -70,7 +70,7 @@ return [
         ],
 
         'static_content' => [
-            'label' => 'Static Content (terms, privacy policy, guidelines)',
+            'label' => 'Static Content - terms and privacy policy',
             'paths' => [
                 'routes/cms/static-content.php',
                 'routes/api/static-content.php',
@@ -104,7 +104,7 @@ return [
         ],
 
         'notifications' => [
-            'label' => 'Notifications (broadcast to users, in-app inbox)',
+            'label' => 'Notifications - broadcast and in-app inbox',
             'paths' => [
                 'routes/cms/notifications.php',
                 'routes/api/notification.php',

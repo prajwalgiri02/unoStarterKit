@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\BoundedPrompts;
+use App\Console\InstallAborted;
 use App\Support\EnvEditor;
 use App\Support\ModuleRemover;
 use Illuminate\Console\Command;
@@ -28,6 +30,8 @@ use function Laravel\Prompts\warning;
 
 class InstallCommand extends Command
 {
+    use BoundedPrompts;
+
     protected $signature = 'uno:install
         {--only= : Reconfigure only these sections, comma separated (app, database, modules, auth, mail, storage, sms, firebase)}';
 
@@ -47,6 +51,26 @@ class InstallCommand extends Command
     private array $loadedEnvKeys = [];
 
     public function handle(): int
+    {
+        if (! $this->input->isInteractive()) {
+            error('The installer asks questions and needs an interactive terminal. Run it without --no-interaction.');
+
+            return self::FAILURE;
+        }
+
+        $this->configureBoundedPrompts();
+
+        try {
+            return $this->install();
+        } catch (InstallAborted $exception) {
+            error($exception->getMessage());
+            warning('Nothing more was changed. Run the installer again: php artisan uno:install');
+
+            return self::FAILURE;
+        }
+    }
+
+    private function install(): int
     {
         $only = $this->onlySections();
 

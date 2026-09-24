@@ -39,7 +39,7 @@ class InstallCommandTest extends TestCase
     public function test_only_updates_the_selected_section(): void
     {
         $this->artisan('uno:install', ['--only' => 'sms'])
-            ->expectsChoice('SMS provider', 'clicksend', ['clicksend' => 'ClickSend', 'log' => 'Log only (development)'])
+            ->expectsChoice('SMS provider', 'ClickSend', ['ClickSend', 'Log only (development)'])
             ->expectsQuestion('ClickSend username', 'grocery')
             ->expectsQuestion('ClickSend API key', '')
             ->expectsQuestion('Sender ID or number', 'Grocery Go')
@@ -55,6 +55,12 @@ class InstallCommandTest extends TestCase
         $this->assertSame('Old', $env->get('APP_NAME'));
         $this->assertStringContainsString('MAIL_FROM_NAME="${APP_NAME}"', File::get($this->envDirectory.'/.env'));
         $this->assertNull($env->get('APP_ENV'));
+    }
+
+    public function test_it_refuses_to_run_without_interaction(): void
+    {
+        $this->artisan('uno:install', ['--no-interaction' => true])
+            ->assertFailed();
     }
 
     public function test_unknown_sections_are_rejected(): void
