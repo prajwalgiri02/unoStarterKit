@@ -26,41 +26,86 @@ Included out of the box:
 
 ## Creating a new project
 
+The installer starts automatically after `composer create-project`. You need SSH access to the GitHub repository.
+
 ```bash
 composer create-project prajwalgiri02/unostarterkit my-project \
   --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git"}'
 ```
+
+In PowerShell, escape the JSON quotes:
+
+```powershell
+composer create-project prajwalgiri02/unostarterkit my-project --repository='{\"type\":\"vcs\",\"url\":\"git@github.com:prajwalgiri02/unoStarterKit.git\"}'
+```
+
+Composer installs the latest tagged release (`v1.0.0`, `v1.1.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
 
 Or clone it and run the installer yourself:
 
 ```bash
 git clone git@github.com:prajwalgiri02/unoStarterKit.git my-project
 cd my-project
-composer install
-php artisan uno:install
+composer setup
 ```
 
-The installer starts automatically after `composer create-project`.
+### Publishing a new version of the kit
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+New projects pick up the newest tag. Existing projects are not affected.
 
 ---
 
 ## The installer
 
-`php artisan uno:install` asks for everything the application needs, writes it to `.env`, and sets the project up. You never have to edit `.env` by hand.
+`php artisan uno:install` asks for everything the application needs, removes the modules you do not want, writes `.env`, and sets the project up. You never have to edit `.env` by hand.
+
+### Modules
+
+The first question is which sidebar modules the project needs:
+
+| Module | Includes |
+|---|---|
+| User Manager | User list, view, edit, block, delete, and approving new users |
+| Messages & Support | Contact-us tickets (CMS page and `POST /api/contact-us`) |
+| Static Content | Terms, privacy policy, community guidelines (CMS page and `GET /api/{type}`) |
+| FAQs | FAQ management (CMS page and `GET /api/faqs`) |
+| Notifications | Broadcast notifications, the header inbox, `GET /api/notifications` |
+
+Dashboard, Settings, authentication, profile and device tokens are always included.
+
+**Unselected modules are deleted from the code**, not hidden: their routes, controllers, models, migrations, seeders, pages, components and tests are removed, and their sidebar entry and any shared code is stripped. The installer shows the list and asks for confirmation first. A deleted module cannot be added back by the installer; copy it from this repository if you need it later.
+
+Shared code that belongs to a module is wrapped in markers, which the installer uses to strip it:
+
+```php
+// @module:notifications
+...
+// @endmodule:notifications
+```
+
+When you add code to a shared file that only makes sense with a module, wrap it in that module's markers. When you add a new file to a module, add it to that module's `paths` in `config/installer.php`.
 
 ### What it asks
 
 | Section | Questions | Always asked |
 |---|---|---|
+| Modules | Which sidebar modules to keep | Yes |
 | Application | Name, URL | Yes |
 | Database | Driver, host, port, database name, username, password | Yes |
-| Authentication | Require admin approval for new users? OTP delivery channel (email / SMS / both) | Yes |
-| Mail | SMTP host, port, username, password, from address | Optional |
+| Authentication | Require admin approval for new users? (only with User Manager), OTP delivery channel | Yes |
+| Mail | Mailer, SMTP host, port, username, password, from address | Optional |
+| File uploads | Local disk or Amazon S3 (access key, secret, region, bucket) | Optional |
+| SMS | ClickSend username, API key, sender ID, country | Optional, required when OTP uses SMS |
 | Firebase | Path to the service account JSON file | Optional |
-| File storage | AWS access key, secret, region, bucket | Optional |
-| SMS | ClickSend username, API key, sender ID | Optional |
 
 Optional sections are offered as a checklist. Tick the ones this project uses; the rest are skipped and can be added later with `--only` (see below).
+
+All questions, defaults and module file lists live in `config/installer.php`, so what the installer asks can be changed there without touching the command.
 
 Values that are the same for every project are set automatically and not asked:
 
@@ -69,13 +114,16 @@ Values that are the same for every project are set automatically and not asked:
 
 ### What it does after the questions
 
-1. Writes all answers to `.env`
-2. Creates the database if it does not exist
-3. Generates `APP_KEY` and `JWT_SECRET` (only if they are empty)
-4. Links storage (`storage:link`)
-5. Runs migrations
-6. Seeds roles, permissions and the default admin user
-7. Optionally installs npm packages and builds the frontend
+1. Deletes the modules you did not select (after confirmation)
+2. Writes all answers to `.env`
+3. Creates the database if it does not exist
+4. Generates `APP_KEY` and `JWT_SECRET` (only if they are empty)
+5. Links storage (`storage:link`)
+6. Runs migrations
+7. Seeds roles, the default admin user and module content
+8. Optionally installs npm packages and builds the frontend
+
+If a step fails, the installer stops and tells you what went wrong. Your answers are already saved in `.env`, so fix the problem and run `php artisan uno:install` again; completed steps are safe to repeat.
 
 ### Default admin login
 
@@ -107,12 +155,13 @@ This:
 
 | Section | Use it when |
 |---|---|
+| `modules` | Removing modules the project no longer needs (modules cannot be added back) |
 | `app` | Renaming the app or changing its URL |
 | `database` | Moving to a different database or changing credentials |
 | `auth` | Turning admin approval on/off, or switching OTP between email, SMS or both |
 | `mail` | Setting up or changing the mail server |
 | `firebase` | Adding push notifications, or replacing the service account file |
-| `storage` | Moving uploads to S3 or changing the bucket |
+| `storage` | Switching uploads between the local disk and S3, or changing the bucket |
 | `sms` | Adding ClickSend, or switching between real SMS and log-only |
 
 Several sections can be given at once, separated by commas:

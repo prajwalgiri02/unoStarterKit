@@ -1,9 +1,15 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "prajwalgiri02/unostarterkit",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Laravel + React/Inertia starter kit with a CMS admin panel, JWT API, OTP, SMS and push notifications.",
+    "keywords": [
+        "laravel",
+        "starter-kit",
+        "inertia",
+        "react",
+        "cms"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -39,12 +45,10 @@
     },
     "scripts": {
         "setup": [
+            "Composer\\Config::disableProcessTimeout",
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "npm install --ignore-scripts",
-            "npm run build"
+            "@php artisan uno:install --ansi"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -65,9 +69,8 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-            "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan uno:install --ansi"
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"

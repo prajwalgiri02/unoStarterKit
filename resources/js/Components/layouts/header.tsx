@@ -1,6 +1,9 @@
+// @module:notifications
 import NotificationDropdown from "@/Components/notifications/notification-dropdown";
 import type { PageProps } from "@/Pages/types";
-import { Link, usePage } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
+// @endmodule:notifications
+import { Link } from "@inertiajs/react";
 import { ArrowLeftIcon, MenuIcon } from "@/Components/icons";
 import type { ReactNode } from "react";
 
@@ -12,8 +15,10 @@ type HeaderProps = {
 };
 
 export default function Header({ title, backHref, actions, onOpenMenu }: HeaderProps) {
+    // @module:notifications
     const { inboxNotifications = [] } = usePage<PageProps>().props;
 
+    // @endmodule:notifications
     return (
         <header className="sticky top-0 z-20 flex h-[90px] shrink-0 items-center justify-between gap-4 border-b border-neutral-200 bg-base-white px-4 sm:px-[30px]">
             <div className="flex min-w-0 items-center gap-3">
@@ -39,7 +44,9 @@ export default function Header({ title, backHref, actions, onOpenMenu }: HeaderP
 
             <div className="flex shrink-0 items-center gap-5">
                 {actions}
+                {/* @module:notifications */}
                 <NotificationDropdown notifications={inboxNotifications} />
+                {/* @endmodule:notifications */}
             </div>
         </header>
     );

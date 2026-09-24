@@ -17,8 +17,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleAndPermission::class,
             AdminUser::class,
+            // @module:static_content
             StaticContentSeeder::class,
+            // @endmodule:static_content
+            // @module:support
             SupportTicketSeeder::class,
+            // @endmodule:support
         ]);
     }
 }

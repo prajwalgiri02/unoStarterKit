@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+// @module:notifications
 use App\Models\UserNotification;
 use App\Services\UserNotificationService;
+// @endmodule:notifications
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -43,6 +45,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            // @module:notifications
             'inboxNotifications' => fn () => $request->user()
                 ? app(UserNotificationService::class)
                     ->latest($request->user())
@@ -55,6 +58,7 @@ class HandleInertiaRequests extends Middleware
                     ])
                     ->values()
                 : [],
+            // @endmodule:notifications
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
                 'success' => fn () => $request->session()->get('success') ?? $request->session()->get('status'),

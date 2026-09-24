@@ -96,6 +96,7 @@ class UserApprovalTest extends TestCase
         $this->assertAuthenticatedAs($admin);
     }
 
+    // @module:user_manager
     public function test_admin_can_approve_pending_users(): void
     {
         config(['users.require_approval' => true]);
@@ -113,8 +114,9 @@ class UserApprovalTest extends TestCase
         $pendingUser->assignRole('user');
 
         $this->actingAs($admin)
+            ->from(route('cms.user-manager.index'))
             ->post(route('cms.admin.users.approve', $pendingUser))
-            ->assertRedirect(route('cms.admin.users.pending'))
+            ->assertRedirect(route('cms.user-manager.index'))
             ->assertSessionHas('status');
 
         $this->assertNotNull($pendingUser->fresh()->approved_at);
@@ -149,4 +151,5 @@ class UserApprovalTest extends TestCase
             ->post(route('cms.admin.users.approve', $pendingUser))
             ->assertForbidden();
     }
+    // @endmodule:user_manager
 }

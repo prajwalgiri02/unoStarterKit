@@ -17,9 +17,9 @@ final class ImageUploadService
      */
     private string $disk;
 
-    public function __construct(string $disk = 's3')
+    public function __construct(?string $disk = null)
     {
-        $this->disk = $disk;
+        $this->disk = $disk ?? config('filesystems.uploads', 'public');
     }
 
     /**

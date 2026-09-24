@@ -86,9 +86,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(FirebaseTokens::class);
     }
+    // @module:notifications
 
     public function userNotifications()
     {
         return $this->hasMany(UserNotification::class, 'notifiable_id')->where('notifiable_type', self::class);
     }
+    // @endmodule:notifications
 }
