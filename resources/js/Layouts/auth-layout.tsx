@@ -1,8 +1,9 @@
 import type { PageProps } from "@/Pages/types/index";
 import { Link, usePage } from "@inertiajs/react";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@/Components/icons";
 import { useEffect, type ReactNode } from "react";
-import { Toaster, toast } from "sonner";
+import { notify } from "@/lib/toast";
+import { Toaster } from "sonner";
 
 type AuthLayoutProps = {
     children: ReactNode;
@@ -25,10 +26,10 @@ export default function AuthLayout({
 
     useEffect(() => {
         if (props.flash?.success) {
-            toast.success(props.flash.success, { id: props.flash.success });
+            notify.success(props.flash.success);
         }
         if (props.flash?.error) {
-            toast.error(props.flash.error, { id: props.flash.error });
+            notify.error(props.flash.error);
         }
     }, [props.flash]);
 
@@ -49,7 +50,7 @@ export default function AuthLayout({
                             href={backHref}
                             className="inline-flex w-fit items-center gap-3 text-body-md font-bold text-neutral-400 transition-colors hover:text-neutral-600"
                         >
-                            <ChevronLeft className="size-5" aria-hidden="true" />
+                            <ArrowLeftIcon className="size-5" />
                             {backLabel}
                         </Link>
                     )}
@@ -69,7 +70,7 @@ export default function AuthLayout({
                 </div>
             </section>
 
-            <Toaster richColors position="bottom-right" />
+            <Toaster position="bottom-right" />
         </main>
     );
 }

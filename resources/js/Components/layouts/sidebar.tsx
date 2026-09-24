@@ -1,142 +1,88 @@
+import LogoMark from "@/Components/common/logo-mark";
+import { CMS_AUTH_SIGN_OUT_PATH, sidebar } from "@/lib/constants/sidebar";
 import { Link, router, usePage } from "@inertiajs/react";
-import { useEffect, useRef, forwardRef } from "react";
-import { createPortal } from "react-dom";
-import { sidebar, CMS_AUTH_SIGN_OUT_PATH } from "@/lib/constants/sidebar";
+import { ChevronLeftSmallIcon, LogoutIcon } from "@/Components/icons";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+type SidebarProps = {
+    collapsed: boolean;
+    onToggleCollapsed: () => void;
+    mobileOpen: boolean;
+    onCloseMobile: () => void;
+};
 
-const MOBILE_BREAKPOINT = 720;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function isMobile() {
-    return window.innerWidth <= MOBILE_BREAKPOINT;
-}
-
-function isPathActive(currentPath: string, path?: string): boolean {
-    if (!path) return false;
+function isActive(currentPath: string, path: string) {
     return currentPath === path || currentPath.startsWith(`${path}/`);
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+const itemBase =
+    "flex h-11 w-full cursor-pointer items-center gap-4 rounded-[10px] px-4 text-body-md text-neutral-700 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50";
 
-interface SidebarProps {
-    mobileOpen: boolean;
-    onMobileToggle: () => void;
-    onCloseMobile: () => void;
-}
-
-export default function Sidebar({ mobileOpen, onMobileToggle, onCloseMobile }: SidebarProps) {
+export default function Sidebar({
+    collapsed,
+    onToggleCollapsed,
+    mobileOpen,
+    onCloseMobile,
+}: SidebarProps) {
     const { url } = usePage();
     const currentPath = url.split("?")[0];
-
-    const sidebarRef = useRef<HTMLElement>(null);
-    const menuBtnRef = useRef<HTMLButtonElement>(null);
-
-    useEffect(() => {
-        function handleOutsideClick(e: MouseEvent) {
-            if (!isMobile()) return;
-            const target = e.target as Node;
-            if (
-                !sidebarRef.current?.contains(target) &&
-                !menuBtnRef.current?.contains(target)
-            ) {
-                onCloseMobile();
-            }
-        }
-        document.addEventListener("click", handleOutsideClick);
-        return () => document.removeEventListener("click", handleOutsideClick);
-    }, [onCloseMobile]);
+    const labelHidden = collapsed ? "lg:sr-only" : "";
+    const itemClass = `${itemBase} ${collapsed ? "lg:justify-center lg:px-0" : ""}`;
 
     return (
         <>
-            {/* ── Mobile overlay ── */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 z-20 bg-black/40"
+                    className="fixed inset-0 z-30 bg-backdrop backdrop-blur-backdrop lg:hidden"
                     onClick={onCloseMobile}
                     aria-hidden="true"
                 />
             )}
 
-            {/* ── Sidebar ── */}
             <aside
-                ref={sidebarRef}
-                id="sidebar"
-                className="sidebar"
+                className={`fixed inset-y-0 left-0 z-40 flex w-[276px] shrink-0 flex-col gap-8 rounded-r-2xl bg-base-white shadow-sidebar transition-[width,translate] duration-200 lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-24" : ""}`}
             >
-                {/* Header */}
-                <div className="sidebar-head">
-                    <img className="logo-mark" src="/images/logo.svg" alt="Logo" />
+                <div className="relative flex justify-center px-[18px] pt-8 pb-[18px]">
+                    <LogoMark className={`text-primary-500 transition-all ${collapsed ? "lg:size-12" : "size-[88px]"}`} />
+                    <button
+                        type="button"
+                        onClick={onToggleCollapsed}
+                        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                        aria-expanded={!collapsed}
+                        className="absolute top-11 -right-3 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-neutral-100 bg-base-white text-neutral-600 outline-none transition-colors hover:text-primary-500 focus-visible:ring-[3px] focus-visible:ring-primary-50 lg:flex"
+                    >
+                        <ChevronLeftSmallIcon className={`size-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
+                    </button>
                 </div>
 
-                {/* Nav */}
-                <nav className="sidebar-nav" aria-label="Main">
-                    {sidebar.map((item) => {
-                        const active = isPathActive(currentPath, item.path);
-
-                        if (item.path === CMS_AUTH_SIGN_OUT_PATH) {
-                            return (
-                                <button
-                                    key={item.label}
-                                    type="button"
-                                    className="nav-item logout w-full cursor-pointer border-0 bg-transparent text-left"
-                                    onClick={() => router.post(CMS_AUTH_SIGN_OUT_PATH)}
-                                >
-                                    <img className="nav-icon" src={item.icon} alt={item.label} />
-                                    <span>{item.label}</span>
-                                </button>
-                            );
-                        }
+                <nav aria-label="Main" className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-8">
+                    {sidebar.map(({ label, icon: Icon, path }) => {
+                        const active = isActive(currentPath, path);
 
                         return (
                             <Link
-                                key={item.label}
-                                href={item.path ?? "#"}
-                                className={`nav-item${active ? " active" : ""}`}
+                                key={path}
+                                href={path}
+                                title={collapsed ? label : undefined}
+                                aria-current={active ? "page" : undefined}
+                                className={`${itemClass} ${active ? "bg-primary-50 font-medium hover:bg-primary-50" : ""}`}
                             >
-                                <img className="nav-icon" src={item.icon} alt={item.label} />
-                                <span>{item.label}</span>
+                                <Icon className="size-6 shrink-0" />
+                                <span className={`truncate ${labelHidden}`}>{label}</span>
                             </Link>
                         );
                     })}
+
+                    <button
+                        type="button"
+                        title={collapsed ? "Logout" : undefined}
+                        onClick={() => router.post(CMS_AUTH_SIGN_OUT_PATH)}
+                        className={itemClass}
+                    >
+                        <LogoutIcon className="size-6 shrink-0" />
+                        <span className={labelHidden}>Logout</span>
+                    </button>
                 </nav>
             </aside>
-
-            {/* ── Mobile menu button ── */}
-            <MobileMenuButton ref={menuBtnRef} onClick={onMobileToggle} />
         </>
     );
 }
-
-// ─── Mobile menu button ───────────────────────────────────────────────────────
-
-const MobileMenuButton = forwardRef<HTMLButtonElement, { onClick: () => void }>(
-    ({ onClick }, ref) => {
-        const topbar = typeof document !== "undefined"
-            ? document.querySelector(".topbar")
-            : null;
-
-        if (!topbar) return null;
-
-        return createPortal(
-            <button
-                ref={ref}
-                type="button"
-                className="menu-btn cursor-pointer border-0 bg-transparent p-0"
-                aria-label="Open menu"
-                onClick={onClick}
-            >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="2">
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="6"  x2="21" y2="6"  />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                </svg>
-            </button>,
-            topbar,
-        );
-    }
-);
-
-MobileMenuButton.displayName = "MobileMenuButton";

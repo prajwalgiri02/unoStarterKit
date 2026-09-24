@@ -1,114 +1,74 @@
-import CmsLayout from "@/Layouts/cms-layout";
-import { useState, useEffect } from "react";
-import ConversationList from "@/Components/cms/messages/ConversationList";
-import MessageDetail from "@/Components/cms/messages/MessageDetail";
-import type {
-    Conversation,
-    MessageType,
-    MessageListPageProps as MessagesProps,
-} from "@/Pages/types/cms/message";
-import { router, usePage } from "@inertiajs/react";
-import type { PageProps } from "@/Pages/types";
-import { toast } from "sonner";
+import TicketDetail from "@/Components/messages/ticket-detail";
+import TicketList, { type TicketFilter } from "@/Components/messages/ticket-list";
+import ConfirmModal from "@/Components/modals/confirm-modal";
+import AppLayout from "@/Layouts/app-layout";
+import type { Conversation, MessageListPageProps } from "@/Pages/types/cms/message";
+import { router } from "@inertiajs/react";
+import { useState } from "react";
 
-function MessagesAndSupport() {
-    const { props } = usePage<PageProps & MessagesProps>();
-    const { tickets = { data: [] }, filters = {} } = props;
+function MessagesAndSupport({ tickets, filters }: MessageListPageProps) {
+    const list = tickets.data;
+    const [selectedId, setSelectedId] = useState<number | null>(list[0]?.id ?? null);
+    const [ticketToDelete, setTicketToDelete] = useState<Conversation | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
-    const conversations = tickets.data;
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const selected = list.find((ticket) => ticket.id === selectedId) ?? list[0] ?? null;
+    const filter = (filters.type as TicketFilter | undefined) ?? "all";
+    const sort = filters.sort ?? "newest";
 
-    const activeFilter: MessageType | "all" = (filters.type as any) || "all";
-
-    useEffect(() => {
-        if (conversations.length > 0) {
-            if (!selectedId || !conversations.find((m) => m.id === selectedId)) {
-                if (window.innerWidth > 1200) {
-                    setSelectedId(conversations[0].id);
-                }
-            }
-        } else {
-            setSelectedId(null);
-        }
-    }, [conversations, selectedId]);
-
-    const selectedConversation =
-        conversations.find((c) => c.id === selectedId) || null;
-
-    const handleFilterChange = (filter: MessageType | "all") => {
-        router.get(
-            "/cms/messages",
-            { ...filters, type: filter === "all" ? undefined : filter },
-            { preserveState: true },
-        );
-    };
-
-    const handleSortChange = (sort: string) => {
-        router.get(
-            "/cms/messages",
-            { ...filters, sort },
-            { preserveState: true },
-        );
-    };
-
-    const handleMarkAction = (id: number) => {
-        router.patch(
-            `/cms/messages/${id}/resolve`,
-            {},
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    toast.success("Ticket marked as resolved");
-                },
-            },
-        );
-    };
-
-    const handleDelete = (id: number) => {
-        router.delete(`/cms/messages/${id}`, {
+    const visit = (params: Record<string, string | undefined>) => {
+        router.get("/cms/messages", { type: filter === "all" ? undefined : filter, sort, ...params }, {
+            preserveState: true,
             preserveScroll: true,
-            onSuccess: () => {
-                toast.success("Ticket deleted successfully");
-                if (selectedId === id) {
-                    setSelectedId(null);
-                }
-            },
+            replace: true,
+        });
+    };
+
+    const resolve = (ticket: Conversation) => {
+        router.patch(`/cms/messages/${ticket.id}/resolve`, {}, { preserveScroll: true });
+    };
+
+    const confirmDelete = () => {
+        if (!ticketToDelete) return;
+        setDeleting(true);
+        router.delete(`/cms/messages/${ticketToDelete.id}`, {
+            preserveScroll: true,
+            onSuccess: () => setTicketToDelete(null),
+            onFinish: () => setDeleting(false),
         });
     };
 
     return (
-        <div className="messages-layout">
-            <ConversationList
-                conversations={conversations}
-                selectedId={selectedId}
+        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,598fr)_minmax(0,491fr)]">
+            <TicketList
+                tickets={list}
+                selectedId={selected?.id ?? null}
                 onSelect={setSelectedId}
-                activeFilter={activeFilter}
-                onFilterChange={handleFilterChange}
-                currentSort={filters.sort || "newest"}
-                onSortChange={handleSortChange}
-                onDelete={handleDelete}
+                filter={filter}
+                onFilterChange={(value) => visit({ type: value === "all" ? undefined : value })}
+                sort={sort}
+                onSortChange={(value) => visit({ sort: value })}
+                onResolve={resolve}
+                onDelete={setTicketToDelete}
             />
+            <TicketDetail ticket={selected} onResolve={resolve} onDelete={setTicketToDelete} />
 
-            <MessageDetail
-                conversation={selectedConversation}
-                onBack={() => setSelectedId(null)}
-                onMarkResolved={handleMarkAction}
-                onDelete={handleDelete}
+            <ConfirmModal
+                open={ticketToDelete !== null}
+                onClose={() => setTicketToDelete(null)}
+                onConfirm={confirmDelete}
+                processing={deleting}
+                title="Delete message?"
+                description={`This will permanently remove the message from ${ticketToDelete?.name ?? "this user"}.`}
+                warning="This action cannot be undone."
+                confirmLabel="Delete"
             />
         </div>
     );
 }
 
 MessagesAndSupport.layout = (page: React.ReactNode) => (
-    <CmsLayout
-        headerLabel="Messages & Support"
-        showSearchBar={false}
-        showActionButton={false}
-        showNotificationButton={true}
-        wrapperClass="messages-content-wrapper"
-    >
-        {page}
-    </CmsLayout>
+    <AppLayout title="Messages & Support">{page}</AppLayout>
 );
 
 export default MessagesAndSupport;

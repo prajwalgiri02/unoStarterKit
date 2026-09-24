@@ -44,8 +44,6 @@ class PendingUserController extends Controller
 
         $this->userApprovalService->approve($user);
 
-        return redirect()
-            ->route('cms.admin.users.pending')
-            ->with('status', 'User approved successfully.');
+        return back()->with('status', 'User approved successfully.');
     }
 }

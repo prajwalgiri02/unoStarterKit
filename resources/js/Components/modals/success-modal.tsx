@@ -1,7 +1,7 @@
 import Button from "@/Components/buttons/button";
 import Modal from "@/Components/modals/modal";
 import { router } from "@inertiajs/react";
-import { Check } from "lucide-react";
+import { TickCircleIcon } from "@/Components/icons";
 import { useId } from "react";
 
 type SuccessModalProps = {
@@ -22,9 +22,7 @@ export default function SuccessModal({
     return (
         <Modal open dismissible={false} labelledBy={titleId}>
             <div className="flex flex-col items-center gap-5 text-center">
-                <span className="flex size-14 items-center justify-center rounded-full bg-primary-500 text-base-white">
-                    <Check className="size-7" strokeWidth={2.5} aria-hidden="true" />
-                </span>
+                <TickCircleIcon className="size-14 text-primary-600" />
                 <h3 id={titleId} className="text-title-md text-primary-500">
                     {title}
                 </h3>

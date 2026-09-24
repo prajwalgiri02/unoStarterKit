@@ -1,150 +1,98 @@
-import CmsLayout from "@/Layouts/cms-layout";
-import { useForm } from "@inertiajs/react";
-import { useState } from "react";
-import Input from "@/Components/inputs/input";
-import TextareaInput from "@/Components/inputs/textarea-input";
 import Button from "@/Components/buttons/button";
+import Card from "@/Components/common/card";
+import Input from "@/Components/inputs/input";
+import Textarea from "@/Components/inputs/textarea";
+import AppLayout from "@/Layouts/app-layout";
+import { useForm } from "@inertiajs/react";
+import { useState, type FormEvent } from "react";
 
-interface StaticContent {
+type StaticContent = {
     id: number;
     type: string;
     label: string;
     title: string;
     description: string;
-}
+};
 
-interface StaticContentPageProps {
+type StaticContentPageProps = {
     contents: StaticContent[];
-}
+};
 
-interface EditFormProps {
-    content: StaticContent;
-    onCancel: () => void;
-}
-
-function EditForm({ content, onCancel }: EditFormProps) {
+function ContentForm({ content, onDone }: { content: StaticContent; onDone: () => void }) {
     const { data, setData, put, processing, errors } = useForm({
         title: content.title,
         description: content.description,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const submit = (e: FormEvent) => {
         e.preventDefault();
-        put(`/cms/static-content/${content.id}`, {
-            preserveScroll: true,
-            onSuccess: () => onCancel(),
-        });
+        put(`/cms/static-content/${content.id}`, { preserveScroll: true, onSuccess: onDone });
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
+        <form onSubmit={submit} className="flex max-w-146 flex-col gap-6">
             <Input
-                id={`title-${content.id}`}
-                name="title"
                 label="Title"
-                placeholder="Enter title"
+                name="title"
                 value={data.title}
                 onChange={(e) => setData("title", e.target.value)}
                 error={errors.title}
             />
-            <TextareaInput
-                id={`description-${content.id}`}
-                name="description"
+            <Textarea
                 label="Content"
-                placeholder="Enter content"
+                name="description"
                 rows={6}
                 value={data.description}
-                className="textarea-large"
                 onChange={(e) => setData("description", e.target.value)}
                 error={errors.description}
             />
-            <div className="flex items-center gap-3">
-                <Button type="submit" size="giant" disabled={processing}>
-                    {processing ? "Saving..." : "Save"}
+            <div className="flex flex-wrap gap-6">
+                <Button type="submit" disabled={processing}>
+                    {processing ? "Publishing..." : "Save & Publish"}
                 </Button>
-                <button
-                    type="button"
-                    className="btns btn-large btns-secondary"
-                    onClick={onCancel}
-                    disabled={processing}
-                >
+                <Button variant="outline" onClick={onDone} disabled={processing}>
                     Cancel
-                </button>
+                </Button>
             </div>
         </form>
     );
 }
 
-function StaticContentItem({ content }: { content: StaticContent }) {
-    const [isEditing, setIsEditing] = useState(false);
+function StaticContentPage({ contents }: StaticContentPageProps) {
+    const [editingId, setEditingId] = useState<number | null>(null);
 
     return (
-        <div className="legal-content-card">
-            <div className="legal-card-content">
-                <div className="flex items-center justify-between">
-                    <h2 className="subtitle-md">{content.label}</h2>
-                    {!isEditing && (
-                        <button
-                            type="button"
-                            className="btns btn-small btns-secondary"
-                            onClick={() => setIsEditing(true)}
-                        >
-                            Edit
-                        </button>
-                    )}
-                </div>
+        <div className="flex flex-col gap-5">
+            {contents.map((content) => {
+                const editing = editingId === content.id;
 
-                {isEditing ? (
-                    <EditForm
-                        content={content}
-                        onCancel={() => setIsEditing(false)}
-                    />
-                ) : (
-                    <div className="mt-3 flex flex-col gap-2">
-                        {content.title && (
-                            <p className="body-sm text-neutral-900">
-                                {content.title}
-                            </p>
+                return (
+                    <Card
+                        key={content.id}
+                        title={content.label}
+                        actions={
+                            !editing && (
+                                <Button size="medium" variant="outline" onClick={() => setEditingId(content.id)}>
+                                    Edit Details
+                                </Button>
+                            )
+                        }
+                    >
+                        {editing ? (
+                            <ContentForm content={content} onDone={() => setEditingId(null)} />
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                <h3 className="text-body-lg text-neutral-900">{content.title}</h3>
+                                <p className="text-body-xs whitespace-pre-line text-neutral-600">{content.description}</p>
+                            </div>
                         )}
-                        <p className="body-xs text-neutral-600 whitespace-pre-line">
-                            {content.description || "No content yet."}
-                        </p>
-                    </div>
-                )}
-            </div>
+                    </Card>
+                );
+            })}
         </div>
     );
 }
 
-function StaticContent({ contents }: StaticContentPageProps) {
-    return (
-        <>
-            {contents.map((content) => (
-                <StaticContentItem key={content.id} content={content} />
-            ))}
-            {contents.length === 0 && (
-                <div className="legal-content-card">
-                    <div className="legal-card-content">
-                        <p className="body-xs text-neutral-500 text-center py-4">
-                            No static content found.
-                        </p>
-                    </div>
-                </div>
-            )}
-        </>
-    );
-}
+StaticContentPage.layout = (page: React.ReactNode) => <AppLayout title="Static Content">{page}</AppLayout>;
 
-StaticContent.layout = (page: React.ReactNode) => (
-    <CmsLayout
-        headerLabel="Static Content"
-        showSearchBar={false}
-        showActionButton={false}
-        showNotificationButton={true}
-        wrapperClass="legal-help-content-wrapper"
-    >
-        {page}
-    </CmsLayout>
-);
-
-export default StaticContent;
+export default StaticContentPage;

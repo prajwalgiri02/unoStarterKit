@@ -2,7 +2,4 @@
 
 @import "tailwindcss";
 
-@import "flatpickr/dist/flatpickr.min.css";
-@import "./flatpickr-theme.css";
-
 @import "./theme.css";
