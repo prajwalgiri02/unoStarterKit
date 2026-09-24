@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Support\ModuleRemover;
-use Illuminate\Support\Facades\File;
-use Tests\TestCase;
+use Installer\ModuleRemover;
+use PHPUnit\Framework\TestCase;
 
 class ModuleRemoverTest extends TestCase
 {
@@ -18,19 +17,19 @@ class ModuleRemoverTest extends TestCase
 
         $this->base = sys_get_temp_dir().DIRECTORY_SEPARATOR.'module-remover-'.uniqid();
 
-        File::ensureDirectoryExists($this->base.'/routes/cms');
-        File::ensureDirectoryExists($this->base.'/resources/js/Pages/cms/faq');
-        File::put($this->base.'/routes/cms/faq.php', '<?php');
-        File::put($this->base.'/resources/js/Pages/cms/faq/index.tsx', 'export default {}');
-        File::put($this->base.'/resources/js/sidebar.ts', implode("\r\n", [
+        mkdir($this->base.'/routes/cms', 0777, true);
+        mkdir($this->base.'/resources/js/Pages/cms/faq', 0777, true);
+        file_put_contents($this->base.'/routes/cms/faq.php', '<?php');
+        file_put_contents($this->base.'/resources/js/Pages/cms/faq/index.tsx', 'export default {}');
+        file_put_contents($this->base.'/resources/js/sidebar.ts', implode("\r\n", [
             'export const sidebar = [',
             '    { label: "Dashboard" },',
-            '    // @module:faqs',
+            '    // @'.'module:faqs',
             '    { label: "FAQs" },',
-            '    // @endmodule:faqs',
-            '    // @module:faqs_extra',
+            '    // @'.'endmodule:faqs',
+            '    // @'.'module:faqs_extra',
             '    { label: "Other" },',
-            '    // @endmodule:faqs_extra',
+            '    // @'.'endmodule:faqs_extra',
             '];',
             '',
         ]));
@@ -38,7 +37,7 @@ class ModuleRemoverTest extends TestCase
 
     protected function tearDown(): void
     {
-        File::deleteDirectory($this->base);
+        $this->deleteDirectory($this->base);
 
         parent::tearDown();
     }
@@ -58,12 +57,12 @@ class ModuleRemoverTest extends TestCase
         $this->assertSame(implode("\r\n", [
             'export const sidebar = [',
             '    { label: "Dashboard" },',
-            '    // @module:faqs_extra',
+            '    // @'.'module:faqs_extra',
             '    { label: "Other" },',
-            '    // @endmodule:faqs_extra',
+            '    // @'.'endmodule:faqs_extra',
             '];',
             '',
-        ]), File::get($this->base.'/resources/js/sidebar.ts'));
+        ]), file_get_contents($this->base.'/resources/js/sidebar.ts'));
     }
 
     public function test_removing_twice_is_harmless(): void
@@ -78,10 +77,30 @@ class ModuleRemoverTest extends TestCase
 
     public function test_every_configured_module_path_exists(): void
     {
-        foreach (config('installer.modules') as $key => $module) {
+        $config = require dirname(__DIR__, 2).'/installer/config.php';
+
+        foreach ($config['modules'] as $key => $module) {
             foreach ($module['paths'] as $path) {
-                $this->assertFileExists(base_path($path), "Module [{$key}] lists a missing path.");
+                $this->assertFileExists(dirname(__DIR__, 2).'/'.$path, "Module [{$key}] lists a missing path.");
             }
         }
+    }
+
+    private function deleteDirectory(string $directory): void
+    {
+        if (! is_dir($directory)) {
+            return;
+        }
+
+        foreach (scandir($directory) as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $directory.DIRECTORY_SEPARATOR.$item;
+            is_dir($path) ? $this->deleteDirectory($path) : unlink($path);
+        }
+
+        rmdir($directory);
     }
 }

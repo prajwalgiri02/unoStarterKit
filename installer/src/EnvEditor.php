@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace Installer;
 
 final class EnvEditor
 {
@@ -82,6 +82,6 @@ final class EnvEditor
             return "'{$value}'";
         }
 
-        return '"'.addcslashes($value, '"\\$').'"';
+        return '"'.addcslashes($value, '"\$').'"';
     }
 }

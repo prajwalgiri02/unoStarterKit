@@ -242,8 +242,8 @@ return [
         ['label' => 'Linking storage', 'command' => ['php', 'artisan', 'storage:link', '--force']],
         ['label' => 'Running migrations', 'command' => ['php', 'artisan', 'migrate', '--force']],
         ['label' => 'Seeding roles, admin user and content', 'command' => ['php', 'artisan', 'db:seed', '--force']],
-        ['label' => 'Installing npm packages', 'command' => ['npm', 'install'], 'confirm' => 'Install frontend dependencies (npm install)?'],
-        ['label' => 'Building frontend assets', 'command' => ['npm', 'run', 'build'], 'confirm' => 'Build frontend assets now (npm run build)?'],
+        ['id' => 'npm_install', 'label' => 'Installing npm packages', 'command' => ['npm', 'install'], 'confirm' => 'Install frontend dependencies (npm install) after setup?'],
+        ['id' => 'npm_build', 'label' => 'Building frontend assets', 'command' => ['npm', 'run', 'build'], 'confirm' => 'Build frontend assets (npm run build) after that?'],
     ],
 
 ];

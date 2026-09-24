@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace Installer;
 
-use Illuminate\Support\Facades\File;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 final class ModuleRemover
 {
@@ -24,7 +26,7 @@ final class ModuleRemover
 
     /**
      * @param  array{paths: list<string>}  $module
-     * @return list<string> Files and directories that were deleted or edited.
+     * @return list<string>
      */
     public function remove(string $key, array $module): array
     {
@@ -34,10 +36,10 @@ final class ModuleRemover
             $path = $this->path($relative);
 
             if (is_dir($path)) {
-                File::deleteDirectory($path);
+                $this->deleteDirectory($path);
                 $changed[] = $relative.'/';
             } elseif (is_file($path)) {
-                File::delete($path);
+                unlink($path);
                 $changed[] = $relative;
             }
         }
@@ -46,9 +48,6 @@ final class ModuleRemover
     }
 
     /**
-     * Deletes every region between a start and end marker for this module in
-     * shared files, including the marker lines.
-     *
      * @return list<string>
      */
     private function stripMarkedRegions(string $key): array
@@ -59,16 +58,12 @@ final class ModuleRemover
         $edited = [];
 
         foreach (self::SCANNED_DIRECTORIES as $directory) {
-            if (! is_dir($this->path($directory))) {
-                continue;
-            }
-
-            foreach (File::allFiles($this->path($directory)) as $file) {
-                if (! in_array($file->getExtension(), self::SCANNED_EXTENSIONS, true)) {
+            foreach ($this->files($this->path($directory)) as $file) {
+                if (! in_array(pathinfo($file, PATHINFO_EXTENSION), self::SCANNED_EXTENSIONS, true)) {
                     continue;
                 }
 
-                $contents = $file->getContents();
+                $contents = (string) file_get_contents($file);
 
                 if (! str_contains($contents, $start)) {
                     continue;
@@ -82,12 +77,51 @@ final class ModuleRemover
                     continue;
                 }
 
-                File::put($file->getPathname(), str_replace("\n", $eol, $stripped));
-                $edited[] = $directory.'/'.str_replace('\\', '/', $file->getRelativePathname());
+                file_put_contents($file, str_replace("\n", $eol, $stripped));
+                $edited[] = $this->relative($file);
             }
         }
 
         return $edited;
+    }
+
+    /**
+     * @return iterable<string>
+     */
+    private function files(string $directory): iterable
+    {
+        if (! is_dir($directory)) {
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                yield $file->getPathname();
+            }
+        }
+    }
+
+    private function deleteDirectory(string $directory): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($iterator as $item) {
+            $item->isDir() && ! $item->isLink() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+        }
+
+        rmdir($directory);
+    }
+
+    private function relative(string $file): string
+    {
+        return ltrim(str_replace('\\', '/', substr($file, strlen($this->basePath))), '/');
     }
 
     private function path(string $relative): string

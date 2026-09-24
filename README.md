@@ -26,27 +26,40 @@ Included out of the box:
 
 ## Creating a new project
 
-The installer starts automatically after `composer create-project`. You need SSH access to the GitHub repository.
+You need SSH access to the GitHub repository. The installer asks all its questions first and installs the Composer packages afterwards, so you are not waiting on a long download before you can answer.
 
 ```bash
-composer create-project prajwalgiri02/unostarterkit my-project \
-  --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git"}'
+composer create-project prajwalgiri02/unostarterkit my-project --remove-vcs \
+  --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git","no-api":true}'
 ```
+
+`--remove-vcs` makes every new project start fresh, without the kit's `.git` history, and stops Composer from asking about it. Always include it.
 
 In PowerShell, escape the JSON quotes:
 
 ```powershell
-composer create-project prajwalgiri02/unostarterkit my-project --repository='{\"type\":\"vcs\",\"url\":\"git@github.com:prajwalgiri02/unoStarterKit.git\"}'
+composer create-project prajwalgiri02/unostarterkit my-project --remove-vcs --repository='{\"type\":\"vcs\",\"url\":\"git@github.com:prajwalgiri02/unoStarterKit.git\",\"no-api\":true}'
 ```
 
 Composer installs the latest tagged release (`v1.0.0`, `v1.1.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
 
-Or clone it and run the installer yourself:
+### If the questions do not appear
+
+Some terminals do not pass your keyboard through to Composer scripts. When that happens the installer skips setup so Composer can finish, and prints what to do. Finish setup yourself from the project folder:
+
+```bash
+cd my-project
+php artisan uno:install
+```
+
+### Cloning instead
 
 ```bash
 git clone git@github.com:prajwalgiri02/unoStarterKit.git my-project
 cd my-project
-composer setup
+rm -rf .git          # PowerShell: Remove-Item -Recurse -Force .git
+composer install
+php artisan uno:install
 ```
 
 ### Publishing a new version of the kit
@@ -62,7 +75,7 @@ New projects pick up the newest tag. Existing projects are not affected.
 
 ## The installer
 
-`php artisan uno:install` asks for everything the application needs, removes the modules you do not want, writes `.env`, and sets the project up. You never have to edit `.env` by hand.
+The installer asks for everything the application needs, removes the modules you do not want, writes `.env`, and sets the project up. You never have to edit `.env` by hand. It starts automatically after `composer create-project`, and you can run it yourself with `php artisan uno:install`.
 
 ### Modules
 
@@ -114,16 +127,24 @@ Values that are the same for every project are set automatically and not asked:
 
 ### What it does after the questions
 
-1. Deletes the modules you did not select (after confirmation)
-2. Writes all answers to `.env`
-3. Creates the database if it does not exist
-4. Generates `APP_KEY` and `JWT_SECRET` (only if they are empty)
-5. Links storage (`storage:link`)
-6. Runs migrations
-7. Seeds roles, the default admin user and module content
-8. Optionally installs npm packages and builds the frontend
+The installer runs in two phases, so all questions are answered before anything slow happens:
 
-If a step fails, the installer stops and tells you what went wrong. Your answers are already saved in `.env`, so fix the problem and run `php artisan uno:install` again; completed steps are safe to repeat.
+**Phase 1: questions (needs no Composer packages).**
+1. Asks every question, including whether to run `npm install` and `npm run build` afterwards
+2. Checks the database connection and creates the database if it does not exist; a wrong password is re-asked straight away
+3. Deletes the modules you did not select (after confirmation)
+4. Writes all answers to `.env`
+
+**Phase 2: setup (after Composer has installed the packages).**
+5. Generates `APP_KEY` and `JWT_SECRET` (only if they are empty)
+6. Links storage (`storage:link`)
+7. Runs migrations
+8. Seeds roles, the default admin user and module content
+9. Runs `npm install` and `npm run build` if you said yes
+
+If a step in phase 2 fails, the installer stops and tells you what went wrong. Your answers are already saved, so fix the problem and run `php artisan uno:install --finish` to repeat only phase 2.
+
+`php artisan uno:install` (or `php installer/setup.php` when `vendor/` does not exist yet) runs both phases in one go.
 
 ### Default admin login
 
