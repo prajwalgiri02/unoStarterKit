@@ -1,58 +1,246 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# unoStarterKit
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 13 + React/Inertia starter kit with a CMS admin panel and a JWT-authenticated API for mobile apps.
 
-## About Laravel
+Included out of the box:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- CMS admin panel (React, Inertia, Tailwind)
+- JWT API authentication
+- Roles & permissions (spatie/laravel-permission)
+- OTP verification over email and/or SMS (ClickSend)
+- Optional admin approval for new users
+- Push notifications (Firebase Cloud Messaging)
+- File uploads to local disk or Amazon S3
+- Support tickets, FAQs, static content, notifications
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requirements
 
-## Learning Laravel
+- PHP 8.3+
+- Composer 2
+- Node.js 20+ and npm
+- MySQL / MariaDB, PostgreSQL, or SQLite
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Creating a new project
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer create-project prajwalgiri02/unostarterkit my-project \
+  --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git"}'
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Or clone it and run the installer yourself:
 
-## Contributing
+```bash
+git clone git@github.com:prajwalgiri02/unoStarterKit.git my-project
+cd my-project
+composer install
+php artisan uno:install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The installer starts automatically after `composer create-project`.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## The installer
 
-## Security Vulnerabilities
+`php artisan uno:install` asks for everything the application needs, writes it to `.env`, and sets the project up. You never have to edit `.env` by hand.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### What it asks
 
-## License
+| Section | Questions | Always asked |
+|---|---|---|
+| Application | Name, URL | Yes |
+| Database | Driver, host, port, database name, username, password | Yes |
+| Authentication | Require admin approval for new users? OTP delivery channel (email / SMS / both) | Yes |
+| Mail | SMTP host, port, username, password, from address | Optional |
+| Firebase | Path to the service account JSON file | Optional |
+| File storage | AWS access key, secret, region, bucket | Optional |
+| SMS | ClickSend username, API key, sender ID | Optional |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Optional sections are offered as a checklist. Tick the ones this project uses; the rest are skipped and can be added later with `--only` (see below).
+
+Values that are the same for every project are set automatically and not asked:
+
+- `APP_ENV=local`, `APP_DEBUG=true`
+- `QUEUE_CONNECTION=database`, `CACHE_STORE=database`, `SESSION_DRIVER=database`
+
+### What it does after the questions
+
+1. Writes all answers to `.env`
+2. Creates the database if it does not exist
+3. Generates `APP_KEY` and `JWT_SECRET` (only if they are empty)
+4. Links storage (`storage:link`)
+5. Runs migrations
+6. Seeds roles, permissions and the default admin user
+7. Optionally installs npm packages and builds the frontend
+
+### Default admin login
+
+| Email | Password |
+|---|---|
+| `developers@appifany.com.au` | `Test@123` |
+
+Change this password after the first login on any shared or deployed environment.
+
+---
+
+## Configuring one section later (`--only`)
+
+Every section can be reconfigured on its own at any time:
+
+```bash
+php artisan uno:install --only=sms
+```
+
+This:
+
+- asks **only** the questions for that section
+- shows the current value as the default, so pressing Enter keeps it
+- leaves password fields unchanged if you leave them blank
+- updates **only** that section's lines in `.env`
+- does **not** run migrations, seeders, key generation or npm
+
+### Available sections
+
+| Section | Use it when |
+|---|---|
+| `app` | Renaming the app or changing its URL |
+| `database` | Moving to a different database or changing credentials |
+| `auth` | Turning admin approval on/off, or switching OTP between email, SMS or both |
+| `mail` | Setting up or changing the mail server |
+| `firebase` | Adding push notifications, or replacing the service account file |
+| `storage` | Moving uploads to S3 or changing the bucket |
+| `sms` | Adding ClickSend, or switching between real SMS and log-only |
+
+Several sections can be given at once, separated by commas:
+
+```bash
+php artisan uno:install --only=mail,sms
+```
+
+### Examples
+
+**The client now wants OTP by SMS.**
+
+```bash
+php artisan uno:install --only=sms,auth
+```
+
+Enter the ClickSend credentials, then choose "SMS" or "Email and SMS" as the OTP channel.
+
+**Moving uploads from the local disk to S3.**
+
+```bash
+php artisan uno:install --only=storage
+```
+
+Existing files on the local disk are not copied to S3; move them yourself if needed.
+
+**Firebase project changed.**
+
+```bash
+php artisan uno:install --only=firebase
+```
+
+Give the path to the new service account JSON. It replaces `storage/app/private/firebase/credentials.json`.
+
+**Changed database credentials.**
+
+```bash
+php artisan uno:install --only=database
+php artisan migrate
+```
+
+`--only` never touches the database itself, so run migrations yourself if the new database is empty.
+
+### After using `--only`
+
+If config caching is enabled (usually on servers), clear it so the new values are picked up:
+
+```bash
+php artisan config:clear
+```
+
+---
+
+## Services
+
+### SMS (ClickSend)
+
+SMS is controlled entirely by `.env`:
+
+```env
+SMS_DRIVER=clicksend
+CLICKSEND_USERNAME=
+CLICKSEND_API_KEY=
+CLICKSEND_FROM=
+CLICKSEND_COUNTRY=AU
+```
+
+SMS is only used for OTPs when `OTP_DELIVERY_CHANNELS` is `sms` or `both`.
+
+Set `SMS_DRIVER=log` during development to write messages to `storage/logs/laravel.log` instead of sending them.
+
+### Push notifications (Firebase)
+
+1. Firebase console → Project settings → Service accounts → **Generate new private key**
+2. Run `php artisan uno:install --only=firebase` and give the path to the downloaded file
+
+The file is copied to `storage/app/private/firebase/credentials.json`, which is ignored by git. Never commit it.
+
+Push notifications are sent only when `FIREBASE_CREDENTIALS` points to a valid file. Without it, notifications are still saved in the database and shown in the app, but no push is sent.
+
+#### Device tokens (mobile app)
+
+Send the device details on login or register:
+
+```json
+POST /api/auth/login
+{
+  "email": "user@example.com",
+  "password": "secret",
+  "device_id": "unique-id-of-this-install",
+  "device_token": "fcm-registration-token",
+  "platform": "android",
+  "token_type": "fcm",
+  "device_name": "Pixel 9",
+  "app_version": "1.0.0"
+}
+```
+
+`device_id` and `device_token` must be sent together. `platform` is `android`, `ios` or `web`; `token_type` is `fcm` (default) or `apns`. Only `fcm` tokens receive pushes.
+
+When Firebase gives the app a new token, update it:
+
+```json
+POST /api/device-tokens        (requires the JWT)
+{ "device_id": "...", "device_token": "...", "platform": "ios" }
+```
+
+On logout, `device_id` is required and that device's token is deleted:
+
+```json
+POST /api/auth/logout          (requires the JWT)
+{ "device_id": "unique-id-of-this-install" }
+```
+
+One device belongs to one user: if another user logs in on the same device, the token moves to them. Tokens that Firebase reports as invalid are deleted automatically after each send.
+
+---
+
+## Development
+
+```bash
+composer dev
+```
+
+Starts the web server, queue worker, log viewer and Vite together.
+
+```bash
+composer test
+```
+
+Runs the test suite.

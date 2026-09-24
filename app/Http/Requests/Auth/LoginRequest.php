@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Requests\Concerns\ValidatesDevice;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
+    use ValidatesDevice;
+
     public function authorize(): bool
     {
         return true;
@@ -21,6 +24,7 @@ class LoginRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email'],
             'password' => ['required', 'string'],
             'remember' => ['nullable', 'boolean'],
+            ...$this->deviceRules(),
         ];
     }
 

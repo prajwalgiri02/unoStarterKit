@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Requests\Concerns\ValidatesDevice;
 use App\Models\User;
 use App\Rules\AustralianPhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
+    use ValidatesDevice;
+
     public function authorize(): bool
     {
         return true;
@@ -24,6 +27,7 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'phone' => ['nullable', 'string', new AustralianPhoneNumber],
+            ...$this->deviceRules(),
         ];
     }
 

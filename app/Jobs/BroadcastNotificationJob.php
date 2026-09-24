@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Enums\DeviceTokenType;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Services\PushNotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Log;
 
 class BroadcastNotificationJob implements ShouldQueue
 {
@@ -17,7 +18,7 @@ class BroadcastNotificationJob implements ShouldQueue
 
     public function __construct(public readonly Notification $notification) {}
 
-    public function handle(): void
+    public function handle(PushNotificationService $push): void
     {
         $query = User::query();
 
@@ -32,31 +33,37 @@ class BroadcastNotificationJob implements ShouldQueue
             }
         }
 
-        $query->with('firebaseTokens')->chunk(500, function ($users): void {
-            foreach ($users as $user) {
-                UserNotification::create([
-                    'notification_id' => $this->notification->id,
-                    'notifiable_id' => $user->id,
-                    'notifiable_type' => User::class,
-                ]);
-
-                $tokens = $user->firebaseTokens->pluck('device_token')->toArray();
-
-                if (! empty($tokens)) {
-                    $this->sendToFirebase($tokens);
+        $query
+            ->with(['firebaseTokens' => fn ($tokens) => $tokens->where('token_type', DeviceTokenType::FCM)])
+            ->chunkById(500, function ($users) use ($push): void {
+                foreach ($users as $user) {
+                    UserNotification::create([
+                        'notification_id' => $this->notification->id,
+                        'notifiable_id' => $user->id,
+                        'notifiable_type' => User::class,
+                    ]);
                 }
-            }
-        });
+
+                $push->sendToTokens(
+                    $users->flatMap->firebaseTokens->pluck('device_token')->all(),
+                    $this->notification->title,
+                    $this->notification->message,
+                    $this->payload(),
+                );
+            });
 
         $this->notification->update(['sent_at' => now()]);
     }
 
-    private function sendToFirebase(array $tokens): void
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(): array
     {
-        Log::info('Sending FCM notification to '.count($tokens)." tokens for broadcast ID: {$this->notification->id}");
-
-        // Use kreait/laravel-firebase or direct FCM V1 HTTP calls here.
-        // Example:
-        // Http::withToken($fcmToken)->post('https://fcm.googleapis.com/v1/projects/my-project/messages:send', [...]);
+        return [
+            ...($this->notification->data ?? []),
+            'notification_id' => $this->notification->id,
+            'url' => $this->notification->url,
+        ];
     }
 }

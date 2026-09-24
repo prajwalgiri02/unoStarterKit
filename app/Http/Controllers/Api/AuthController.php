@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\DeviceTokenService;
 use App\Services\UserRegistrationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +24,8 @@ class AuthController extends Controller
      * @return void
      */
     public function __construct(
-        private readonly UserRegistrationService $registrationService
+        private readonly UserRegistrationService $registrationService,
+        private readonly DeviceTokenService $deviceTokens,
     ) {}
 
     /**
@@ -35,6 +38,8 @@ class AuthController extends Controller
         $user = $this->registrationService->register($request->userAttributes());
 
         $token = Auth::guard('api')->login($user);
+
+        $this->registerDevice($user, $request->device());
 
         return $this->respondWithToken($token);
     }
@@ -67,6 +72,8 @@ class AuthController extends Controller
             return $this->errorResponse('Your account has been blocked.', 403);
         }
 
+        $this->registerDevice($user, $request->device());
+
         return $this->respondWithToken($token);
     }
 
@@ -75,8 +82,13 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout()
+    public function logout(LogoutRequest $request)
     {
+        /** @var User $user */
+        $user = Auth::guard('api')->user();
+
+        $this->deviceTokens->removeForDevice($user, $request->validated('device_id'));
+
         Auth::guard('api')->logout();
 
         return $this->successResponse(null, 'Successfully logged out');
@@ -90,6 +102,16 @@ class AuthController extends Controller
     public function refresh()
     {
         return $this->respondWithToken(Auth::guard('api')->refresh());
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $device
+     */
+    private function registerDevice(User $user, ?array $device): void
+    {
+        if ($device !== null) {
+            $this->deviceTokens->register($user, $device);
+        }
     }
 
     /**
