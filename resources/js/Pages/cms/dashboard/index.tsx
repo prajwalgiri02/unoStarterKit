@@ -1,70 +1,50 @@
-import DashboardCharts from "@/Components/cms/dashboard/DashboardCharts";
-import StatsGrid from "@/Components/cms/dashboard/StatsGrid";
-import CmsLayout from "@/Layouts/cms-layout";
-import { router, usePage } from "@inertiajs/react";
-import FilterRow from "@/Components/common/FilterRow";
+import Button from "@/Components/buttons/button";
+import DateRangePicker, { type DateRange } from "@/Components/inputs/date-range-picker";
+import AppLayout from "@/Layouts/app-layout";
+import { router } from "@inertiajs/react";
 
-type DashboardProps = {
-    auth: {
-        user: { id: number; name: string; email: string } | null;
-    };
-    // cms: {
-    //     sessionExpireOnBrowserClose: boolean;
-    // };
-};
+function toQueryDate(date: Date | null) {
+    if (!date) return undefined;
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function fromQueryDate(value: string | null) {
+    if (!value) return null;
+    const [year, month, day] = value.split("-").map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+}
 
 const Dashboard = () => {
-    const {
-        auth: { user },
-    } = usePage<DashboardProps>().props;
+    const params = new URLSearchParams(window.location.search);
+    const range: DateRange = {
+        from: fromQueryDate(params.get("from")),
+        to: fromQueryDate(params.get("to")),
+    };
+
+    const applyRange = ({ from, to }: DateRange) => {
+        router.get(
+            window.location.pathname,
+            { from: toQueryDate(from), to: toQueryDate(to) },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    };
 
     return (
-        <>
-            <FilterRow
-                className="filters-row"
-                labelClassName="filter-label link-md-400"
-                dropdownContainerClassName="dropdown-select"
-                dropdownClassName="link-md-400 text-neutral-500"
-                items={[
-                    {
-                        value: "date",
-                        onChange: (val) => {},
-                        options: [
-                            { value: "date", label: "Date" },
-                            { value: "name", label: "Name" },
-                        ],
-                    },
-                    {
-                        value: "city",
-                        onChange: (val) => {},
-                        options: [
-                            { value: "city", label: "City" },
-                            { value: "state", label: "State" },
-                        ],
-                    },
-                ]}
-            >
-                <button className="btns btns-primary btn-small1 link-md-700">
-                    Export
-                </button>
-            </FilterRow>
-
-            <StatsGrid />
-
-            <DashboardCharts />
-        </>
+        <div className="flex flex-col gap-8">
+            <div className="flex items-center justify-end gap-5">
+                <span className="text-link-sm font-normal text-neutral-600">Sort by</span>
+                <DateRangePicker value={range} onApply={applyRange} />
+                <Button size="medium">Export</Button>
+            </div>
+        </div>
     );
 };
 
 Dashboard.layout = (page: React.ReactNode) => (
-    <CmsLayout
-        headerLabel="Dashboard"
-        showSearchBar={true}
-        showActionButton={false}
-        showNotificationButton={true}
-    >
-        {page}
-    </CmsLayout>
+    <AppLayout title="Dashboard">{page}</AppLayout>
 );
 
 export default Dashboard;

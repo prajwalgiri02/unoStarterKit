@@ -1,16 +1,13 @@
-import React from "react";
-import CmsLayout from "@/Layouts/cms-layout";
-import { useForm, Link } from "@inertiajs/react";
-import Input from "@/Components/inputs/input";
 import Button from "@/Components/buttons/button";
+import BackLink from "@/Components/common/back-link";
+import Input from "@/Components/inputs/input";
+import UserProfileCard from "@/Components/users/user-profile-card";
+import AppLayout from "@/Layouts/app-layout";
+import type { UserDetailPageProps } from "@/Pages/types/cms/user";
+import { router, useForm } from "@inertiajs/react";
+import type { FormEvent } from "react";
 
-import type { UserCms } from "@/Pages/types/cms/user";
-
-interface UserEditProps {
-    user: UserCms;
-}
-
-function UserEdit({ user }: UserEditProps) {
+function UserEdit({ user: { data: user } }: UserDetailPageProps) {
     const { data, setData, put, processing, errors } = useForm({
         name: user.name,
         email: user.email,
@@ -18,108 +15,75 @@ function UserEdit({ user }: UserEditProps) {
         password_confirmation: "",
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const submit = (e: FormEvent) => {
         e.preventDefault();
-        put(`/cms/user-manager/${user.id}`, {
-            preserveScroll: true,
-        });
+        put(`/cms/user-manager/${user.id}`, { preserveScroll: true });
+    };
+
+    const toggleBlock = () => {
+        router.post(`/cms/user-manager/${user.id}/toggle-block`, {}, { preserveScroll: true });
     };
 
     return (
-        <div className="legal-content-card">
-            <div className="legal-card-content flex flex-col gap-6">
-                <div className="flex items-center justify-between">
-                    <h2 className="subtitle-md text-neutral-900">Edit User</h2>
-                    <Link
-                        href={`/cms/user-manager/${user.id}`}
-                        className="body-xs text-neutral-500 hover:text-neutral-700"
-                    >
-                        Cancel
-                    </Link>
+        <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6">
+                <BackLink href={`/cms/user-manager/${user.id}`}>User Details</BackLink>
+                <UserProfileCard user={user} onToggleBlock={toggleBlock} />
+            </div>
+
+            <form onSubmit={submit} className="flex max-w-3xl flex-col gap-8">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <Input
+                        label="Full Name"
+                        name="name"
+                        value={data.name}
+                        onChange={(e) => setData("name", e.target.value)}
+                        error={errors.name}
+                        autoComplete="name"
+                    />
+                    <Input
+                        label="Email Address"
+                        type="email"
+                        name="email"
+                        value={data.email}
+                        onChange={(e) => setData("email", e.target.value)}
+                        error={errors.email}
+                        autoComplete="email"
+                    />
+                    <Input
+                        label="New Password"
+                        type="password"
+                        name="password"
+                        placeholder="Leave blank to keep current"
+                        value={data.password}
+                        onChange={(e) => setData("password", e.target.value)}
+                        error={errors.password}
+                        autoComplete="new-password"
+                    />
+                    <Input
+                        label="Confirm New Password"
+                        type="password"
+                        name="password_confirmation"
+                        value={data.password_confirmation}
+                        onChange={(e) => setData("password_confirmation", e.target.value)}
+                        error={errors.password_confirmation}
+                        autoComplete="new-password"
+                    />
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                            id="name"
-                            name="name"
-                            label="Full Name"
-                            placeholder="Enter full name"
-                            value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
-                            error={errors.name}
-                        />
-                        <Input
-                            type="email"
-                            id="email"
-                            name="email"
-                            label="Email"
-                            placeholder="Enter email"
-                            value={data.email}
-                            onChange={(e) => setData("email", e.target.value)}
-                            error={errors.email}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                            type="password"
-                            id="password"
-                            name="password"
-                            label="New Password"
-                            placeholder="Leave blank to keep current"
-                            value={data.password}
-                            onChange={(e) =>
-                                setData("password", e.target.value)
-                            }
-                            error={errors.password}
-                        />
-                        <Input
-                            type="password"
-                            id="password_confirmation"
-                            name="password_confirmation"
-                            label="Confirm New Password"
-                            placeholder="Confirm new password"
-                            value={data.password_confirmation}
-                            onChange={(e) =>
-                                setData("password_confirmation", e.target.value)
-                            }
-                            error={errors.password_confirmation}
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-3 pt-2">
-                        <Button
-                            type="submit"
-                            disabled={processing}
-                            size="giant"
-                        >
-                            {processing ? "Saving..." : "Save Changes"}
-                        </Button>
-                        <Link
-                            href={`/cms/user-manager/${user.id}`}
-                            className="btns btn-large btns-secondary"
-                        >
-                            Cancel
-                        </Link>
-                    </div>
-                </form>
-            </div>
+                <div className="flex flex-wrap gap-5">
+                    <Button type="submit" disabled={processing}>
+                        {processing ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button variant="outline" onClick={() => router.visit(`/cms/user-manager/${user.id}`)}>
+                        Cancel
+                    </Button>
+                </div>
+            </form>
         </div>
     );
 }
 
-UserEdit.layout = (page: React.ReactNode) => (
-    <CmsLayout
-        headerLabel="Edit User"
-        showSearchBar={false}
-        showActionButton={false}
-        showNotificationButton={true}
-        backUrl="/cms/user-manager"
-        wrapperClass="user-management-content-wrapper"
-    >
-        {page}
-    </CmsLayout>
-);
+UserEdit.layout = (page: React.ReactNode) => <AppLayout title="User Manager">{page}</AppLayout>;
 
 export default UserEdit;

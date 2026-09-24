@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserNotificationService
 {
@@ -17,6 +18,16 @@ class UserNotificationService
             ->with('notification')
             ->latest()
             ->paginate($perPage);
+    }
+
+    public function latest(User $user, int $limit = 10): Collection
+    {
+        return UserNotification::where('notifiable_id', $user->id)
+            ->where('notifiable_type', User::class)
+            ->with('notification')
+            ->latest()
+            ->limit($limit)
+            ->get();
     }
 
     public function markAsRead(UserNotification $userNotification): void

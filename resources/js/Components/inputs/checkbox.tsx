@@ -1,6 +1,6 @@
 import { fieldError } from "@/Components/inputs/first-error-message";
 import { useFormContext } from "@inertiajs/react";
-import { Check, Minus } from "lucide-react";
+import { CheckIcon, MinusIcon } from "@/Components/icons";
 import {
     useEffect,
     useId,
@@ -82,14 +82,12 @@ export default function Checkbox({
                         className={`peer size-5 cursor-pointer appearance-none border-[1.5px] border-primary-500 bg-base-white outline-none transition-colors hover:bg-primary-50 focus-visible:ring-[3px] focus-visible:ring-primary-50 checked:bg-primary-500 checked:hover:bg-primary-600 indeterminate:bg-primary-500 indeterminate:hover:bg-primary-600 disabled:cursor-not-allowed disabled:border-neutral-200 disabled:bg-base-white disabled:checked:border-primary-200 disabled:checked:bg-primary-200 disabled:indeterminate:border-primary-200 disabled:indeterminate:bg-primary-200 ${shape === "circle" ? "rounded-full" : "rounded-[5px]"}`}
                         {...rest}
                     />
-                    <Check
+                    <CheckIcon
                         aria-hidden="true"
-                        strokeWidth={2.5}
                         className="pointer-events-none absolute inset-0 m-auto hidden size-3.5 text-base-white peer-checked:block peer-indeterminate:hidden"
                     />
-                    <Minus
+                    <MinusIcon
                         aria-hidden="true"
-                        strokeWidth={2.5}
                         className="pointer-events-none absolute inset-0 m-auto hidden size-3.5 text-base-white peer-indeterminate:block"
                     />
                 </span>

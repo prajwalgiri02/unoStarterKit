@@ -1,122 +1,69 @@
-import React from "react";
-import { Link } from "@inertiajs/react";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/Components/icons";
 import { decodePaginationLabel } from "@/lib/security";
+import { Link } from "@inertiajs/react";
 
-interface PaginationProps {
-    links: {
-        url: string | null;
-        label: string;
-        active: boolean;
-    }[];
-    meta?: {
-        current_page: number;
-        from: number;
-        to: number;
-        total: number;
-        per_page: number;
-    };
-    onPerPageChange?: (perPage: number) => void;
-}
-
-const Pagination = ({ links, meta, onPerPageChange }: PaginationProps) => {
-    if (!links || links.length === 0) return null;
-
-    // First and Last logic
-    const firstLink =
-        links.find((l) => l.label.toLowerCase().includes("1")) || links[1];
-
-    // Find last numerical link for "Last" button
-    const lastNumLink = [...links]
-        .reverse()
-        .find((l) => !isNaN(Number(l.label)));
-
-    const prevLink = links[0];
-    const nextLink = links[links.length - 1];
-
-    return (
-        <div className="table-pagination">
-            <div className="pagination-info">
-                <div className="items-per-page">
-                    <span className="caption-md">Items per page</span>
-                    <div className="dropdown-select-sm">
-                        <select
-                            className="body-xs text-neutral-600"
-                            value={meta?.per_page || 10}
-                            onChange={(e) =>
-                                onPerPageChange?.(Number(e.target.value))
-                            }
-                        >
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <img src="/icons/small-drop.svg" alt="Arrow Down" />
-                    </div>
-                </div>
-                {meta && (
-                    <span className="records-count caption-md">
-                        Records of {meta.to} of {meta.total}
-                    </span>
-                )}
-            </div>
-
-            <div className="pagination-controls flex flex-wrap md:flex-nowrap items-center gap-2">
-                <Link
-                    href={firstLink?.url || "#"}
-                    className={`pagination-btn caption-md ${!firstLink?.url ? "disabled" : ""}`}
-                    id="prevPageBtn"
-                    preserveScroll
-                    preserveState
-                >
-                    First
-                </Link>
-
-                {links.slice(1, -1).map((link, index) => (
-                    <Link
-                        key={index}
-                        href={link.url || "#"}
-                        className={`pagination-btn caption-md ${link.active ? "active" : ""} ${!link.url ? "disabled" : ""}`}
-                        preserveScroll
-                        preserveState
-                    >
-                        {decodePaginationLabel(link.label)}
-                    </Link>
-                ))}
-
-                <Link
-                    href={lastNumLink?.url || "#"}
-                    className={`pagination-btn caption-md ${!lastNumLink?.url ? "disabled" : ""}`}
-                    id="nextPageBtn"
-                    preserveScroll
-                    preserveState
-                >
-                    Last
-                </Link>
-
-                <div className="pagination-nav">
-                    <Link
-                        href={prevLink?.url || "#"}
-                        className={`pagination-nav-btn ${!prevLink?.url ? "disabled" : ""}`}
-                        id="firstPageBtn"
-                        preserveScroll
-                        preserveState
-                    >
-                        <img src="/icons/prev.svg" alt="prev" />
-                    </Link>
-                    <Link
-                        href={nextLink?.url || "#"}
-                        className={`pagination-nav-btn ${!nextLink?.url ? "disabled" : ""}`}
-                        id="lastPageBtn"
-                        preserveScroll
-                        preserveState
-                    >
-                        <img src="/icons/next.svg" alt="next" />
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
+type PaginationLink = {
+    url: string | null;
+    label: string;
+    active: boolean;
 };
 
-export default Pagination;
+type PaginationProps = {
+    links: PaginationLink[];
+    from?: number | null;
+    to?: number | null;
+    total?: number;
+};
+
+const itemClass =
+    "flex size-8 items-center justify-center rounded-full text-body-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-primary-50";
+
+export default function Pagination({ links, from, to, total }: PaginationProps) {
+    if (links.length <= 3) return null;
+
+    const prev = links[0];
+    const next = links[links.length - 1];
+    const pages = links.slice(1, -1);
+
+    const arrow = (link: PaginationLink, label: string, icon: React.ReactNode) =>
+        link.url ? (
+            <Link href={link.url} preserveScroll aria-label={label} className={`${itemClass} text-neutral-600 hover:bg-neutral-50`}>
+                {icon}
+            </Link>
+        ) : (
+            <span aria-hidden="true" className={`${itemClass} text-neutral-300`}>
+                {icon}
+            </span>
+        );
+
+    return (
+        <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-4 pt-2">
+            {total !== undefined && (
+                <p className="text-body-xs text-neutral-600">
+                    Showing {from ?? 0}–{to ?? 0} of {total}
+                </p>
+            )}
+            <div className="flex items-center gap-1">
+                {arrow(prev, "Previous page", <ArrowLeftIcon className="size-4" />)}
+                {pages.map((link, index) =>
+                    link.url ? (
+                        <Link
+                            key={index}
+                            href={link.url}
+                            preserveScroll
+                            aria-current={link.active ? "page" : undefined}
+                            className={`${itemClass} ${link.active ? "bg-primary-500 text-base-white" : "text-neutral-700 hover:bg-neutral-50"}`}
+                        >
+                            {decodePaginationLabel(link.label)}
+                        </Link>
+                    ) : (
+                        <span key={index} className={`${itemClass} text-neutral-400`}>
+                            {decodePaginationLabel(link.label)}
+                        </span>
+                    ),
+                )}
+                {arrow(next, "Next page", <ArrowRightIcon className="size-4" />)}
+            </div>
+        </nav>
+    );
+}

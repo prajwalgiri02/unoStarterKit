@@ -1,3 +1,5 @@
+import type { PaginationLink } from "../ui/pagination";
+
 export interface BroadcastNotification {
     id: number;
     title: string;
@@ -14,9 +16,9 @@ export interface BroadcastNotification {
 export interface BroadcastNotificationPageProps {
     notifications: {
         data: BroadcastNotification[];
-        current_page: number;
-        last_page: number;
+        links: PaginationLink[];
+        from: number | null;
+        to: number | null;
         total: number;
-        per_page: number;
     };
 }

@@ -1,6 +1,6 @@
 import { fieldError } from "@/Components/inputs/first-error-message";
 import { useFormContext } from "@inertiajs/react";
-import { Eye, EyeOff } from "lucide-react";
+import { EyeIcon, EyeSlashIcon } from "@/Components/icons";
 import {
     useId,
     useState,
@@ -155,7 +155,7 @@ export default function Input({
                                 aria-pressed={passwordVisible}
                                 className="flex size-full cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary-200 disabled:cursor-not-allowed [&>svg]:size-full"
                             >
-                                {passwordVisible ? <Eye /> : <EyeOff />}
+                                {passwordVisible ? <EyeSlashIcon /> : <EyeIcon />}
                             </button>
                         </span>
                     )
