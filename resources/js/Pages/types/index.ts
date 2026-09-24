@@ -18,7 +18,7 @@ export type PageProps<
     auth: {
         user: User | null;
     };
-    notifications?: AppNotification[];
+    inboxNotifications?: AppNotification[];
     cms: {
         // sessionLifetimeMinutes: number;
         // sessionExpireOnBrowserClose: boolean;

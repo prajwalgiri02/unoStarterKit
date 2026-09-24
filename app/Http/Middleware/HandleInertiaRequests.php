@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'notifications' => fn () => $request->user()
+            'inboxNotifications' => fn () => $request->user()
                 ? app(UserNotificationService::class)
                     ->latest($request->user())
                     ->map(fn (UserNotification $item): array => [

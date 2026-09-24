@@ -12,7 +12,7 @@ type HeaderProps = {
 };
 
 export default function Header({ title, backHref, actions, onOpenMenu }: HeaderProps) {
-    const { notifications = [] } = usePage<PageProps>().props;
+    const { inboxNotifications = [] } = usePage<PageProps>().props;
 
     return (
         <header className="sticky top-0 z-20 flex h-[90px] shrink-0 items-center justify-between gap-4 border-b border-neutral-200 bg-base-white px-4 sm:px-[30px]">
@@ -39,7 +39,7 @@ export default function Header({ title, backHref, actions, onOpenMenu }: HeaderP
 
             <div className="flex shrink-0 items-center gap-5">
                 {actions}
-                <NotificationDropdown notifications={notifications} />
+                <NotificationDropdown notifications={inboxNotifications} />
             </div>
         </header>
     );
