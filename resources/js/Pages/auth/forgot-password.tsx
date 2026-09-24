@@ -6,24 +6,28 @@ import { Form } from "@inertiajs/react";
 const ForgotPassword = () => {
     return (
         <Form
-            id="signinForm"
+            id="forgotPasswordForm"
             action="/cms/forgot-password"
             method="post"
             validationTimeout={500}
             disableWhileProcessing
+            className="flex flex-col gap-6"
         >
             {({ processing }) => (
                 <>
-                    <div className="flex flex-col gap-4">
-                        <Input name="email" type="email" label="Email" autoComplete="email" />
-                    </div>
-                    <div className="flex flex-col gap-4 mt-10">
-                        <Button type="submit" disabled={processing}>
-                            {processing
-                                ? "Sending verification code..."
-                                : "Send Verification Code"}
-                        </Button>
-                    </div>
+                    <Input
+                        name="email"
+                        type="email"
+                        label="Email"
+                        size="medium"
+                        placeholder="yourname@gmail.com"
+                        autoComplete="email"
+                    />
+                    <Button type="submit" disabled={processing} className="w-full">
+                        {processing
+                            ? "Sending verification code..."
+                            : "Send Verification Code"}
+                    </Button>
                 </>
             )}
         </Form>
@@ -32,11 +36,9 @@ const ForgotPassword = () => {
 
 ForgotPassword.layout = (page: React.ReactNode) => (
     <AuthLayout
-        headerTitle="Forgot Password"
-        headerDescription="Enter your email address to reset your password. We'll send you a verification code to proceed."
-        goBack={true}
-        goBackLabelText="Back"
-        goBackUrl="/cms/login"
+        title="Forgot Password"
+        description="Enter your email address to reset your password. We'll send you a verification code to proceed."
+        backHref="/cms/login"
     >
         {page}
     </AuthLayout>

@@ -1,61 +1,75 @@
 import type { PageProps } from "@/Pages/types/index";
 import { Link, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
 import { Toaster, toast } from "sonner";
 
+type AuthLayoutProps = {
+    children: ReactNode;
+    title?: ReactNode;
+    description?: ReactNode;
+    backHref?: string;
+    backLabel?: string;
+    wide?: boolean;
+};
+
 export default function AuthLayout({
-  children,
-  headerTitle = "Welcome👋",
-  headerDescription = "",
-  goBack = false,
-  goBackLabelText = "Go Back",
-  goBackUrl = "/",
-}: { 
-  children: React.ReactNode;
-  headerTitle?: string;
-  headerDescription?: React.ReactNode;
-  goBack?: boolean;
-  goBackLabelText?: string;
-  goBackUrl?: string;
-}) {
-  const { props } = usePage<PageProps>();
+    children,
+    title = "Welcome 👋",
+    description,
+    backHref,
+    backLabel = "Back",
+    wide = false,
+}: AuthLayoutProps) {
+    const { props } = usePage<PageProps>();
 
-  useEffect(() => {
-    if (props.flash?.success) {
-      toast.success(props.flash.success, {
-        id: props.flash.success,
-      });
-    }
-    if (props.flash?.error) {
-      toast.error(props.flash.error, {
-        id: props.flash.error,
-      });
-    }
-  }, [props.flash]);
+    useEffect(() => {
+        if (props.flash?.success) {
+            toast.success(props.flash.success, { id: props.flash.success });
+        }
+        if (props.flash?.error) {
+            toast.error(props.flash.error, { id: props.flash.error });
+        }
+    }, [props.flash]);
 
-  return (
-    <main className="auth-shell">
-      <aside className="auth-brand">
-        <img className="logo-large" src="/images/logoLogin.svg" alt="Yesterday logo" />
-      </aside>
-      <section className="auth-form-wrap">
-        <div className="auth-form">
-        {goBack && (
-          <Link className="auth-back"  href={goBackUrl}>
-            <img src="/icons/back.svg" />
-            <p>{goBackLabelText}</p>
-          </Link>
+    return (
+        <main className="flex min-h-dvh bg-base-white lg:p-8">
+            <aside className="hidden shrink-0 items-center justify-center rounded-[30px] bg-primary-500 lg:flex lg:w-[56.5%]">
+                <img
+                    src="/images/auth-logo.svg"
+                    alt="Borrowed"
+                    className="w-[305px] max-w-[60%]"
+                />
+            </aside>
 
-)}
-          <h1 className="auth-title">{headerTitle}</h1>
-          {headerDescription && (
-                      <p className="auth-subtitle">{headerDescription}</p>
+            <section className="flex flex-1 items-center justify-center px-6 py-12">
+                <div className={`flex w-full flex-col gap-10 ${wide ? "max-w-96" : "max-w-[327px]"}`}>
+                    {backHref && (
+                        <Link
+                            href={backHref}
+                            className="inline-flex w-fit items-center gap-3 text-body-md font-bold text-neutral-400 transition-colors hover:text-neutral-600"
+                        >
+                            <ChevronLeft className="size-5" aria-hidden="true" />
+                            {backLabel}
+                        </Link>
+                    )}
 
-          )}
-          {children}
-        </div>
-        <Toaster richColors position="bottom-right" />
-      </section>
-    </main>
-  );
+                    <div className="flex flex-col gap-[30px]">
+                        <h1 className="text-title-md text-primary-500">{title}</h1>
+
+                        <div className="flex flex-col gap-6">
+                            {description && (
+                                <p className="text-body-xs text-neutral-700">
+                                    {description}
+                                </p>
+                            )}
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <Toaster richColors position="bottom-right" />
+        </main>
+    );
 }

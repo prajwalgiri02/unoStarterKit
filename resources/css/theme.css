@@ -163,4 +163,7 @@
     --color-base-black: #000000;
     --color-base-white: #ffffff;
     --color-base-transparent: transparent;
+
+    --color-backdrop: color-mix(in srgb, var(--color-primary-800) 70%, transparent);
+    --blur-backdrop: 0px;
 }

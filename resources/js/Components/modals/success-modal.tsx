@@ -1,51 +1,40 @@
-import { Link } from "@inertiajs/react";
-import { useEffect } from "react";
+import Button from "@/Components/buttons/button";
+import Modal from "@/Components/modals/modal";
+import { router } from "@inertiajs/react";
+import { Check } from "lucide-react";
+import { useId } from "react";
 
-interface SuccessModalProps {
+type SuccessModalProps = {
     title: string;
     description: string;
     buttonText: string;
     buttonLink: string;
-}
+};
 
-const SuccessModal = ({
+export default function SuccessModal({
     title,
     description,
     buttonText,
     buttonLink,
-}: SuccessModalProps) => {
-    useEffect(() => {
-        document.body.classList.add("overflow-hidden");
-        return () => {
-            document.body.classList.remove("overflow-hidden");
-        };
-    }, []);
+}: SuccessModalProps) {
+    const titleId = useId();
 
     return (
-        <div className="success-overlay" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
-            <div className="success-modal">
-                <div className="success-modal__icon">
-                    <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
+        <Modal open dismissible={false} labelledBy={titleId}>
+            <div className="flex flex-col items-center gap-5 text-center">
+                <span className="flex size-14 items-center justify-center rounded-full bg-primary-500 text-base-white">
+                    <Check className="size-7" strokeWidth={2.5} aria-hidden="true" />
+                </span>
+                <h3 id={titleId} className="text-title-md text-primary-500">
+                    {title}
+                </h3>
+                <div className="flex w-full flex-col gap-6">
+                    <p className="text-body-xs text-neutral-700">{description}</p>
+                    <Button className="w-full" onClick={() => router.visit(buttonLink)}>
+                        {buttonText}
+                    </Button>
                 </div>
-                <h3 id="successModalTitle" className="success-modal__title">{title}</h3>
-                <p className="success-modal__description">{description}</p>
-                <Link href={buttonLink} className="btn btn-primary success-modal__btn">
-                    {buttonText}
-                </Link>
             </div>
-        </div>
+        </Modal>
     );
-};
-
-export default SuccessModal;
+}

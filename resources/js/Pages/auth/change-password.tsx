@@ -29,33 +29,28 @@ const ChangePassword = () => {
                 action={`/cms/reset-password/${token}`}
                 method="post"
                 disableWhileProcessing
+                className="flex flex-col gap-6"
             >
                 {({ processing }) => (
                     <>
                         <input type="hidden" name="email" value={email} />
-                        <div className="flex flex-col gap-4">
-                            <Input
-                                type="password"
-                                name="password"
-                                label="New Password"
-                                placeholder="Enter new password"
-                                autoComplete="new-password"
-                            />
-                            <Input
-                                type="password"
-                                name="password_confirmation"
-                                label="Confirm New Password"
-                                placeholder="Repeat password"
-                                autoComplete="new-password"
-                            />
-                        </div>
-                        <div className="flex flex-col gap-4 mt-10">
-                            <Button type="submit" disabled={processing}>
-                                {processing
-                                    ? "Resetting password..."
-                                    : "Reset password"}
-                            </Button>
-                        </div>
+                        <Input
+                            type="password"
+                            name="password"
+                            label="New Password"
+                            size="medium"
+                            autoComplete="new-password"
+                        />
+                        <Input
+                            type="password"
+                            name="password_confirmation"
+                            label="Confirm New Password"
+                            size="medium"
+                            autoComplete="new-password"
+                        />
+                        <Button type="submit" disabled={processing} className="w-full">
+                            {processing ? "Confirming..." : "Confirm Password"}
+                        </Button>
                     </>
                 )}
             </Form>
@@ -64,13 +59,7 @@ const ChangePassword = () => {
 };
 
 ChangePassword.layout = (page: React.ReactNode) => (
-    <AuthLayout
-        headerTitle="Reset Password"
-        headerDescription=""
-        goBack={true}
-        goBackLabelText="Back"
-        goBackUrl="/cms/login"
-    >
+    <AuthLayout title="Reset Password" backHref="/cms/login">
         {page}
     </AuthLayout>
 );
