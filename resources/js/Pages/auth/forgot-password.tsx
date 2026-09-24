@@ -1,5 +1,5 @@
 import Button from "@/Components/buttons/button";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import AuthLayout from "@/Layouts/auth-layout";
 import { Form } from "@inertiajs/react";
 
@@ -15,7 +15,7 @@ const ForgotPassword = () => {
             {({ processing }) => (
                 <>
                     <div className="flex flex-col gap-4">
-                    <FormInput name="email" type="email" skipBlurValidation />
+                        <Input name="email" type="email" label="Email" autoComplete="email" />
                     </div>
                     <div className="flex flex-col gap-4 mt-10">
                         <Button type="submit" disabled={processing}>

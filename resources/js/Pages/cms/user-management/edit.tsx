@@ -1,7 +1,7 @@
 import React from "react";
 import CmsLayout from "@/Layouts/cms-layout";
 import { useForm, Link } from "@inertiajs/react";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import Button from "@/Components/buttons/button";
 
 import type { UserCms } from "@/Pages/types/cms/user";
@@ -40,7 +40,7 @@ function UserEdit({ user }: UserEditProps) {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormInput
+                        <Input
                             id="name"
                             name="name"
                             label="Full Name"
@@ -49,7 +49,7 @@ function UserEdit({ user }: UserEditProps) {
                             onChange={(e) => setData("name", e.target.value)}
                             error={errors.name}
                         />
-                        <FormInput
+                        <Input
                             type="email"
                             id="email"
                             name="email"
@@ -62,7 +62,7 @@ function UserEdit({ user }: UserEditProps) {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormInput
+                        <Input
                             type="password"
                             id="password"
                             name="password"
@@ -74,7 +74,7 @@ function UserEdit({ user }: UserEditProps) {
                             }
                             error={errors.password}
                         />
-                        <FormInput
+                        <Input
                             type="password"
                             id="password_confirmation"
                             name="password_confirmation"

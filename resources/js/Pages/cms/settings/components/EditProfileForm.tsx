@@ -1,5 +1,5 @@
 import { useForm, router, usePage } from "@inertiajs/react";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import Button from "@/Components/buttons/button";
 import ConfirmationAccountModal from "./ConfirmationAccountModal";
 import { useState, useEffect } from "react";
@@ -158,7 +158,7 @@ export default function EditProfileForm({
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormInput
+                        <Input
                             id="name"
                             name="name"
                             label="Full Name"
@@ -167,7 +167,7 @@ export default function EditProfileForm({
                             onChange={(e) => setData("name", e.target.value)}
                             error={errors.name}
                         />
-                        <FormInput
+                        <Input
                             type="email"
                             id="email"
                             name="email"
@@ -184,7 +184,7 @@ export default function EditProfileForm({
                             Change Password
                         </span>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <FormInput
+                            <Input
                                 type="password"
                                 id="password"
                                 name="password"
@@ -196,7 +196,7 @@ export default function EditProfileForm({
                                 }
                                 error={errors.password}
                             />
-                            <FormInput
+                            <Input
                                 type="password"
                                 id="password_confirmation"
                                 name="password_confirmation"

@@ -2,7 +2,7 @@ import React from "react";
 import { useForm } from "@inertiajs/react";
 import SelectInput from "@/Components/inputs/select-input";
 import TextareaInput from "@/Components/inputs/textarea-input";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import Button from "@/Components/buttons/button";
 
 const ComposeNotification: React.FC = () => {
@@ -49,7 +49,7 @@ const ComposeNotification: React.FC = () => {
                         </label>
                     </div>
 
-                    <FormInput
+                    <Input
                         id="title"
                         name="title"
                         label="Notification Title"

@@ -1,7 +1,7 @@
 import CmsLayout from "@/Layouts/cms-layout";
 import { useForm } from "@inertiajs/react";
 import { useState } from "react";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import TextareaInput from "@/Components/inputs/textarea-input";
 import Button from "@/Components/buttons/button";
 
@@ -38,7 +38,7 @@ function EditForm({ content, onCancel }: EditFormProps) {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
-            <FormInput
+            <Input
                 id={`title-${content.id}`}
                 name="title"
                 label="Title"

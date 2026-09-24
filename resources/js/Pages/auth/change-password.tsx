@@ -1,5 +1,5 @@
 import Button from "@/Components/buttons/button";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import SuccessModal from "@/Components/modals/success-modal";
 import AuthLayout from "@/Layouts/auth-layout";
 import { Form, usePage } from "@inertiajs/react";
@@ -34,7 +34,20 @@ const ChangePassword = () => {
                     <>
                         <input type="hidden" name="email" value={email} />
                         <div className="flex flex-col gap-4">
-                            <FormInput type="password" name="password" confirmed label="New Password" confirmLabel="Confirm New Password" skipBlurValidation />
+                            <Input
+                                type="password"
+                                name="password"
+                                label="New Password"
+                                placeholder="Enter new password"
+                                autoComplete="new-password"
+                            />
+                            <Input
+                                type="password"
+                                name="password_confirmation"
+                                label="Confirm New Password"
+                                placeholder="Repeat password"
+                                autoComplete="new-password"
+                            />
                         </div>
                         <div className="flex flex-col gap-4 mt-10">
                             <Button type="submit" disabled={processing}>

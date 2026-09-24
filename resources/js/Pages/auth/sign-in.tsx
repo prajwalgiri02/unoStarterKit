@@ -1,7 +1,7 @@
 import Button from "@/Components/buttons/button";
 import TextButton from "@/Components/buttons/text-button";
 import CheckboxInput from "@/Components/inputs/checkbox-input";
-import FormInput from "@/Components/inputs/email-input";
+import Input from "@/Components/inputs/input";
 import AuthLayout from "@/Layouts/auth-layout";
 import { Form } from "@inertiajs/react";
 
@@ -17,8 +17,8 @@ const SignIn = () => {
             {({ processing }) => (
                 <>
                     <div className="flex flex-col gap-4">
-                        <FormInput name="email" type="email" skipBlurValidation />
-                        <FormInput name="password" type="password" skipBlurValidation />
+                        <Input name="email" type="email" label="Email" autoComplete="email" />
+                        <Input name="password" type="password" label="Password" autoComplete="current-password" />
                         <div className="auth-row">
                             <CheckboxInput
                                 id="rememberme"
