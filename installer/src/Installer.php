@@ -46,7 +46,7 @@ final class Installer
                 $choices = $this->loadState();
 
                 if ($choices === null && $fromComposer) {
-                    $this->io->warning('Setup has not been completed yet. Run it now: php installer/setup.php');
+                    $this->skippedNotice();
 
                     return 0;
                 }
@@ -60,7 +60,7 @@ final class Installer
             $this->io->error($exception->getMessage());
 
             if ($fromComposer) {
-                $this->io->warning('Setup was skipped so Composer can finish installing. Run it in your terminal: php installer/setup.php');
+                $this->io->warning('Composer cannot read your keyboard here, so the questions were skipped.');
 
                 return 0;
             }
@@ -691,6 +691,19 @@ final class Installer
         }
 
         return implode(' ', [$program, ...array_map('escapeshellarg', $command)]);
+    }
+
+    private function skippedNotice(): void
+    {
+        $this->io->line();
+        $this->io->line(' ================================================================');
+        $this->io->line('  SETUP IS NOT FINISHED. The packages are installed, but your');
+        $this->io->line('  questions were not asked (Composer cannot read the keyboard).');
+        $this->io->line();
+        $this->io->line('  Finish it now, in this terminal:');
+        $this->io->line('      cd '.basename($this->basePath));
+        $this->io->line('      php installer/setup.php');
+        $this->io->line(' ================================================================');
     }
 
     private function summary(): void

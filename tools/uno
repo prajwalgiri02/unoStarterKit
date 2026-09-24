@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: uno <project-name>"
+    exit 1
+fi
+
+REPO="${UNO_REPO:-git@github.com:prajwalgiri02/unoStarterKit.git}"
+
+composer create-project prajwalgiri02/unostarterkit "$1" --no-install --no-scripts --remove-vcs --repository="{\"type\":\"vcs\",\"url\":\"$REPO\",\"no-api\":true}"
+
+cd "$1"
+php installer/setup.php

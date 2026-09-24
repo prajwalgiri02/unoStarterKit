@@ -47,6 +47,20 @@ What happens:
 
 Composer installs the latest tagged release (`v1.0.0`, `v1.1.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
 
+### One command with `uno`
+
+Install the `uno` command once per computer and creating a project is a single command, like `laravel new`:
+
+```bash
+uno grocery-go
+```
+
+It runs the two commands above for you. To install it, copy the file for your system from the `tools/` folder of this repository into a folder that is on your PATH:
+
+- **Windows:** copy `tools/uno.cmd` to a PATH folder such as `C:\ProgramData\ComposerSetup\bin` (where `composer` lives).
+- **Mac / Linux:** copy `tools/uno` to `/usr/local/bin/uno` and run `chmod +x /usr/local/bin/uno`.
+
+To get the file without cloning the whole repository, download it from GitHub or from any existing project created with the kit (`tools/` is included in every project).
 ### Why not one command?
 
 Composer runs scripts without connecting your keyboard on Windows, so a script cannot ask questions there. Running the installer yourself as the second command avoids that. (`composer create-project` without the flags still works: the installer skips its questions when it detects it cannot read input and tells you to run `php installer/setup.php`.)

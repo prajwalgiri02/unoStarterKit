@@ -144,7 +144,7 @@ class InstallerTest extends TestCase
         [$code, $output] = $this->install('', fromComposer: true);
 
         $this->assertSame(0, $code);
-        $this->assertStringContainsString('php installer/setup.php', $output);
+        $this->assertStringContainsString('the questions were skipped', $output);
     }
 
     public function test_finish_without_saved_answers_under_composer_is_a_no_op(): void
