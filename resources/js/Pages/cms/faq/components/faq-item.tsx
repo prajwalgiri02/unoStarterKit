@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import { useState } from "react";
 
 type FaqItemProps = {
@@ -31,9 +32,9 @@ export default function FaqItem({
                 <span className="faq-question subtitle-xs">
                     {title}
                     {status === "draft" && (
-                        <span className="btns btn-small btns-secondary ms-2">
-                            DRAFT
-                        </span>
+                        <Badge size="tiny" variant="outline" color="neutral" className="ms-2">
+                            Draft
+                        </Badge>
                     )}
                 </span>
                 <div className="faq-actions">

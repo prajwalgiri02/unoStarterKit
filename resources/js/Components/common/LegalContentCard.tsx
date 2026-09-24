@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import SanitizedHtml from "@/Components/common/SanitizedHtml";
 
 type LegalContentCardProps = {
@@ -26,9 +27,14 @@ export default function LegalContentCard({
                     <h2 className="legal-section-title subtitle-md m-0">
                         {sectionTitle}
                     </h2>
-                    <span className="btns btn-small btns-secondary w-fit">
+                    <Badge
+                        size="small"
+                        variant="outline"
+                        color={status === "published" ? "success" : "neutral"}
+                        className="w-fit"
+                    >
                         {statusLabel}
-                    </span>
+                    </Badge>
                 </div>
 
                 <p className="body-md text-neutral-900 mb-3 font-semibold">

@@ -1,3 +1,4 @@
+import Checkbox from "@/Components/inputs/checkbox";
 import React from "react";
 import { useForm } from "@inertiajs/react";
 import SelectInput from "@/Components/inputs/select-input";
@@ -30,24 +31,15 @@ const ComposeNotification: React.FC = () => {
                 </div>
 
                 <form className="legal-form" onSubmit={handleSubmit}>
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            id="send_to_all"
-                            name="send_to_all"
-                            className="checkbox-squared"
-                            checked={data.send_to_all}
-                            onChange={(e) =>
-                                setData("send_to_all", e.target.checked)
-                            }
-                        />
-                        <label
-                            htmlFor="send_to_all"
-                            className="body-xs text-neutral-600 mb-0"
-                        >
-                            Send to all users
-                        </label>
-                    </div>
+                    <Checkbox
+                        id="send_to_all"
+                        name="send_to_all"
+                        label="Send to all users"
+                        checked={data.send_to_all}
+                        onChange={(e) =>
+                            setData("send_to_all", e.target.checked)
+                        }
+                    />
 
                     <Input
                         id="title"

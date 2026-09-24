@@ -1,3 +1,10 @@
+import Badge, { type BadgeColor } from "@/Components/badges/badge";
+const roleColors: Record<string, BadgeColor> = {
+    admin: "primary",
+    "content-editor": "info",
+    moderator: "warning",
+};
+
 type EmployeeTableRowProps = {
     id: string;
     avatar: string;
@@ -35,9 +42,9 @@ export default function EmployeeTableRow({
                 </div>
             </td>
             <td>
-                <span className={`badge-tiny role-badge link-sm ${roleClass}`}>
+                <Badge size="tiny" variant="outline" color={roleColors[roleClass] ?? "neutral"}>
                     {role}
-                </span>
+                </Badge>
             </td>
             <td className="body-xs text-neutral-900">{joinDate}</td>
             <td>

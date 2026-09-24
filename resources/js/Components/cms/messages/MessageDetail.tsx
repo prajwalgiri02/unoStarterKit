@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import type { Conversation } from "@/Pages/types/cms/message";
 import { useEffect } from "react";
 
@@ -58,17 +59,21 @@ const DetailHeader = ({ conversation, onDelete }: DetailHeaderProps) => {
                 className="message-detail-meta"
                 style={{ position: "relative" }}
             >
-                <span
-                    className={`message-badge caption-md ${conversation.type === "contact_us" ? "contact-us" : "report"}`}
+                <Badge
+                    size="tiny"
+                    variant="outline"
+                    color={conversation.type === "contact_us" ? "info" : "warning"}
                 >
                     {conversation.type_label}
-                </span>
+                </Badge>
                 {conversation.type === "dispute" && (
-                    <span
-                        className={`message-badge caption-md ${conversation.status}`}
+                    <Badge
+                        size="tiny"
+                        variant="outline"
+                        color={conversation.status === "pending" ? "warning" : "success"}
                     >
                         {conversation.status_label}
-                    </span>
+                    </Badge>
                 )}
                 {conversation.type === "contact_us" && (
                     <span className="message-date body-xs">

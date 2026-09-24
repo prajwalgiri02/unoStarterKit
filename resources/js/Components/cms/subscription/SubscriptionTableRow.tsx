@@ -1,3 +1,10 @@
+import Badge, { type BadgeColor } from "@/Components/badges/badge";
+const planColors: Record<string, BadgeColor> = {
+    premium: "primary",
+    family: "info",
+    freemium: "neutral",
+};
+
 type SubscriptionTableRowProps = {
     id: string;
     initials: string;
@@ -33,15 +40,15 @@ export default function SubscriptionTableRow({
                 </div>
             </td>
             <td>
-                <span className={`subscription-badge link-sm ${planClass}`}>
+                <Badge size="tiny" variant="outline" color={planColors[planClass] ?? "neutral"}>
                     {plan}
-                </span>
+                </Badge>
             </td>
             <td className="date-cell body-xs">{joinDate}</td>
             <td>
-                <span className="badge-tiny link-sm status-badge-sub user-status-badge active">
+                <Badge size="tiny" variant="outline" color="success">
                     Active
-                </span>
+                </Badge>
             </td>
             <td className="actions-cell">
                 <button className="actions-btn" data-id={id}>

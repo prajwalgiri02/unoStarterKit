@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import React, { useState, useEffect } from "react";
 import { Link, router } from "@inertiajs/react";
 import DeleteModal from "@/Components/modals/DeleteModal";
@@ -114,8 +115,9 @@ const ChildrenTable = ({ children }: ChildrenTableProps) => {
                                                 </span>
                                             </td>
                                             <td>
-                                                <span
-                                                    className={`subscription-badge subscription-badge-user link-sm ${child.phase.toLowerCase()}`}
+                                                <Badge
+                                                    size="tiny"
+                                                    color="neutral"
                                                     style={
                                                         child.phase_colors
                                                             ? {
@@ -131,7 +133,7 @@ const ChildrenTable = ({ children }: ChildrenTableProps) => {
                                                     }
                                                 >
                                                     {child.phase}
-                                                </span>
+                                                </Badge>
                                             </td>
                                             <td className="date-cell body-xs">
                                                 {child.waypoint}

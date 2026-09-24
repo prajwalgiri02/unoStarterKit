@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import React from "react";
 
 interface UserProfileCardProps {
@@ -31,9 +32,9 @@ const UserProfileCard = ({
                 <div className="">
                     <div className="flex gap-3 items-center justify-center">
                         <p className="user-name subtitle-xs">{name}</p>
-                        <div className="badge-tiny link-sm bg-success-500 text-white flex items-center justify-center">
+                        <Badge size="tiny" color="success">
                             {status}
-                        </div>
+                        </Badge>
                     </div>
                     <div className="user-email body-xs">{email}</div>
                 </div>

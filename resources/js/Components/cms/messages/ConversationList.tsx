@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import { useState, useEffect } from "react";
 import type { Conversation, MessageType } from "@/Pages/types/cms/message";
 
@@ -144,11 +145,13 @@ const ConversationItem = ({
         </td>
         <td>
             <div className="flex items-center justify-center">
-                <span
-                    className={`message-badge caption-md ${conversation.type === "contact_us" ? "contact-us" : "report"}`}
+                <Badge
+                    size="tiny"
+                    variant="outline"
+                    color={conversation.type === "contact_us" ? "info" : "warning"}
                 >
                     {conversation.type_label}
-                </span>
+                </Badge>
             </div>
         </td>
         <td>
@@ -158,11 +161,13 @@ const ConversationItem = ({
                         {conversation.date}
                     </span>
                 ) : (
-                    <span
-                        className={`message-badge caption-md ${conversation.status === "pending" ? "pending" : "resolved"}`}
+                    <Badge
+                        size="tiny"
+                        variant="outline"
+                        color={conversation.status === "pending" ? "warning" : "success"}
                     >
                         {conversation.status_label}
-                    </span>
+                    </Badge>
                 )}
             </div>
         </td>

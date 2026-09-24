@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import React, { useState } from "react";
 import CmsLayout from "@/Layouts/cms-layout";
 import { router, Link } from "@inertiajs/react";
@@ -235,13 +236,15 @@ function UserManagement({
                                             </span>
                                         </td>
                                         <td>
-                                            <span
-                                                className={`subscription-badge link-sm ${user.is_approved ? "approved" : "pending"}`}
+                                            <Badge
+                                                size="tiny"
+                                                variant="outline"
+                                                color={user.is_approved ? "success" : "warning"}
                                             >
                                                 {user.is_approved
                                                     ? "Approved"
                                                     : "Pending"}
-                                            </span>
+                                            </Badge>
                                         </td>
                                         <td className="date-cell body-xs">
                                             {new Date(
@@ -249,13 +252,15 @@ function UserManagement({
                                             ).toLocaleDateString()}
                                         </td>
                                         <td>
-                                            <span
-                                                className={`badge-tiny link-sm user-status-badge status-badge-sub ${user.is_blocked ? "blocked" : "active"}`}
+                                            <Badge
+                                                size="tiny"
+                                                variant="outline"
+                                                color={user.is_blocked ? "error" : "success"}
                                             >
                                                 {user.is_blocked
                                                     ? "Blocked"
                                                     : "Active"}
-                                            </span>
+                                            </Badge>
                                         </td>
                                         <td className="actions-cell">
                                             <button

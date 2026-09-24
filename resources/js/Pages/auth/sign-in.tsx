@@ -1,6 +1,6 @@
 import Button from "@/Components/buttons/button";
 import TextButton from "@/Components/buttons/text-button";
-import CheckboxInput from "@/Components/inputs/checkbox-input";
+import Checkbox from "@/Components/inputs/checkbox";
 import Input from "@/Components/inputs/input";
 import AuthLayout from "@/Layouts/auth-layout";
 import { Form } from "@inertiajs/react";
@@ -20,9 +20,10 @@ const SignIn = () => {
                         <Input name="email" type="email" label="Email" autoComplete="email" />
                         <Input name="password" type="password" label="Password" autoComplete="current-password" />
                         <div className="auth-row">
-                            <CheckboxInput
+                            <Checkbox
                                 id="rememberme"
                                 name="remember"
+                                value="1"
                                 label="Remember Me"
                             />
                             <TextButton

@@ -1,3 +1,4 @@
+import Badge from "@/Components/badges/badge";
 import React from "react";
 import { router } from "@inertiajs/react";
 import type { BroadcastNotification } from "@/Pages/types/cms/notification";
@@ -60,9 +61,9 @@ const SentNotifications: React.FC<SentNotificationsProps> = ({
                                     </td>
                                     <td className="body-xs text-neutral-700">
                                         {n.location ? (
-                                            <span className="location-badge caption-md">
+                                            <Badge size="tiny" variant="outline" color="neutral">
                                                 {n.location}
-                                            </span>
+                                            </Badge>
                                         ) : (
                                             "—"
                                         )}
