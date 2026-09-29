@@ -18,7 +18,7 @@ export default function IconButton({ label, tone = "neutral", className = "", ch
             type="button"
             aria-label={label}
             title={label}
-            className={`flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-primary-50 disabled:cursor-not-allowed disabled:opacity-50 [&>svg]:size-[18px] ${toneClasses[tone]} ${className}`.trim()}
+            className={`flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-primary-50 disabled:cursor-not-allowed disabled:opacity-50 [&>svg]:size-[18px] ${toneClasses[tone]} ${className}`.trim()}
             {...rest}
         >
             {children}

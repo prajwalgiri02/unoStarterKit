@@ -17,7 +17,17 @@ function FaqItem({ faq, onEdit, onDelete }: { faq: Faq; onEdit: () => void; onDe
     return (
         <article className="flex flex-col gap-5 rounded-[20px] border border-neutral-200 bg-base-white px-5 py-5 sm:px-[30px]">
             <div className="flex items-start justify-between gap-4">
-                <h2 className="text-subtitle-lg font-medium text-neutral-900">{faq.title}</h2>
+                <h2 className="min-w-0 flex-1 text-subtitle-lg font-medium text-neutral-900">
+                    <button
+                        type="button"
+                        aria-expanded={open}
+                        aria-controls={panelId}
+                        onClick={() => setOpen((v) => !v)}
+                        className="w-full cursor-pointer rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-primary-50"
+                    >
+                        {faq.title}
+                    </button>
+                </h2>
                 <div className="flex shrink-0 items-center gap-1">
                     <IconButton label="Edit question" tone="primary" onClick={onEdit}>
                         <EditPenIcon />

@@ -34,7 +34,7 @@ export default function DropdownMenu({ label, trigger, items, align = "end" }: D
                         e.stopPropagation();
                         setOpen((v) => !v);
                     }}
-                    className="flex size-8 cursor-pointer items-center justify-center rounded-full text-neutral-600 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50 [&>svg]:size-5"
+                    className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-neutral-600 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50 [&>svg]:size-5"
                 >
                     {trigger}
                 </button>
