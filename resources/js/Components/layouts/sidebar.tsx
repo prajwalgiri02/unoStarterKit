@@ -15,7 +15,7 @@ function isActive(currentPath: string, path: string) {
 }
 
 const itemBase =
-    "flex h-11 w-full cursor-pointer items-center gap-4 rounded-[10px] px-4 text-body-md text-neutral-700 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50";
+    "flex h-11 w-full shrink-0 cursor-pointer items-center gap-4 rounded-[10px] px-4 text-body-md text-neutral-700 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50";
 
 export default function Sidebar({
     collapsed,
@@ -39,10 +39,10 @@ export default function Sidebar({
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-40 flex w-[276px] shrink-0 flex-col gap-8 rounded-r-2xl bg-base-white shadow-sidebar transition-[width,translate] duration-200 lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-24" : ""}`}
+                className={`fixed inset-y-0 left-0 z-40 flex w-[276px] shrink-0 flex-col gap-2 rounded-r-2xl lg:gap-8 bg-base-white shadow-sidebar transition-[width,translate] duration-200 lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-24" : ""}`}
             >
-                <div className="relative flex justify-center px-[18px] pt-8 pb-[18px]">
-                    <LogoMark className={`text-primary-500 transition-all ${collapsed ? "lg:size-12" : "size-[88px]"}`} />
+                <div className="relative flex shrink-0 justify-center px-4.5 pt-8 pb-4.5">
+                    <LogoMark className={`text-primary-500 size-[88px] transition-all ${collapsed ? "lg:size-12" : ""}`} />
                     <button
                         type="button"
                         onClick={onToggleCollapsed}
