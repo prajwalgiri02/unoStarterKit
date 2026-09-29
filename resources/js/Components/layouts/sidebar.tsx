@@ -15,7 +15,7 @@ function isActive(currentPath: string, path: string) {
 }
 
 const itemBase =
-    "flex h-11 w-full shrink-0 cursor-pointer items-center gap-4 rounded-[10px] px-4 text-body-md text-neutral-700 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50";
+    "flex h-11 w-full shrink-0 cursor-pointer overflow-hidden items-center gap-4 rounded-[10px] px-4 text-body-md text-neutral-700 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-[3px] focus-visible:ring-primary-50";
 
 export default function Sidebar({
     collapsed,
@@ -67,7 +67,7 @@ export default function Sidebar({
                                 className={`${itemClass} ${active ? "bg-primary-50 font-medium hover:bg-primary-50" : ""}`}
                             >
                                 <Icon className="size-6 shrink-0" />
-                                <span className={`truncate ${labelHidden}`}>{label}</span>
+                                <span className={`whitespace-nowrap ${labelHidden}`}>{label}</span>
                             </Link>
                         );
                     })}
@@ -79,7 +79,7 @@ export default function Sidebar({
                         className={itemClass}
                     >
                         <LogoutIcon className="size-6 shrink-0" />
-                        <span className={labelHidden}>Logout</span>
+                        <span className={`whitespace-nowrap ${labelHidden}`}>Logout</span>
                     </button>
                 </nav>
             </aside>
