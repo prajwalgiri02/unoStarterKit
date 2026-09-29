@@ -39,7 +39,7 @@ function MessagesAndSupport({ tickets, filters }: MessageListPageProps) {
     };
 
     return (
-        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,598fr)_minmax(0,491fr)]">
+        <div className="grid grid-cols-1 items-start gap-6 xl:h-[calc(100dvh-90px-3rem)] xl:min-h-120 xl:grid-cols-[minmax(0,598fr)_minmax(0,491fr)] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch">
             <TicketList
                 tickets={list}
                 selectedId={selected?.id ?? null}

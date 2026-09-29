@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type PopoverProps = {
     open: boolean;
@@ -9,6 +10,11 @@ type PopoverProps = {
     children: ReactNode;
 };
 
+type Position = { top: number; left: number };
+
+const GAP = 8;
+const EDGE = 8;
+
 export default function Popover({
     open,
     onOpenChange,
@@ -17,13 +23,51 @@ export default function Popover({
     className = "",
     children,
 }: PopoverProps) {
-    const ref = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const pointerInside = useRef(false);
+    const [position, setPosition] = useState<Position | null>(null);
+
+    const updatePosition = useCallback(() => {
+        const anchor = triggerRef.current?.getBoundingClientRect();
+        const content = contentRef.current;
+        if (!anchor || !content) return;
+
+        const { offsetWidth: width, offsetHeight: height } = content;
+        const viewportWidth = document.documentElement.clientWidth;
+        const viewportHeight = window.innerHeight;
+
+        const spaceBelow = viewportHeight - anchor.bottom - GAP - EDGE;
+        const spaceAbove = anchor.top - GAP - EDGE;
+        const top =
+            height > spaceBelow && spaceAbove > spaceBelow
+                ? Math.max(EDGE, anchor.top - GAP - height)
+                : anchor.bottom + GAP;
+
+        const preferredLeft = align === "end" ? anchor.right - width : anchor.left;
+        const left = Math.min(Math.max(EDGE, preferredLeft), viewportWidth - width - EDGE);
+
+        setPosition({ top, left });
+    }, [align]);
+
+    useLayoutEffect(() => {
+        if (!open) {
+            setPosition(null);
+            return;
+        }
+        updatePosition();
+    }, [open, updatePosition]);
 
     useEffect(() => {
         if (!open) return;
 
-        const handlePointer = (e: MouseEvent) => {
-            if (!ref.current?.contains(e.target as Node)) onOpenChange(false);
+        const content = contentRef.current;
+        const resizeObserver = content ? new ResizeObserver(updatePosition) : null;
+        if (content) resizeObserver?.observe(content);
+
+        const handlePointer = () => {
+            if (!pointerInside.current) onOpenChange(false);
+            pointerInside.current = false;
         };
         const handleKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") onOpenChange(false);
@@ -31,22 +75,41 @@ export default function Popover({
 
         document.addEventListener("mousedown", handlePointer);
         document.addEventListener("keydown", handleKey);
+        window.addEventListener("resize", updatePosition);
+        window.addEventListener("scroll", updatePosition, true);
+
         return () => {
+            resizeObserver?.disconnect();
             document.removeEventListener("mousedown", handlePointer);
             document.removeEventListener("keydown", handleKey);
+            window.removeEventListener("resize", updatePosition);
+            window.removeEventListener("scroll", updatePosition, true);
         };
-    }, [open, onOpenChange]);
+    }, [open, onOpenChange, updatePosition]);
+
+    const markInside = () => {
+        pointerInside.current = true;
+    };
 
     return (
-        <div ref={ref} className="relative inline-flex">
+        <div ref={triggerRef} onMouseDownCapture={markInside} className="relative inline-flex">
             {trigger}
-            {open && (
-                <div
-                    className={`absolute top-full z-30 mt-2 ${align === "end" ? "right-0" : "left-0"} ${className}`.trim()}
-                >
-                    {children}
-                </div>
-            )}
+            {open &&
+                createPortal(
+                    <div
+                        ref={contentRef}
+                        onMouseDownCapture={markInside}
+                        style={{
+                            top: position?.top ?? 0,
+                            left: position?.left ?? 0,
+                            visibility: position ? "visible" : "hidden",
+                        }}
+                        className={`fixed z-50 ${className}`.trim()}
+                    >
+                        {children}
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 }

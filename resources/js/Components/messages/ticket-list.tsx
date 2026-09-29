@@ -45,27 +45,27 @@ export default function TicketList({
     onDelete,
 }: TicketListProps) {
     return (
-        <section aria-label="Inbox" className="flex flex-col gap-5 rounded-3xl bg-base-white pt-7 pb-3">
-            <div className="flex items-center justify-between gap-4 px-6">
+        <section aria-label="Inbox" className="flex max-h-[calc(100dvh-90px-3rem)] min-h-0 flex-col gap-5 rounded-3xl bg-base-white pt-7 pb-3 xl:max-h-none">
+            <div className="flex shrink-0 items-center justify-between gap-4 px-6">
                 <h2 className="text-subtitle-lg font-medium text-neutral-800">Inbox</h2>
                 <SortMenu options={sortOptions} value={sort} onChange={onSortChange} />
             </div>
 
-            <div className="px-6">
+            <div className="shrink-0 px-6">
                 <Tabs label="Filter messages" items={filterTabs} value={filter} onChange={onFilterChange} />
             </div>
 
             {tickets.length === 0 ? (
                 <p className="px-6 py-10 text-center text-body-xs text-neutral-500">No messages found</p>
             ) : (
-                <ul className="flex flex-col">
+                <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                     {tickets.map((ticket) => {
                         const selected = ticket.id === selectedId;
 
                         return (
                             <li
                                 key={ticket.id}
-                                className={`grid h-14 grid-cols-[minmax(0,1fr)_auto_20px] items-center gap-7 pr-7 transition-colors sm:grid-cols-[minmax(0,1fr)_100px_112px_auto_20px] ${selected ? "bg-neutral-25" : "hover:bg-neutral-25"}`}
+                                className={`grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_auto_20px] items-center gap-7 pr-7 transition-colors sm:grid-cols-[minmax(0,1fr)_100px_112px_auto_20px] ${selected ? "bg-neutral-25" : "hover:bg-neutral-25"}`}
                             >
                                 <button
                                     type="button"
