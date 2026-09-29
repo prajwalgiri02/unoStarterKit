@@ -17,7 +17,7 @@ type DataTableProps<T> = {
 
 export default function DataTable<T>({ columns, rows, rowKey, emptyMessage = "No records found", caption }: DataTableProps<T>) {
     return (
-        <div className="-mx-1 overflow-x-auto px-1">
+        <div className="-mx-1 overflow-x-auto scrollbar-none px-1">
             <table className="w-full min-w-[640px] border-separate border-spacing-0 text-left">
                 {caption && <caption className="sr-only">{caption}</caption>}
                 <thead>

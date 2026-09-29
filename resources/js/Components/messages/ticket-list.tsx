@@ -58,7 +58,7 @@ export default function TicketList({
             {tickets.length === 0 ? (
                 <p className="px-6 py-10 text-center text-body-xs text-neutral-500">No messages found</p>
             ) : (
-                <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none">
                     {tickets.map((ticket) => {
                         const selected = ticket.id === selectedId;
 

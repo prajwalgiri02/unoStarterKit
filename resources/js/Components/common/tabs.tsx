@@ -16,7 +16,7 @@ export default function Tabs<T extends string>({ items, value, onChange, label, 
         <div
             role="tablist"
             aria-label={label}
-            className={`inline-grid max-w-full auto-cols-fr grid-flow-col overflow-x-auto rounded-2xl bg-neutral-100 p-1 ${className}`.trim()}
+            className={`inline-grid max-w-full auto-cols-fr grid-flow-col overflow-x-auto scrollbar-none rounded-2xl bg-neutral-100 p-1 ${className}`.trim()}
         >
             {items.map((item) => {
                 const selected = item.value === value;

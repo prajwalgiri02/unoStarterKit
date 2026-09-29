@@ -54,7 +54,7 @@ export default function Sidebar({
                     </button>
                 </div>
 
-                <nav aria-label="Main" className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-8">
+                <nav aria-label="Main" className="flex flex-1 flex-col gap-6 overflow-y-auto scrollbar-none px-6 pb-8">
                     {sidebar.map(({ label, icon: Icon, path }) => {
                         const active = isActive(currentPath, path);
 

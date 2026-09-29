@@ -92,7 +92,7 @@ export default function NotificationDropdown({ notifications }: NotificationDrop
                         No notifications yet
                     </p>
                 ) : (
-                    <ul className="max-h-[600px] overflow-y-auto rounded-b-2xl">
+                    <ul className="max-h-[600px] overflow-y-auto scrollbar-none rounded-b-2xl">
                         {notifications.map((n) => (
                             <li
                                 key={n.id}

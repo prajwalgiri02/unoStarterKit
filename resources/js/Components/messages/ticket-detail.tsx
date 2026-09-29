@@ -22,7 +22,7 @@ export default function TicketDetail({ ticket, onResolve, onDelete }: TicketDeta
     }
 
     return (
-        <section aria-label="Message details" className="flex min-h-0 flex-col gap-8 overflow-y-auto rounded-3xl bg-base-white pb-8 shadow-panel xl:h-full">
+        <section aria-label="Message details" className="flex min-h-0 flex-col gap-8 overflow-y-auto scrollbar-none rounded-3xl bg-base-white pb-8 shadow-panel xl:h-full">
             <header className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-neutral-100 bg-base-white py-3 pr-2 pl-6">
                 <div className="flex min-w-0 items-center gap-3">
                     <Avatar name={ticket.name} size="medium" />
