@@ -22,7 +22,7 @@ class SupportTicketController extends Controller
     {
         $filters = [
             'type' => $request->query('type', 'all'),
-            'sort' => $request->query('sort', 'newest'),
+            'sort' => $request->query('sort'),
         ];
 
         return Inertia::render('cms/messages-and-support/index', [

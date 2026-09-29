@@ -14,7 +14,7 @@ function MessagesAndSupport({ tickets, filters }: MessageListPageProps) {
 
     const selected = list.find((ticket) => ticket.id === selectedId) ?? list[0] ?? null;
     const filter = (filters.type as TicketFilter | undefined) ?? "all";
-    const sort = filters.sort ?? "newest";
+    const sort = filters.sort;
 
     const visit = (params: Record<string, string | undefined>) => {
         router.get("/cms/messages", { type: filter === "all" ? undefined : filter, sort, ...params }, {

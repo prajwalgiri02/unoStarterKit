@@ -23,7 +23,7 @@ export default function TicketDetail({ ticket, onResolve, onDelete }: TicketDeta
 
     return (
         <section aria-label="Message details" className="flex flex-col gap-8 overflow-hidden rounded-3xl bg-base-white pb-8 shadow-panel">
-            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 bg-neutral-25 py-3 pr-3 pl-6">
+            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 py-3 pr-2 pl-6">
                 <div className="flex min-w-0 items-center gap-3">
                     <Avatar name={ticket.name} size="medium" />
                     <div className="min-w-0">
@@ -31,7 +31,7 @@ export default function TicketDetail({ ticket, onResolve, onDelete }: TicketDeta
                         <p className="truncate text-link-sm font-normal text-neutral-500">{ticket.email}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                     <TicketBadges ticket={ticket} />
                     <DropdownMenu
                         label="Message options"

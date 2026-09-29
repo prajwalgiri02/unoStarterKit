@@ -40,7 +40,7 @@ export default function DropdownMenu({ label, trigger, items, align = "end" }: D
                 </button>
             }
         >
-            <div role="menu" className="flex min-w-52 flex-col gap-1 rounded-[20px] border border-neutral-200 bg-base-white p-3 shadow-panel">
+            <div role="menu" className="flex w-max min-w-52 flex-col gap-1 rounded-[20px] border border-neutral-200 bg-base-white p-3 shadow-panel">
                 {items.map((item) => (
                     <button
                         key={item.label}
@@ -52,11 +52,11 @@ export default function DropdownMenu({ label, trigger, items, align = "end" }: D
                             setOpen(false);
                             item.onSelect();
                         }}
-                        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-body-xs outline-none transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-5 ${
+                        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-body-xs whitespace-nowrap outline-none transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-5 ${
                             item.tone === "danger" ? "text-error-500" : "text-neutral-700"
                         }`}
                     >
-                        {item.icon && <span aria-hidden="true" className="flex shrink-0 text-primary-500">{item.icon}</span>}
+                        {item.icon && <span aria-hidden="true" className={`flex shrink-0 ${item.tone === "danger" ? "" : "text-primary-500"}`}>{item.icon}</span>}
                         {item.label}
                     </button>
                 ))}

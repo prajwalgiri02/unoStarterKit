@@ -57,7 +57,7 @@ export default function NotificationDropdown({ notifications }: NotificationDrop
                 aria-label="Notifications"
                 className="w-[392px] max-w-[calc(100vw-2rem)] rounded-2xl border border-neutral-200 bg-base-white shadow-lg"
             >
-                <div className="flex items-center justify-between gap-4 border-b border-neutral-100 px-6 py-5">
+                <div className="flex items-center justify-between gap-4 border-b border-neutral-200/50 px-6 py-5">
                     <h2 className="text-body-lg font-semibold text-neutral-900">Notifications</h2>
                     <Popover
                         open={menuOpen}

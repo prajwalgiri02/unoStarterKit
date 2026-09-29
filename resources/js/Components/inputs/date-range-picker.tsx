@@ -98,9 +98,9 @@ export default function DateRangePicker({
             <div
                 role="dialog"
                 aria-label="Choose date range"
-                className="w-[387px] max-w-[calc(100vw-2rem)] rounded-[20px] border border-neutral-200 bg-base-white shadow-lg"
+                className="w-[387px] max-w-[calc(100vw-2rem)] rounded-[20px] bg-base-white shadow-popover"
             >
-                <div className="flex items-center justify-between border-b border-neutral-100 px-8 py-6">
+                <div className="flex items-center justify-between border-b border-neutral-200/50 px-8 py-6">
                     <p className="text-subtitle-md text-neutral-900" aria-live="polite">
                         {month.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
                     </p>
@@ -167,7 +167,7 @@ export default function DateRangePicker({
                     </div>
                 </div>
 
-                <div className="border-t border-neutral-100 px-7 py-4">
+                <div className="border-t border-neutral-200/50 px-7 py-4">
                     <Button className="w-full" onClick={apply} disabled={!draft.from}>
                         Apply
                     </Button>

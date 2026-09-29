@@ -1,11 +1,11 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 const sizeClasses = {
-    giant: { base: "h-14 text-subtitle-xs", padding: "px-6", icon: "size-6" },
-    large: { base: "h-12 text-body-lg", padding: "px-5", icon: "size-6" },
-    medium: { base: "h-10 text-body-sm", padding: "px-4", icon: "size-4.5" },
-    small: { base: "h-8 text-link-sm", padding: "px-3", icon: "size-4" },
-    tiny: { base: "h-6 text-link-sm", padding: "px-2", icon: "size-4" },
+    giant: { base: "h-14 text-subtitle-xs", padding: "px-6", icon: "size-6", iconOnly: "size-6" },
+    large: { base: "h-12 text-body-lg", padding: "px-5", icon: "size-6", iconOnly: "size-6" },
+    medium: { base: "h-10 text-body-sm", padding: "px-4", icon: "size-4.5", iconOnly: "size-6" },
+    small: { base: "h-8 text-link-sm", padding: "px-3", icon: "size-4", iconOnly: "size-6" },
+    tiny: { base: "h-6 text-link-sm", padding: "px-2", icon: "size-4", iconOnly: "size-4" },
 } as const;
 
 const toneClasses = {
@@ -48,7 +48,7 @@ export default function Button({
     const sizes = sizeClasses[size];
 
     const composed = [
-        "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[40px] outline-none transition-all duration-200 disabled:pointer-events-none disabled:cursor-not-allowed",
+        "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[40px] outline-none transition-all duration-200 disabled:pointer-events-none disabled:cursor-not-allowed",
         sizes.base,
         iconOnly ? "aspect-square px-0" : sizes.padding,
         toneClasses[tone][variant],
@@ -57,9 +57,9 @@ export default function Button({
         .filter(Boolean)
         .join(" ");
 
-    const icon = (content: ReactNode) => (
+    const icon = (content: ReactNode, iconSize: string = sizes.icon) => (
         <span
-            className={`flex shrink-0 items-center justify-center [&>svg]:size-full ${sizes.icon}`}
+            className={`flex shrink-0 items-center justify-center [&>svg]:size-full ${iconSize}`}
             aria-hidden="true"
         >
             {content}
@@ -69,11 +69,11 @@ export default function Button({
     return (
         <button type={type} className={composed} disabled={disabled} {...rest}>
             {iconOnly ? (
-                icon(children)
+                icon(children, sizes.iconOnly)
             ) : (
                 <>
                     {startIcon && icon(startIcon)}
-                    {children}
+                    <span className="px-2">{children}</span>
                     {endIcon && icon(endIcon)}
                 </>
             )}
