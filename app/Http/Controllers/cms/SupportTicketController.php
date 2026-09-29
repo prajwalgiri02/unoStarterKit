@@ -36,13 +36,15 @@ class SupportTicketController extends Controller
     {
         $this->supportTicketService->resolve($ticket);
 
-        return back()->with('status', 'Ticket marked as resolved.');
+        return back()->with('status', "{$ticket->type->label()} message marked as completed.");
     }
 
     public function destroy(SupportTicket $ticket): RedirectResponse
     {
+        $label = $ticket->type->label();
+
         $this->supportTicketService->delete($ticket);
 
-        return redirect()->route('cms.admin.messages.index')->with('status', 'Ticket deleted.');
+        return back()->with('status', "{$label} message deleted.");
     }
 }
