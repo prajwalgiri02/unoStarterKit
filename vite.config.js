@@ -28,6 +28,9 @@ export default defineConfig({
         tailwindcss(),
         react(),
     ],
+    optimizeDeps: {
+        entries: ['resources/js/**/*.tsx'],
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

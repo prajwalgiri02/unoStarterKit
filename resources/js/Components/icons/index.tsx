@@ -346,3 +346,77 @@ export function MinusIcon(props: IconProps) {
         </Svg>
     );
 }
+
+export function BoldIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M7 5H13C14.93 5 16.5 6.57 16.5 8.5C16.5 10.43 14.93 12 13 12H7V5Z" />
+            <path {...line} d="M7 12H14C15.93 12 17.5 13.57 17.5 15.5C17.5 17.43 15.93 19 14 19H7V12Z" />
+        </Svg>
+    );
+}
+
+export function ItalicIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M10 5H18" />
+            <path {...line} d="M6 19H14" />
+            <path {...line} d="M14 5L10 19" />
+        </Svg>
+    );
+}
+
+export function UnderlineIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M7 4V11C7 13.76 9.24 16 12 16C14.76 16 17 13.76 17 11V4" />
+            <path {...line} d="M5 20H19" />
+        </Svg>
+    );
+}
+
+export function ListBulletIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M9 6H20" />
+            <path {...line} d="M9 12H20" />
+            <path {...line} d="M9 18H20" />
+            <circle cx="4.5" cy="6" r="1" fill="currentColor" />
+            <circle cx="4.5" cy="12" r="1" fill="currentColor" />
+            <circle cx="4.5" cy="18" r="1" fill="currentColor" />
+        </Svg>
+    );
+}
+
+export function ListOrderedIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M10 6H20" />
+            <path {...line} d="M10 12H20" />
+            <path {...line} d="M10 18H20" />
+            <path {...line} d="M4 4.5L5.5 3.75V8.5" />
+            <path {...line} d="M4 14C4.3 13.4 4.85 13 5.5 13C6.33 13 7 13.6 7 14.35C7 15.6 4 16.5 4 18.5H7" />
+        </Svg>
+    );
+}
+
+export function LinkIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M13.06 10.94C14.97 12.85 14.97 15.94 13.06 17.84L11.06 19.84C9.15 21.75 6.06 21.75 4.16 19.84C2.25 17.93 2.25 14.84 4.16 12.94L5.5 11.6" />
+            <path {...line} d="M10.94 13.06C9.03 11.15 9.03 8.06 10.94 6.16L12.94 4.16C14.85 2.25 17.94 2.25 19.84 4.16C21.75 6.07 21.75 9.16 19.84 11.06L18.5 12.4" />
+        </Svg>
+    );
+}
+
+export function ClearFormatIcon(props: IconProps) {
+    return (
+        <Svg {...props}>
+            <path {...line} d="M5 7V5H17V7" />
+            <path {...line} d="M11 5L8.5 19" />
+            <path {...line} d="M6.5 19H10.5" />
+            <path {...line} d="M15 14L20 19" />
+            <path {...line} d="M20 14L15 19" />
+        </Svg>
+    );
+}

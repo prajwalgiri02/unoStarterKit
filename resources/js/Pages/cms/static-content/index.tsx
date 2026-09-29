@@ -1,10 +1,12 @@
 import Button from "@/Components/buttons/button";
 import Card from "@/Components/common/card";
+import RichText from "@/Components/common/rich-text";
 import Input from "@/Components/inputs/input";
-import Textarea from "@/Components/inputs/textarea";
 import AppLayout from "@/Layouts/app-layout";
 import { useForm } from "@inertiajs/react";
-import { useState, type FormEvent } from "react";
+import { lazy, Suspense, useState, type FormEvent } from "react";
+
+const RichTextEditor = lazy(() => import("@/Components/inputs/rich-text-editor"));
 
 type StaticContent = {
     id: number;
@@ -26,7 +28,7 @@ function ContentForm({ content, onDone }: { content: StaticContent; onDone: () =
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        put(`/cms/static-content/${content.id}`, { preserveScroll: true, onSuccess: onDone });
+        put(`/cms/static-content/${content.id}`, { preserveScroll: true, preserveState: true, onSuccess: onDone });
     };
 
     return (
@@ -38,14 +40,15 @@ function ContentForm({ content, onDone }: { content: StaticContent; onDone: () =
                 onChange={(e) => setData("title", e.target.value)}
                 error={errors.title}
             />
-            <Textarea
-                label="Content"
-                name="description"
-                rows={6}
-                value={data.description}
-                onChange={(e) => setData("description", e.target.value)}
-                error={errors.description}
-            />
+            <Suspense fallback={<div aria-hidden="true" className="h-[200px] animate-pulse rounded-[20px] bg-neutral-50" />}>
+                <RichTextEditor
+                    label="Content"
+                    name="description"
+                    value={data.description}
+                    onChange={(html) => setData("description", html)}
+                    error={errors.description}
+                />
+            </Suspense>
             <div className="flex flex-wrap gap-6">
                 <Button type="submit" disabled={processing}>
                     {processing ? "Publishing..." : "Save & Publish"}
@@ -59,12 +62,21 @@ function ContentForm({ content, onDone }: { content: StaticContent; onDone: () =
 }
 
 function StaticContentPage({ contents }: StaticContentPageProps) {
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingIds, setEditingIds] = useState<Set<number>>(() => new Set());
+
+    const setEditing = (id: number, editing: boolean) => {
+        setEditingIds((current) => {
+            const next = new Set(current);
+            if (editing) next.add(id);
+            else next.delete(id);
+            return next;
+        });
+    };
 
     return (
         <div className="flex flex-col gap-5">
             {contents.map((content) => {
-                const editing = editingId === content.id;
+                const editing = editingIds.has(content.id);
 
                 return (
                     <Card
@@ -72,18 +84,18 @@ function StaticContentPage({ contents }: StaticContentPageProps) {
                         title={content.label}
                         actions={
                             !editing && (
-                                <Button size="medium" variant="outline" onClick={() => setEditingId(content.id)}>
+                                <Button size="medium" variant="outline" onClick={() => setEditing(content.id, true)}>
                                     Edit Details
                                 </Button>
                             )
                         }
                     >
                         {editing ? (
-                            <ContentForm content={content} onDone={() => setEditingId(null)} />
+                            <ContentForm content={content} onDone={() => setEditing(content.id, false)} />
                         ) : (
                             <div className="flex flex-col gap-2">
                                 <h3 className="text-body-lg text-neutral-900">{content.title}</h3>
-                                <p className="text-body-xs whitespace-pre-line text-neutral-600">{content.description}</p>
+                                <RichText html={content.description} />
                             </div>
                         )}
                     </Card>
