@@ -112,6 +112,6 @@ function UserView({ user: { data: user } }: UserDetailPageProps) {
     );
 }
 
-UserView.layout = (page: React.ReactNode) => <AppLayout title="User Manager">{page}</AppLayout>;
+UserView.layout = (page: React.ReactNode) => <AppLayout title="User Manager" pageTitle="User Details">{page}</AppLayout>;
 
 export default UserView;

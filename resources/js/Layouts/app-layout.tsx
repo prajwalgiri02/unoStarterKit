@@ -1,13 +1,14 @@
 import Header from "@/Components/layouts/header";
 import Sidebar from "@/Components/layouts/sidebar";
 import type { PageProps } from "@/Pages/types";
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { notify } from "@/lib/toast";
 import { Toaster } from "sonner";
 
 type AppLayoutProps = {
     title: ReactNode;
+    pageTitle?: string;
     backHref?: string;
     actions?: ReactNode;
     children: ReactNode;
@@ -23,7 +24,7 @@ function readCollapsed() {
     }
 }
 
-export default function AppLayout({ title, backHref, actions, children }: AppLayoutProps) {
+export default function AppLayout({ title, pageTitle, backHref, actions, children }: AppLayoutProps) {
     const { url, props } = usePage<PageProps>();
     const [collapsed, setCollapsed] = useState(readCollapsed);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -45,6 +46,7 @@ export default function AppLayout({ title, backHref, actions, children }: AppLay
 
     return (
         <div className="flex min-h-dvh bg-neutral-25">
+            <Head title={pageTitle ?? (typeof title === "string" ? title : undefined)} />
             <Sidebar
                 collapsed={collapsed}
                 onToggleCollapsed={toggleCollapsed}

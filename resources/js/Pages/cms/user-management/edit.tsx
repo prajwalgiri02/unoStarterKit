@@ -84,6 +84,6 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
     );
 }
 
-UserEdit.layout = (page: React.ReactNode) => <AppLayout title="User Manager">{page}</AppLayout>;
+UserEdit.layout = (page: React.ReactNode) => <AppLayout title="User Manager" pageTitle="Edit User">{page}</AppLayout>;
 
 export default UserEdit;

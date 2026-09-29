@@ -60,6 +60,6 @@ const SignIn = () => {
     );
 };
 
-SignIn.layout = (page: React.ReactNode) => <AuthLayout>{page}</AuthLayout>;
+SignIn.layout = (page: React.ReactNode) => <AuthLayout pageTitle="Log In">{page}</AuthLayout>;
 
 export default SignIn;

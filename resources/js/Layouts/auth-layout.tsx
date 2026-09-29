@@ -1,5 +1,5 @@
 import type { PageProps } from "@/Pages/types/index";
-import { Link, usePage } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import { ArrowLeftIcon } from "@/Components/icons";
 import { useEffect, type ReactNode } from "react";
 import { notify } from "@/lib/toast";
@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 type AuthLayoutProps = {
     children: ReactNode;
     title?: ReactNode;
+    pageTitle?: string;
     description?: ReactNode;
     backHref?: string;
     backLabel?: string;
@@ -17,6 +18,7 @@ type AuthLayoutProps = {
 export default function AuthLayout({
     children,
     title = "Welcome 👋",
+    pageTitle,
     description,
     backHref,
     backLabel = "Back",
@@ -35,6 +37,7 @@ export default function AuthLayout({
 
     return (
         <main className="flex min-h-dvh bg-base-white lg:p-8">
+            <Head title={pageTitle ?? (typeof title === "string" ? title : undefined)} />
             <aside className="hidden shrink-0 items-center justify-center rounded-[30px] bg-primary-500 lg:flex lg:w-[56.5%]">
                 <img
                     src="/images/auth-logo.svg"
