@@ -56,7 +56,7 @@ export default function Textarea({
                 onChange={handleChange}
                 aria-invalid={errorMessage ? true : undefined}
                 aria-describedby={helper ? helperId : undefined}
-                className={`w-full resize-y rounded-[20px] border-[1.5px] px-4 py-3 text-body-xs text-neutral-900 outline-none transition-colors placeholder:text-neutral-500 ${stateClasses}`}
+                className={`w-full resize-none rounded-[20px] border-[1.5px] px-4 py-3 text-body-xs text-neutral-900 outline-none transition-colors placeholder:text-neutral-500 ${stateClasses}`}
                 {...rest}
             />
             {helper && (
