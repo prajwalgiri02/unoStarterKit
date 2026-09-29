@@ -18,6 +18,7 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
+            detectTls: 'unostarterkit.test',
             fonts: [
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
