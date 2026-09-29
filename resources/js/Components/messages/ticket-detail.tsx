@@ -31,7 +31,7 @@ export default function TicketDetail({ ticket, onResolve, onDelete }: TicketDeta
                         <p className="truncate text-link-sm font-normal text-neutral-500">{ticket.email}</p>
                     </div>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-4">
                     <TicketBadges ticket={ticket} />
                     <DropdownMenu
                         label="Message options"

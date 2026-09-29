@@ -77,7 +77,7 @@ export default function TicketList({
                                         <Avatar name={ticket.name} />
                                         <span className="truncate text-link-sm text-neutral-900">{ticket.name}</span>
                                     </span>
-                                    <TicketBadges ticket={ticket} className="hidden sm:block" />
+                                    <TicketBadges ticket={ticket} columns className="hidden sm:block" />
                                     <span className="text-body-xs whitespace-nowrap text-neutral-600">{ticket.date}</span>
                                 </button>
                                 <span className="-mx-1.5 flex">
