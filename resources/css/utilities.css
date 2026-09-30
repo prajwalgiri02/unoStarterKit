@@ -5,3 +5,14 @@
         display: none;
     }
 }
+
+@utility autofill-none {
+    &:autofill,
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+        -webkit-text-fill-color: currentColor;
+        caret-color: currentColor;
+        transition: background-color 99999s ease-out 0s;
+    }
+}

@@ -138,7 +138,7 @@ export default function Input({
                     onChange={handleChange}
                     aria-invalid={resolvedStatus === "error" || undefined}
                     aria-describedby={helper ? helperId : undefined}
-                    className="h-full min-w-0 flex-1 bg-transparent text-body-xs text-neutral-900 outline-none placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:text-neutral-400 disabled:placeholder:text-neutral-400"
+                    className="h-full min-w-0 flex-1 bg-transparent autofill-none text-body-xs text-neutral-900 outline-none placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:text-neutral-400 disabled:placeholder:text-neutral-400"
                     {...rest}
                 />
 
