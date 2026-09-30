@@ -7,7 +7,8 @@ import Textarea from "@/Components/inputs/textarea";
 import ConfirmModal from "@/Components/modals/confirm-modal";
 import AppLayout from "@/Layouts/app-layout";
 import type { Faq, FaqListPageProps } from "@/Pages/types/cms/faq";
-import { router, useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
+import useFieldForm from "@/lib/use-field-form";
 import { useState, type FormEvent } from "react";
 
 function FaqItem({ faq, onEdit, onDelete }: { faq: Faq; onEdit: () => void; onDelete: () => void }) {
@@ -60,7 +61,7 @@ function FaqPage({ faqs }: FaqListPageProps) {
     const [toDelete, setToDelete] = useState<Faq | null>(null);
     const [deleting, setDeleting] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, setField, post, put, processing, errors, reset, clearErrors } = useFieldForm({
         question: "",
         answer: "",
     });
@@ -117,7 +118,7 @@ function FaqPage({ faqs }: FaqListPageProps) {
                         label="Enter Question"
                         name="question"
                         value={data.question}
-                        onChange={(e) => setData("question", e.target.value)}
+                        onChange={(e) => setField("question", e.target.value)}
                         error={errors.question}
                     />
                     <Textarea
@@ -125,7 +126,7 @@ function FaqPage({ faqs }: FaqListPageProps) {
                         name="answer"
                         rows={10}
                         value={data.answer}
-                        onChange={(e) => setData("answer", e.target.value)}
+                        onChange={(e) => setField("answer", e.target.value)}
                         error={errors.answer}
                     />
                     <div className="flex flex-wrap gap-5">

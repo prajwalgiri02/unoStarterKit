@@ -3,7 +3,7 @@ import Card from "@/Components/common/card";
 import RichText from "@/Components/common/rich-text";
 import Input from "@/Components/inputs/input";
 import AppLayout from "@/Layouts/app-layout";
-import { useForm } from "@inertiajs/react";
+import useFieldForm from "@/lib/use-field-form";
 import { lazy, Suspense, useState, type FormEvent } from "react";
 
 const RichTextEditor = lazy(() => import("@/Components/inputs/rich-text-editor"));
@@ -21,7 +21,7 @@ type StaticContentPageProps = {
 };
 
 function ContentForm({ content, onDone }: { content: StaticContent; onDone: () => void }) {
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setField, put, processing, errors } = useFieldForm({
         title: content.title,
         description: content.description,
     });
@@ -37,7 +37,7 @@ function ContentForm({ content, onDone }: { content: StaticContent; onDone: () =
                 label="Title"
                 name="title"
                 value={data.title}
-                onChange={(e) => setData("title", e.target.value)}
+                onChange={(e) => setField("title", e.target.value)}
                 error={errors.title}
             />
             <Suspense fallback={<div aria-hidden="true" className="h-[200px] animate-pulse rounded-[20px] bg-neutral-50" />}>
@@ -45,7 +45,7 @@ function ContentForm({ content, onDone }: { content: StaticContent; onDone: () =
                     label="Content"
                     name="description"
                     value={data.description}
-                    onChange={(html) => setData("description", html)}
+                    onChange={(html) => setField("description", html)}
                     error={errors.description}
                 />
             </Suspense>

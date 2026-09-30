@@ -4,11 +4,12 @@ import Input from "@/Components/inputs/input";
 import UserProfileCard from "@/Components/users/user-profile-card";
 import AppLayout from "@/Layouts/app-layout";
 import type { UserDetailPageProps } from "@/Pages/types/cms/user";
-import { router, useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
+import useFieldForm from "@/lib/use-field-form";
 import type { FormEvent } from "react";
 
 function UserEdit({ user: { data: user } }: UserDetailPageProps) {
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setField, put, processing, errors } = useFieldForm({
         name: user.name,
         email: user.email,
         password: "",
@@ -37,7 +38,7 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
                         label="Full Name"
                         name="name"
                         value={data.name}
-                        onChange={(e) => setData("name", e.target.value)}
+                        onChange={(e) => setField("name", e.target.value)}
                         error={errors.name}
                         autoComplete="name"
                     />
@@ -46,7 +47,7 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
                         type="email"
                         name="email"
                         value={data.email}
-                        onChange={(e) => setData("email", e.target.value)}
+                        onChange={(e) => setField("email", e.target.value)}
                         error={errors.email}
                         autoComplete="email"
                     />
@@ -56,7 +57,7 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
                         name="password"
                         placeholder="Leave blank to keep current"
                         value={data.password}
-                        onChange={(e) => setData("password", e.target.value)}
+                        onChange={(e) => setField("password", e.target.value)}
                         error={errors.password}
                         autoComplete="new-password"
                     />
@@ -65,7 +66,7 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
                         type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        onChange={(e) => setData("password_confirmation", e.target.value)}
+                        onChange={(e) => setField("password_confirmation", e.target.value)}
                         error={errors.password_confirmation}
                         autoComplete="new-password"
                     />

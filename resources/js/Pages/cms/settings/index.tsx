@@ -6,7 +6,8 @@ import Input from "@/Components/inputs/input";
 import OtpModal from "@/Components/modals/otp-modal";
 import AppLayout from "@/Layouts/app-layout";
 import type { SettingsPageProps, SettingsUser } from "@/Pages/types/cms/settings";
-import { router, useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
+import useFieldForm from "@/lib/use-field-form";
 import { useEffect, useState, type FormEvent } from "react";
 
 type OtpState = { token: string; email: string };
@@ -31,7 +32,7 @@ function Settings({ user, otpLength }: SettingsPageProps) {
     const [verifying, setVerifying] = useState(false);
     const [resending, setResending] = useState(false);
 
-    const { data, setData, put, processing, errors, reset, clearErrors } = useForm({
+    const { data, setField, put, processing, errors, reset, clearErrors } = useFieldForm({
         name: user.name,
         email: user.email,
         password: "",
@@ -124,7 +125,7 @@ function Settings({ user, otpLength }: SettingsPageProps) {
                         label="Full Name"
                         name="name"
                         value={data.name}
-                        onChange={(e) => setData("name", e.target.value)}
+                        onChange={(e) => setField("name", e.target.value)}
                         error={errors.name}
                         autoComplete="name"
                     />
@@ -133,7 +134,7 @@ function Settings({ user, otpLength }: SettingsPageProps) {
                         type="email"
                         name="email"
                         value={data.email}
-                        onChange={(e) => setData("email", e.target.value)}
+                        onChange={(e) => setField("email", e.target.value)}
                         error={errors.email}
                         autoComplete="email"
                     />
@@ -146,7 +147,7 @@ function Settings({ user, otpLength }: SettingsPageProps) {
                         name="password"
                         size="medium"
                         value={data.password}
-                        onChange={(e) => setData("password", e.target.value)}
+                        onChange={(e) => setField("password", e.target.value)}
                         error={errors.password}
                         autoComplete="new-password"
                     />
@@ -156,7 +157,7 @@ function Settings({ user, otpLength }: SettingsPageProps) {
                         name="password_confirmation"
                         size="medium"
                         value={data.password_confirmation}
-                        onChange={(e) => setData("password_confirmation", e.target.value)}
+                        onChange={(e) => setField("password_confirmation", e.target.value)}
                         error={errors.password_confirmation}
                         autoComplete="new-password"
                     />
