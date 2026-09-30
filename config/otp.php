@@ -2,7 +2,7 @@
 
 return [
     'defaults' => [
-        'length' => 6,
+        'length' => (int) env('OTP_LENGTH', 6),
         'expires_in_minutes' => 10,
         'max_attempts' => 5,
         'max_resends' => 3,
@@ -39,7 +39,6 @@ return [
 
     'purposes' => [
         'password_reset' => [
-            'length' => 5,
             'expires_in_minutes' => 10,
             'delivery' => [
                 'channels' => env('OTP_DELIVERY_CHANNELS', 'mail'),

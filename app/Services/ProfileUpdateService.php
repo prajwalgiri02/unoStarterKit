@@ -89,6 +89,11 @@ final class ProfileUpdateService
         ];
     }
 
+    public function otpLength(): int
+    {
+        return $this->otpService->length(OtpPurpose::PASSWORD_CHANGE);
+    }
+
     public function verifyAndApply(Otp $otp, string $code): User
     {
         $this->otpService->verify($otp, $code);

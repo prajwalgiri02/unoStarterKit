@@ -21,6 +21,7 @@ class ProfileController extends Controller
 
         return Inertia::render('cms/settings/index', [
             'user' => $user->only('id', 'name', 'email'),
+            'otpLength' => $this->profileUpdateService->otpLength(),
         ]);
     }
 

@@ -165,12 +165,7 @@ final class PasswordResetService
 
     public function otpLength(): int
     {
-        $settings = array_replace(
-            config('otp.defaults', []),
-            config('otp.purposes.'.OtpPurpose::PASSWORD_RESET->value, []),
-        );
-
-        return (int) ($settings['length'] ?? 6);
+        return $this->otpService->length(OtpPurpose::PASSWORD_RESET);
     }
 
     public function maskEmail(string $email): string

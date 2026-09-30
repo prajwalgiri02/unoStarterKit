@@ -431,6 +431,11 @@ final class OtpService
         };
     }
 
+    public function length(OtpPurpose $purpose): int
+    {
+        return $this->settings($purpose)['length'];
+    }
+
     /**
      * @return array{
      *     length: int,

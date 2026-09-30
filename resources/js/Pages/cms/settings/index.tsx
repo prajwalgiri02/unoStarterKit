@@ -23,7 +23,7 @@ function ProfileHeading({ user }: { user: SettingsUser }) {
     );
 }
 
-function Settings({ user }: SettingsPageProps) {
+function Settings({ user, otpLength }: SettingsPageProps) {
     const [editing, setEditing] = useState(false);
     const [otp, setOtp] = useState<OtpState | null>(null);
     const [secondsLeft, setSecondsLeft] = useState(0);
@@ -175,6 +175,7 @@ function Settings({ user }: SettingsPageProps) {
                 <OtpModal
                     open
                     email={otp.email}
+                    length={otpLength}
                     secondsLeft={secondsLeft}
                     error={otpError}
                     processing={verifying}

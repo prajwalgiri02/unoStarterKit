@@ -7,6 +7,7 @@ export interface SettingsUser {
 
 export interface SettingsPageProps {
     user: SettingsUser;
+    otpLength: number;
     flash: {
         success?: string;
         error?: string;
