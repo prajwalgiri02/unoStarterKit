@@ -1,4 +1,4 @@
-/** Mirrors FaqResource.php */
+/** Mirrors cms/FaqController::index */
 export interface Faq {
     id: number;
     title: string;
