@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\GeneratedOtp;
+use App\Enums\ApiErrorCode;
 use App\Enums\OtpChannel;
 use App\Enums\OtpPurpose;
 use App\Exceptions\OtpException;
@@ -60,6 +61,7 @@ final class PasswordResetService
             throw new OtpException(
                 $exception->getMessage(),
                 'email',
+                reason: $exception->reason,
             );
         } catch (\Throwable $exception) {
             $this->rollbackInitiatedOtp($generated->otp, $snapshot);
@@ -68,6 +70,7 @@ final class PasswordResetService
             throw new OtpException(
                 'The verification code could not be sent. Please try again.',
                 'email',
+                reason: ApiErrorCode::OtpDeliveryFailed,
             );
         }
 
@@ -115,6 +118,7 @@ final class PasswordResetService
 
             throw new OtpException(
                 'The verification code could not be sent. Please try again.',
+                reason: ApiErrorCode::OtpDeliveryFailed,
             );
         }
     }
@@ -138,6 +142,7 @@ final class PasswordResetService
             $user->forceFill([
                 'password' => Hash::make($password),
                 'remember_token' => Str::random(60),
+                'token_version' => $user->token_version + 1,
             ])->save();
 
             $this->otpService->consume($otp);
@@ -161,6 +166,16 @@ final class PasswordResetService
             $token,
             OtpPurpose::PASSWORD_RESET,
         );
+    }
+
+    public function issueResetToken(Otp $otp): string
+    {
+        return $this->otpService->rotateFlowToken($otp);
+    }
+
+    public function isReadyForReset(Otp $otp): bool
+    {
+        return $this->otpService->isValidVerifiedOtp($otp);
     }
 
     public function otpLength(): int

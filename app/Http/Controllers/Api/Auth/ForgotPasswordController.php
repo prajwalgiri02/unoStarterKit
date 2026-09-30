@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Enums\ApiErrorCode;
+use App\Exceptions\OtpException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ResendPasswordResetOtpRequest;
+use App\Http\Requests\Api\ResetPasswordWithTokenRequest;
+use App\Http\Requests\Api\VerifyPasswordResetOtpRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
-use App\Http\Requests\Auth\ResetPasswordRequest;
-use App\Http\Requests\Auth\VerifyPasswordOtpRequest;
 use App\Services\PasswordResetService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ForgotPasswordController extends Controller
 {
@@ -22,11 +24,11 @@ class ForgotPasswordController extends Controller
     ) {}
 
     /**
-     * Initiate the password reset process.
+     * Send a reset code. The response is the same whether or not the account exists.
      */
     public function sendResetOtp(ForgotPasswordRequest $request): JsonResponse
     {
-        $generated = $this->passwordResetService->initiate(
+        $this->passwordResetService->initiate(
             email: $request->validated('email'),
             metadata: [
                 'ip_address' => $request->ip(),
@@ -34,51 +36,41 @@ class ForgotPasswordController extends Controller
             ],
         );
 
-        if ($generated === null) {
-            return $this->errorResponse('We couldn\'t find an account with that email address.', 404);
-        }
-
-        return $this->successResponse(null, 'A verification code has been sent to your email.');
+        return $this->successResponse(null, 'Please check your email for a verification code.');
     }
 
     /**
-     * Verify the OTP code.
+     * Verify the code and issue a single-use reset token.
      */
-    public function verifyOtp(VerifyPasswordOtpRequest $request): JsonResponse
+    public function verifyOtp(VerifyPasswordResetOtpRequest $request): JsonResponse
     {
-        $email = $request->validated('email');
-        $otp = $this->passwordResetService->findForEmail($email);
+        $otp = $this->passwordResetService->findForEmail($request->validated('email'));
 
         if (! $otp) {
-            return $this->errorResponse('No active password reset request found for this email.', 400);
+            throw new OtpException('The verification code is incorrect.', reason: ApiErrorCode::OtpInvalid);
         }
 
-        try {
-            $this->passwordResetService->verify(
-                otp: $otp,
-                code: $request->validated('otp'),
-            );
+        $this->passwordResetService->verify(
+            otp: $otp,
+            code: $request->validated('otp'),
+        );
 
-            return $this->successResponse(null, 'Verification successful. You can now reset your password.');
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
-        }
+        $otp->refresh();
+
+        return $this->successResponse([
+            'reset_token' => $this->passwordResetService->issueResetToken($otp),
+            'expires_in' => max(0, (int) now()->diffInSeconds($otp->expires_at)),
+        ], 'Code verified. You can now set a new password.');
     }
 
     /**
-     * Resend the OTP code.
+     * Send a new code. The response is the same whether or not a reset is in progress.
      */
-    public function resendOtp(Request $request): JsonResponse
+    public function resendOtp(ResendPasswordResetOtpRequest $request): JsonResponse
     {
-        $request->validate(['email' => 'required|email']);
-        $email = $request->input('email');
-        $otp = $this->passwordResetService->findForEmail($email);
+        $otp = $this->passwordResetService->findForEmail($request->validated('email'));
 
-        if (! $otp) {
-            return $this->errorResponse('No active password reset request found for this email.', 400);
-        }
-
-        try {
+        if ($otp) {
             $this->passwordResetService->resend(
                 otp: $otp,
                 metadata: [
@@ -86,38 +78,31 @@ class ForgotPasswordController extends Controller
                     'last_resend_user_agent' => $request->userAgent(),
                 ],
             );
-
-            return $this->successResponse(null, 'A new verification code has been sent.');
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
         }
+
+        return $this->successResponse(null, 'A new verification code has been sent.');
     }
 
     /**
-     * Reset the password.
+     * Set the new password using the reset token from the verify step.
      */
-    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    public function resetPassword(ResetPasswordWithTokenRequest $request): JsonResponse
     {
-        $email = $request->validated('email');
-        $otp = $this->passwordResetService->findForEmail($email);
+        $otp = $this->passwordResetService->findByToken($request->validated('reset_token'));
 
-        if (! $otp) {
-            return $this->errorResponse('No active password reset request found for this email.', 400);
-        }
-
-        if (! $otp->isVerified()) {
-            return $this->errorResponse('The verification code has not been verified yet.', 400);
-        }
-
-        $user = $this->passwordResetService->resetPassword(
-            otp: $otp,
-            password: $request->validated('password'),
-        );
+        $user = $otp && $this->passwordResetService->isReadyForReset($otp)
+            ? $this->passwordResetService->resetPassword(
+                otp: $otp,
+                password: $request->validated('password'),
+            )
+            : null;
 
         if (! $user) {
-            return $this->errorResponse('The account could not be found.', 404);
+            $message = 'Your reset session has expired. Please request a new code.';
+
+            return $this->errorResponse($message, 422, ['reset_token' => [$message]], ApiErrorCode::ResetTokenInvalid);
         }
 
-        return $this->successResponse(null, 'Your password has been reset successfully.');
+        return $this->successResponse(null, 'Your password has been reset. Please log in with your new password.');
     }
 }

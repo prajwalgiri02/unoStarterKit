@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ApiErrorCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\LogoutRequest;
@@ -51,10 +52,10 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        $credentials = $request->only(['email', 'password']);
+        $credentials = $request->safe()->only(['email', 'password']);
 
         if (! $token = Auth::guard('api')->attempt($credentials)) {
-            return $this->errorResponse('Unauthorized', 401);
+            return $this->errorResponse('Invalid email or password.', 401, errorCode: ApiErrorCode::InvalidCredentials);
         }
 
         /** @var User $user */
@@ -63,13 +64,13 @@ class AuthController extends Controller
         if ($user !== null && $user->isPendingApproval()) {
             Auth::guard('api')->logout();
 
-            return $this->errorResponse('Your account is pending approval.', 403);
+            return $this->errorResponse('Your account is pending approval.', 403, errorCode: ApiErrorCode::AccountPendingApproval);
         }
 
         if ($user !== null && $user->isBlocked()) {
             Auth::guard('api')->logout();
 
-            return $this->errorResponse('Your account has been blocked.', 403);
+            return $this->errorResponse('Your account has been blocked.', 403, errorCode: ApiErrorCode::AccountBlocked);
         }
 
         $this->registerDevice($user, $request->device());

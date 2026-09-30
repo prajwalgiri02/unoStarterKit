@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\GeneratedOtp;
+use App\Enums\ApiErrorCode;
 use App\Enums\OtpChannel;
 use App\Enums\OtpPurpose;
 use App\Exceptions\OtpException;
@@ -80,6 +81,7 @@ final class ProfileUpdateService
 
             throw new OtpException(
                 'The verification code could not be sent. Please try again.',
+                reason: ApiErrorCode::OtpDeliveryFailed,
             );
         }
 

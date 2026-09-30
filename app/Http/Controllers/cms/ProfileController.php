@@ -37,7 +37,7 @@ class ProfileController extends Controller
             return back()->with([
                 'otp_required' => true,
                 'otp_token' => $result['generated']->flowToken,
-                'new_email' => $request->input('email'),
+                'new_email' => $request->validated('email'),
                 'seconds_remaining' => 120,
                 'status' => 'A verification code has been sent to your email to confirm the changes.',
             ]);

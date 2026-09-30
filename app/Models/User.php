@@ -36,7 +36,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims()
     {
-        return [];
+        return ['tv' => (int) $this->token_version];
     }
 
     /**
@@ -51,6 +51,7 @@ class User extends Authenticatable implements JWTSubject
             'approved_at' => 'datetime',
             'blocked_at' => 'datetime',
             'password' => 'hashed',
+            'token_version' => 'integer',
         ];
     }
 

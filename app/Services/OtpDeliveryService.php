@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\SmsGateway;
 use App\Data\GeneratedOtp;
+use App\Enums\ApiErrorCode;
 use App\Enums\OtpChannel;
 use App\Enums\OtpPurpose;
 use App\Exceptions\OtpException;
@@ -30,6 +31,7 @@ class OtpDeliveryService
         if ($channels === []) {
             throw new OtpException(
                 'No OTP delivery channels are configured.',
+                reason: ApiErrorCode::OtpDeliveryFailed,
             );
         }
 
@@ -48,6 +50,7 @@ class OtpDeliveryService
 
                 $failures[] = new OtpException(
                     'The verification code could not be sent. Please try again.',
+                    reason: ApiErrorCode::OtpDeliveryFailed,
                 );
             }
         }
@@ -78,6 +81,7 @@ class OtpDeliveryService
         if ($phone === null) {
             throw new OtpException(
                 'SMS delivery is enabled, but no phone number is available for this account.',
+                reason: ApiErrorCode::OtpDeliveryFailed,
             );
         }
 

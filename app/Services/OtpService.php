@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\GeneratedOtp;
+use App\Enums\ApiErrorCode;
 use App\Enums\OtpChannel;
 use App\Enums\OtpPurpose;
 use App\Exceptions\OtpException;
@@ -82,6 +83,20 @@ final class OtpService
             code: $plainCode,
             flowToken: $plainFlowToken,
         );
+    }
+
+    /**
+     * Replace the flow token and return the new plain token.
+     */
+    public function rotateFlowToken(Otp $otp): string
+    {
+        $plainFlowToken = Str::random(64);
+
+        $otp->forceFill([
+            'flow_token' => $this->hashFlowToken($plainFlowToken),
+        ])->save();
+
+        return $plainFlowToken;
     }
 
     /**
@@ -180,19 +195,23 @@ final class OtpService
 
             'not_found' => throw new OtpException(
                 'The OTP request could not be found.',
+                reason: ApiErrorCode::OtpNotFound,
             ),
 
             'already_verified' => throw new OtpException(
                 'This OTP has already been verified.',
+                reason: ApiErrorCode::OtpAlreadyVerified,
             ),
 
             'resend_limit' => throw new OtpException(
                 'The maximum number of OTP resends has been reached.',
+                reason: ApiErrorCode::OtpResendLimit,
             ),
 
             'cooldown' => throw new OtpException(
                 "Please wait {$result['retry_after']} seconds before requesting another OTP.",
                 retryAfterSeconds: $result['retry_after'],
+                reason: ApiErrorCode::OtpResendCooldown,
             ),
 
             default => throw new OtpException(
@@ -262,22 +281,27 @@ final class OtpService
 
             'not_found' => throw new OtpException(
                 'The OTP request could not be found.',
+                reason: ApiErrorCode::OtpNotFound,
             ),
 
             'already_verified' => throw new OtpException(
                 'This OTP has already been verified.',
+                reason: ApiErrorCode::OtpAlreadyVerified,
             ),
 
             'expired' => throw new OtpException(
                 'Your verification code has expired. Resend a new code below.',
+                reason: ApiErrorCode::OtpExpired,
             ),
 
             'attempt_limit' => throw new OtpException(
                 'Too many incorrect attempts. Request a new code.',
+                reason: ApiErrorCode::OtpAttemptLimit,
             ),
 
             'invalid' => throw new OtpException(
                 "The OTP is incorrect. {$result['attempts_remaining']} attempts remaining.",
+                reason: ApiErrorCode::OtpInvalid,
             ),
 
             default => throw new OtpException(

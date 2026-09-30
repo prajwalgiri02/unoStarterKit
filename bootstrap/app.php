@@ -1,10 +1,13 @@
 <?php
 
+use App\Exceptions\ApiExceptionRenderer;
 use App\Exceptions\OtpException;
+use App\Http\Middleware\EnsureApiTokenIsCurrent;
 use App\Http\Middleware\EnsurePasswordResetOtpPending;
 use App\Http\Middleware\EnsurePasswordResetOtpVerified;
 use App\Http\Middleware\EnsureUserApproved;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,17 +29,27 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
 
+        $middleware->api(append: [
+            EnsureApiTokenIsCurrent::class,
+        ]);
+
         $middleware->alias([
             'password-reset.pending' => EnsurePasswordResetOtpPending::class,
             'password-reset.verified' => EnsurePasswordResetOtpVerified::class,
             'approved' => EnsureUserApproved::class,
             'role' => RoleMiddleware::class,
-            'precognitive' => \App\Http\Middleware\HandlePrecognitiveRequests::class,
+            'precognitive' => HandlePrecognitiveRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
+        );
+
+        $exceptions->render(
+            fn (Throwable $exception, Request $request) => $request->is('api/*')
+                ? app(ApiExceptionRenderer::class)->render($exception)
+                : null,
         );
 
         $exceptions->render(function (
