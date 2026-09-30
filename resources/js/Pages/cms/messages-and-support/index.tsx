@@ -11,6 +11,7 @@ function MessagesAndSupport({ tickets, filters }: MessageListPageProps) {
     const [selectedId, setSelectedId] = useState<number | null>(list[0]?.id ?? null);
     const [ticketToDelete, setTicketToDelete] = useState<Conversation | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
     const selected = list.find((ticket) => ticket.id === selectedId) ?? list[0] ?? null;
     const filter = (filters.type as TicketFilter | undefined) ?? "all";
@@ -24,6 +25,17 @@ function MessagesAndSupport({ tickets, filters }: MessageListPageProps) {
         });
     };
 
+    const openTicket = (id: number) => {
+        setSelectedId(id);
+        setMobileView("detail");
+        window.scrollTo({ top: 0 });
+    };
+
+    const backToInbox = () => {
+        setMobileView("list");
+        window.scrollTo({ top: 0 });
+    };
+
     const resolve = (ticket: Conversation) => {
         router.patch(`/cms/messages/${ticket.id}/resolve`, {}, { preserveScroll: true });
     };
@@ -33,25 +45,35 @@ function MessagesAndSupport({ tickets, filters }: MessageListPageProps) {
         setDeleting(true);
         router.delete(`/cms/messages/${ticketToDelete.id}`, {
             preserveScroll: true,
-            onSuccess: () => setTicketToDelete(null),
+            onSuccess: () => {
+                if (ticketToDelete.id === selected?.id) setMobileView("list");
+                setTicketToDelete(null);
+            },
             onFinish: () => setDeleting(false),
         });
     };
 
     return (
-        <div className="grid grid-cols-1 items-start gap-6 xl:h-[calc(100dvh-90px-3rem)] xl:min-h-120 xl:grid-cols-[minmax(0,598fr)_minmax(0,491fr)] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch">
+        <div className="grid h-[calc(100dvh-90px-3rem)] min-h-120 grid-cols-1 grid-rows-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,598fr)_minmax(0,491fr)]">
             <TicketList
                 tickets={list}
                 selectedId={selected?.id ?? null}
-                onSelect={setSelectedId}
+                onSelect={openTicket}
                 filter={filter}
                 onFilterChange={(value) => visit({ type: value === "all" ? undefined : value })}
                 sort={sort}
                 onSortChange={(value) => visit({ sort: value })}
                 onResolve={resolve}
                 onDelete={setTicketToDelete}
+                hiddenOnMobile={mobileView === "detail"}
             />
-            <TicketDetail ticket={selected} onResolve={resolve} onDelete={setTicketToDelete} />
+            <TicketDetail
+                ticket={selected}
+                onResolve={resolve}
+                onDelete={setTicketToDelete}
+                onBack={backToInbox}
+                hiddenOnMobile={mobileView === "list"}
+            />
 
             <ConfirmModal
                 open={ticketToDelete !== null}

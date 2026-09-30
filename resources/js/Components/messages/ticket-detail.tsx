@@ -1,8 +1,9 @@
 import Button from "@/Components/buttons/button";
+import IconButton from "@/Components/buttons/icon-button";
 import Avatar from "@/Components/common/avatar";
 import DetailField from "@/Components/common/detail-field";
 import DropdownMenu from "@/Components/common/dropdown-menu";
-import { DotsVerticalIcon, TrashLinearIcon } from "@/Components/icons";
+import { ArrowLeftIcon, DotsVerticalIcon, TrashLinearIcon } from "@/Components/icons";
 import TicketBadges from "@/Components/messages/ticket-badges";
 import type { Conversation } from "@/Pages/types/cms/message";
 
@@ -10,21 +11,30 @@ type TicketDetailProps = {
     ticket: Conversation | null;
     onResolve: (ticket: Conversation) => void;
     onDelete: (ticket: Conversation) => void;
+    onBack?: () => void;
+    hiddenOnMobile?: boolean;
 };
 
-export default function TicketDetail({ ticket, onResolve, onDelete }: TicketDetailProps) {
+export default function TicketDetail({ ticket, onResolve, onDelete, onBack, hiddenOnMobile = false }: TicketDetailProps) {
+    const display = hiddenOnMobile ? "hidden lg:flex" : "flex";
+
     if (!ticket) {
         return (
-            <section className="flex min-h-80 items-center justify-center rounded-3xl xl:h-full bg-base-white p-6 text-body-xs text-neutral-500 shadow-panel">
+            <section className={`${display} min-h-80 items-center justify-center rounded-3xl bg-base-white p-6 text-body-xs text-neutral-500 shadow-panel`}>
                 Select a message to view its details
             </section>
         );
     }
 
     return (
-        <section aria-label="Message details" className="flex min-h-0 flex-col gap-8 overflow-y-auto scrollbar-none rounded-3xl bg-base-white pb-8 shadow-panel xl:h-full">
+        <section aria-label="Message details" className={`${display} min-h-0 flex-col gap-8 overflow-y-auto scrollbar-none rounded-3xl bg-base-white pb-8 shadow-panel`}>
             <header className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-neutral-100 bg-base-white py-3 pr-2 pl-6">
                 <div className="flex min-w-0 items-center gap-3">
+                    {onBack && (
+                        <IconButton label="Back to inbox" onClick={onBack} className="-ml-3 lg:hidden">
+                            <ArrowLeftIcon />
+                        </IconButton>
+                    )}
                     <Avatar name={ticket.name} size="medium" />
                     <div className="min-w-0">
                         <p className="truncate text-body-lg font-semibold text-neutral-800">{ticket.name}</p>

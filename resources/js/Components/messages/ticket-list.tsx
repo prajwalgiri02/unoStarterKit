@@ -31,6 +31,7 @@ type TicketListProps = {
     onSortChange: (sort: string) => void;
     onResolve: (ticket: Conversation) => void;
     onDelete: (ticket: Conversation) => void;
+    hiddenOnMobile?: boolean;
 };
 
 export default function TicketList({
@@ -43,9 +44,10 @@ export default function TicketList({
     onSortChange,
     onResolve,
     onDelete,
+    hiddenOnMobile = false,
 }: TicketListProps) {
     return (
-        <section aria-label="Inbox" className="flex max-h-[calc(100dvh-90px-3rem)] min-h-0 flex-col gap-5 rounded-3xl bg-base-white pt-7 pb-3 xl:max-h-none">
+        <section aria-label="Inbox" className={`${hiddenOnMobile ? "hidden lg:flex" : "flex"} min-h-0 flex-col gap-5 rounded-3xl bg-base-white pt-7 pb-3`}>
             <div className="flex shrink-0 items-center justify-between gap-4 px-6">
                 <h2 className="text-subtitle-lg font-medium text-neutral-800">Inbox</h2>
                 <SortMenu options={sortOptions} value={sort} onChange={onSortChange} />
@@ -58,26 +60,26 @@ export default function TicketList({
             {tickets.length === 0 ? (
                 <p className="px-6 py-10 text-center text-body-xs text-neutral-500">No messages found</p>
             ) : (
-                <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none">
+                <ul className="flex min-h-0 flex-1 flex-col overflow-auto scrollbar-none">
                     {tickets.map((ticket) => {
                         const selected = ticket.id === selectedId;
 
                         return (
                             <li
                                 key={ticket.id}
-                                className={`grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_auto_20px] items-center gap-7 pr-7 transition-colors sm:grid-cols-[minmax(0,1fr)_100px_112px_auto_20px] ${selected ? "bg-neutral-25" : "hover:bg-neutral-25"}`}
+                                className={`grid h-14 min-w-min shrink-0 grid-cols-[minmax(150px,1fr)_100px_112px_auto_20px] items-center gap-7 pr-7 transition-colors ${selected ? "bg-neutral-25" : "hover:bg-neutral-25"}`}
                             >
                                 <button
                                     type="button"
                                     onClick={() => onSelect(ticket.id)}
                                     aria-current={selected ? "true" : undefined}
-                                    className="col-span-2 grid h-full cursor-pointer grid-cols-subgrid items-center pl-6 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-primary-50 focus-visible:ring-inset sm:col-span-4"
+                                    className="col-span-4 grid h-full cursor-pointer grid-cols-subgrid items-center pl-6 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-primary-50 focus-visible:ring-inset"
                                 >
                                     <span className="flex min-w-0 items-center gap-2">
                                         <Avatar name={ticket.name} />
                                         <span className="truncate text-link-sm text-neutral-900">{ticket.name}</span>
                                     </span>
-                                    <TicketBadges ticket={ticket} columns className="hidden sm:block" />
+                                    <TicketBadges ticket={ticket} columns />
                                     <span className="text-body-xs whitespace-nowrap text-neutral-600">{ticket.date}</span>
                                 </button>
                                 <span className="-mx-1.5 flex">
