@@ -1,6 +1,13 @@
 import { NavArrowDownIcon } from "@/Components/icons";
-import { fieldError } from "@/Components/inputs/first-error-message";
-import { useFormContext } from "@inertiajs/react";
+import Field, {
+    fieldClasses,
+    fieldControlClasses,
+    fieldSizes,
+    useFieldError,
+    type FieldSize,
+    type FieldStatus,
+    type FieldVariant,
+} from "@/Components/inputs/field";
 import { useId, type ChangeEvent, type ComponentProps, type ReactNode } from "react";
 
 export type SelectOption = {
@@ -8,18 +15,34 @@ export type SelectOption = {
     label: string;
 };
 
-type SelectProps = Omit<ComponentProps<"select">, "children"> & {
+type SelectProps = Omit<ComponentProps<"select">, "children" | "size"> & {
     label?: ReactNode;
     options: SelectOption[];
     placeholder?: string;
+    helperText?: ReactNode;
     error?: string;
+    status?: FieldStatus;
+    variant?: FieldVariant;
+    size?: FieldSize;
+    startIcon?: ReactNode;
+};
+
+const controlPadding: Record<FieldSize, { plain: string; withIcon: string; end: string }> = {
+    large: { plain: "pl-4", withIcon: "pl-13", end: "pr-11" },
+    medium: { plain: "pl-3", withIcon: "pl-12", end: "pr-10" },
+    small: { plain: "pl-3", withIcon: "pl-10", end: "pr-8" },
 };
 
 export default function Select({
     label,
     options,
     placeholder,
+    helperText,
     error,
+    status = "default",
+    variant = "filled",
+    size = "large",
+    startIcon,
     className = "",
     id,
     name,
@@ -29,40 +52,41 @@ export default function Select({
 }: SelectProps) {
     const generatedId = useId();
     const selectId = id ?? generatedId;
-    const errorId = `${selectId}-error`;
-    const form = useFormContext();
-
-    const errorMessage =
-        error ||
-        (form && name ? fieldError(form.errors as Record<string, unknown>, name) : undefined);
+    const helperId = `${selectId}-helper`;
+    const { errorMessage, clearError } = useFieldError(name, error);
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         onChange?.(e);
-        if (form && name) form.clearErrors(name);
+        clearError();
     };
 
-    const stateClasses = disabled
-        ? "cursor-not-allowed bg-neutral-50 text-neutral-400"
-        : errorMessage
-          ? "border-error-500 bg-error-50"
-          : "border-neutral-200 bg-base-white hover:not-focus:bg-neutral-25 focus:border-primary-500 focus:bg-primary-50";
+    const resolvedStatus: FieldStatus = errorMessage ? "error" : status;
+    const helper = errorMessage || helperText;
+    const styles = fieldClasses({ status: resolvedStatus, variant, disabled });
+    const sizes = fieldSizes[size];
+    const padding = controlPadding[size];
+    const iconClassName = `pointer-events-none flex shrink-0 items-center justify-center [&>svg]:size-full ${sizes.icon}`;
 
     return (
-        <div className={`flex w-full flex-col gap-2 ${className}`.trim()}>
-            {label && (
-                <label htmlFor={selectId} className="text-link-sm text-neutral-600">
-                    {label}
-                </label>
-            )}
-            <div className="relative">
+        <Field
+            label={label}
+            labelFor={selectId}
+            helper={helper}
+            helperId={helperId}
+            helperClassName={styles.helper}
+            className={className}
+        >
+            <div className={`relative flex w-full items-center ${sizes.box} ${styles.box}`}>
+                {startIcon && <span className={iconClassName}>{startIcon}</span>}
+
                 <select
                     id={selectId}
                     name={name}
                     disabled={disabled}
                     onChange={handleChange}
-                    aria-invalid={errorMessage ? true : undefined}
-                    aria-describedby={errorMessage ? errorId : undefined}
-                    className={`h-12 w-full cursor-pointer appearance-none rounded-[20px] border-[1.5px] pr-11 pl-4 text-body-xs text-neutral-900 outline-none transition-colors ${stateClasses}`}
+                    aria-invalid={resolvedStatus === "error" || undefined}
+                    aria-describedby={helper ? helperId : undefined}
+                    className={`absolute inset-0 size-full cursor-pointer appearance-none rounded-[inherit] ${padding.end} ${startIcon ? padding.withIcon : padding.plain} ${fieldControlClasses}`}
                     {...rest}
                 >
                     {placeholder !== undefined && <option value="">{placeholder}</option>}
@@ -72,13 +96,11 @@ export default function Select({
                         </option>
                     ))}
                 </select>
-                <NavArrowDownIcon className="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-neutral-400" />
+
+                <span className={`ml-auto ${iconClassName}`}>
+                    <NavArrowDownIcon />
+                </span>
             </div>
-            {errorMessage && (
-                <p id={errorId} className="text-link-sm font-normal text-error-500">
-                    {errorMessage}
-                </p>
-            )}
-        </div>
+        </Field>
     );
 }

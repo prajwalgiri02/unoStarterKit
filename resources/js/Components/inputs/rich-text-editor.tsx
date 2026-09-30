@@ -11,9 +11,8 @@ import {
     NavArrowDownIcon,
     UnderlineIcon,
 } from "@/Components/icons";
-import { fieldError } from "@/Components/inputs/first-error-message";
+import Field, { fieldClasses, useFieldError, type FieldStatus, type FieldVariant } from "@/Components/inputs/field";
 import Input from "@/Components/inputs/input";
-import { useFormContext } from "@inertiajs/react";
 import Link from "@tiptap/extension-link";
 import { Placeholder } from "@tiptap/extensions";
 import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react";
@@ -28,6 +27,8 @@ type RichTextEditorProps = {
     placeholder?: string;
     helperText?: ReactNode;
     error?: string;
+    status?: FieldStatus;
+    variant?: FieldVariant;
     disabled?: boolean;
     className?: string;
 };
@@ -291,6 +292,8 @@ export default function RichTextEditor({
     placeholder = "",
     helperText,
     error,
+    status = "default",
+    variant = "filled",
     disabled = false,
     className = "",
 }: RichTextEditorProps) {
@@ -298,15 +301,14 @@ export default function RichTextEditor({
     const helperId = useId();
     const lastValue = useRef(value);
     const onChangeRef = useRef(onChange);
-    const form = useFormContext();
-
-    const errorMessage =
-        error || (form && name ? fieldError(form.errors as Record<string, unknown>, name) : undefined);
+    const { errorMessage, clearError } = useFieldError(name, error);
+    const resolvedStatus: FieldStatus = errorMessage ? "error" : status;
     const helper = errorMessage || helperText;
+    const styles = fieldClasses({ status: resolvedStatus, variant, disabled });
 
     onChangeRef.current = (html: string) => {
         onChange(html);
-        if (form && name) form.clearErrors(name);
+        clearError();
     };
 
     const editor = useEditor({
@@ -355,31 +357,19 @@ export default function RichTextEditor({
         editor.setOptions({ editorProps: { attributes } });
     }, [editor, label, labelId, helper, helperId, errorMessage]);
 
-    const stateClasses = disabled
-        ? "cursor-not-allowed bg-neutral-50 text-neutral-400"
-        : errorMessage
-          ? "border-error-500 bg-error-50"
-          : "border-neutral-200 bg-base-white hover:not-focus-within:bg-neutral-25 focus-within:border-primary-500";
-
     return (
-        <div className={`group flex w-full flex-col gap-2 ${className}`.trim()}>
-            {label && (
-                <span id={labelId} className="text-link-sm text-neutral-600">
-                    {label}
-                </span>
-            )}
-            <div className={`rounded-[20px] border-[1.5px] transition-colors ${stateClasses}`}>
+        <Field
+            label={label}
+            labelId={labelId}
+            helper={helper}
+            helperId={helperId}
+            helperClassName={styles.helper}
+            className={className}
+        >
+            <div className={`rounded-[20px] ${styles.box}`}>
                 <Toolbar editor={editor} disabled={disabled} />
                 <EditorContent editor={editor} />
             </div>
-            {helper && (
-                <p
-                    id={helperId}
-                    className={`text-link-sm font-normal ${errorMessage ? "text-error-500" : "text-neutral-600 group-focus-within:text-primary-500"}`}
-                >
-                    {helper}
-                </p>
-            )}
-        </div>
+        </Field>
     );
 }
