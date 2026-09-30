@@ -36,9 +36,9 @@ export default function AuthLayout({
     }, [props.flash]);
 
     return (
-        <main className="flex min-h-dvh bg-base-white lg:p-8">
+        <main className="flex min-h-dvh bg-auth-background lg:p-8">
             <Head title={pageTitle ?? (typeof title === "string" ? title : undefined)} />
-            <aside className="hidden shrink-0 items-center justify-center rounded-[30px] bg-primary-500 lg:flex lg:w-[56.5%]">
+            <aside className="hidden shrink-0 items-center justify-center rounded-[30px] bg-auth-panel lg:flex lg:w-[56.5%]">
                 <img
                     src="/images/auth-logo.svg"
                     alt="Borrowed"

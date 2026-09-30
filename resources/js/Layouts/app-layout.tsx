@@ -45,7 +45,7 @@ export default function AppLayout({ title, pageTitle, backHref, actions, childre
     };
 
     return (
-        <div className="flex min-h-dvh bg-neutral-25">
+        <div className="flex min-h-dvh bg-app-background">
             <Head title={pageTitle ?? (typeof title === "string" ? title : undefined)} />
             <Sidebar
                 collapsed={collapsed}

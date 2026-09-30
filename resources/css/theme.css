@@ -164,6 +164,10 @@
     --color-base-white: #ffffff;
     --color-base-transparent: transparent;
 
+    --color-app-background: var(--color-neutral-25);
+    --color-auth-background: var(--color-base-white);
+    --color-auth-panel: var(--color-primary-500);
+
     --color-backdrop: color-mix(in srgb, var(--color-primary-800) 70%, transparent);
     --blur-backdrop: 0px;
 
