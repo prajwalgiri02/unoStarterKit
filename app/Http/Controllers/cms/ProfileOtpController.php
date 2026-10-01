@@ -68,6 +68,7 @@ class ProfileOtpController extends Controller
 
         return back()
             ->with('resendAvailableAt', $this->profileUpdateService->resendAvailableAt($otp)?->toIso8601String())
+            ->with('seconds_remaining', $this->profileUpdateService->resendCooldownRemaining($otp))
             ->with('status', 'A new verification code has been sent.');
     }
 

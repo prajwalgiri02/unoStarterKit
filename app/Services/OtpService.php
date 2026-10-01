@@ -254,7 +254,9 @@ final class OtpService
             }
 
             if (! Hash::check($submittedCode, $otp->code)) {
+                $otp->timestamps = false;
                 $otp->increment('attempts');
+                $otp->timestamps = true;
 
                 return [
                     'status' => 'invalid',
@@ -359,6 +361,13 @@ final class OtpService
             ->addSeconds($settings['resend_cooldown_seconds']);
 
         return now()->isBefore($availableAt) ? $availableAt : null;
+    }
+
+    public function resendCooldownRemaining(Otp $otp): int
+    {
+        $availableAt = $this->resendAvailableAt($otp);
+
+        return $availableAt === null ? 0 : (int) ceil(now()->diffInSeconds($availableAt));
     }
 
     public function findForDestination(

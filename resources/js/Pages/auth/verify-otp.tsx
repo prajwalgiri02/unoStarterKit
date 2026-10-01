@@ -11,6 +11,7 @@ export type OtpPayload = {
     updatedAt: string;
     expiresAt: string;
     verifiedAt: string | null;
+    resendAvailableAt: string | null;
 };
 
 type VerifyOtpPageProps = {
@@ -18,14 +19,19 @@ type VerifyOtpPageProps = {
     email: string;
     token: string;
     otpLength: number;
+    resendAvailableAt?: string | null;
 };
 
 const VerifyOTP = () => {
-    const { otp, email, token, otpLength } = usePage<VerifyOtpPageProps>().props;
-    const [otpValue, setOtpValue] = useState("");
-    const [secondsLeft, setSecondsLeft] = useState(() =>
-        otp ? secondsUntil(otp.expiresAt) : 0,
+    const { otp, email, token, otpLength, resendAvailableAt } = usePage<VerifyOtpPageProps>().props;
+    const otpResendAt = otp?.resendAvailableAt ?? null;
+    const throttledUntil = resendAvailableAt ?? null;
+    const resendWait = useCallback(
+        () => Math.max(otpResendAt ? secondsUntil(otpResendAt) : 0, throttledUntil ? secondsUntil(throttledUntil) : 0),
+        [otpResendAt, throttledUntil],
     );
+    const [otpValue, setOtpValue] = useState("");
+    const [secondsLeft, setSecondsLeft] = useState(resendWait);
     const [resendProcessing, setResendProcessing] = useState(false);
     const [errorSuppressed, setErrorSuppressed] = useState(false);
 
@@ -35,12 +41,11 @@ const VerifyOTP = () => {
     };
 
     useEffect(() => {
-        if (!otp?.expiresAt) return;
-        const tick = () => setSecondsLeft(secondsUntil(otp.expiresAt));
+        const tick = () => setSecondsLeft(resendWait());
         tick();
         const id = window.setInterval(tick, 1000);
         return () => window.clearInterval(id);
-    }, [otp?.expiresAt]);
+    }, [resendWait]);
 
     const canResend = secondsLeft <= 0 && !resendProcessing;
 

@@ -38,7 +38,7 @@ class ProfileController extends Controller
                 'otp_required' => true,
                 'otp_token' => $result['generated']->flowToken,
                 'new_email' => $request->validated('email'),
-                'seconds_remaining' => 120,
+                'seconds_remaining' => $this->profileUpdateService->resendCooldownRemaining($result['generated']->otp),
                 'status' => 'A verification code has been sent to your email to confirm the changes.',
             ]);
         }

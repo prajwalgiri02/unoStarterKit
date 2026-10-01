@@ -59,7 +59,7 @@ function Settings({ user, otpLength }: SettingsPageProps) {
                 const next = page.props.flash as SettingsPageProps["flash"] & { otp_token?: string };
                 if (next?.otp_required && next.otp_token) {
                     setOtp({ token: next.otp_token, email: next.new_email ?? data.email });
-                    setSecondsLeft(next.seconds_remaining ?? 120);
+                    setSecondsLeft(next.seconds_remaining ?? 0);
                     setOtpError(undefined);
                 } else {
                     setEditing(false);
@@ -89,7 +89,10 @@ function Settings({ user, otpLength }: SettingsPageProps) {
         setResending(true);
         router.post(`/cms/settings/resend/${otp.token}`, {}, {
             preserveScroll: true,
-            onSuccess: () => setSecondsLeft(120),
+            onSuccess: (page) => {
+                const next = page.props.flash as SettingsPageProps["flash"];
+                setSecondsLeft(next?.seconds_remaining ?? 0);
+            },
             onFinish: () => setResending(false),
         });
     };

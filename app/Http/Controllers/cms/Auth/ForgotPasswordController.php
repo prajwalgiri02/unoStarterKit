@@ -64,6 +64,7 @@ class ForgotPasswordController extends Controller
                 'updatedAt' => $otp->updated_at->toIso8601String(),
                 'expiresAt' => $otp->expires_at->toIso8601String(),
                 'verifiedAt' => $otp->verified_at?->toIso8601String(),
+                'resendAvailableAt' => $this->passwordResetService->resendAvailableAt($otp)?->toIso8601String(),
             ],
         ]);
     }

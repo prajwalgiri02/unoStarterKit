@@ -12,6 +12,7 @@ use App\Exceptions\OtpException;
 use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -176,6 +177,11 @@ final class PasswordResetService
     public function isReadyForReset(Otp $otp): bool
     {
         return $this->otpService->isValidVerifiedOtp($otp);
+    }
+
+    public function resendAvailableAt(Otp $otp): ?Carbon
+    {
+        return $this->otpService->resendAvailableAt($otp);
     }
 
     public function otpLength(): int

@@ -149,6 +149,11 @@ final class ProfileUpdateService
         return $this->otpService->resendAvailableAt($otp);
     }
 
+    public function resendCooldownRemaining(Otp $otp): int
+    {
+        return $this->otpService->resendCooldownRemaining($otp);
+    }
+
     public function maskEmail(string $email): string
     {
         [$username, $domain] = array_pad(explode('@', $email, 2), 2, '');
