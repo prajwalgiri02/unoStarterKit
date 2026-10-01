@@ -40,6 +40,7 @@ It serves as a consistent foundation for future Uno Technology projects, allowin
   - [13. Video Upload (Chunked to S3)](#13-video-upload-chunked-to-s3)
   - [14. Standardised API Responses](#14-standardised-api-responses)
   - [15. Slug Generation (`HasSlug`)](#15-slug-generation-hasslug)
+  - [16. CMS Frontend (React + Tailwind)](#16-cms-frontend-react--tailwind)
 - [Configuration Reference](#configuration-reference)
 - [Route Overview](#route-overview)
   - [API Routes (`/api/*`)](#api-routes-api)
@@ -52,11 +53,14 @@ It serves as a consistent foundation for future Uno Technology projects, allowin
 | Layer | Package / Tool |
 |---|---|
 | Framework | Laravel 13.x, PHP 8.3+ |
-| Frontend bridge | Inertia.js (`inertiajs/inertia-laravel`) |
+| Frontend bridge | Inertia.js v3 (`inertiajs/inertia-laravel`, `@inertiajs/react`) |
+| CMS frontend | React 19 + TypeScript, Tailwind CSS v4 (theme tokens in `resources/css/theme.css`) |
+| Rich text | Tiptap 3 (editor) + DOMPurify (rendering) |
+| Toasts | sonner |
 | API auth | JWT (`php-open-source-saver/jwt-auth`) |
 | Roles & permissions | Spatie Laravel Permission v8 |
 | File storage | AWS S3 (`league/flysystem-aws-s3-v3`) |
-| Frontend build | Vite + npm |
+| Frontend build | Vite 8 + npm |
 | Testing | PHPUnit 12 |
 | Code style | Laravel Pint |
 
@@ -90,24 +94,31 @@ All mobile/SPA clients authenticate with stateless JWT tokens.
 |---|---|---|
 | `POST` | `/api/auth/register` | Register a new account and receive a token |
 | `POST` | `/api/auth/login` | Log in and receive a token |
-| `POST` | `/api/auth/logout` | Invalidate the current token |
-| `POST` | `/api/auth/refresh` | Rotate the JWT before it expires |
-| `POST` | `/api/auth/me` | Return the authenticated user's profile |
+| `POST` | `/api/auth/logout` | Invalidate the current token (`device_id` required) |
+| `POST` | `/api/auth/refresh` | Issue a new token; the current one must not have expired yet |
+| `GET` | `/api/profile` | Return the authenticated user's profile |
 
 **Login guards:**
-- A user whose account is **pending admin approval** receives a `403` response.
-- A user whose account has been **blocked** also receives a `403` response.
+- Wrong email or password returns `401` with `code: invalid_credentials`.
+- A user whose account is **pending admin approval** receives `403` with `code: account_pending_approval`.
+- A user whose account has been **blocked** receives `403` with `code: account_blocked`.
 
-The token response shape:
+The token response (inside the standard envelope, see [Standardised API Responses](#14-standardised-api-responses)):
 
 ```json
 {
-  "access_token": "...",
-  "token_type": "bearer",
-  "expires_in": 3600,
-  "user": { ... }
+  "status": 200,
+  "message": null,
+  "data": {
+    "access_token": "...",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "user": { ... }
+  }
 }
 ```
+
+**Token revocation:** every JWT carries a `tv` claim matching `users.token_version`. A password reset increments the version, and the `EnsureApiTokenIsCurrent` middleware (appended to the `api` middleware group) rejects older tokens with `401 unauthenticated`, signing the user out on every device.
 
 ---
 
@@ -173,7 +184,7 @@ Each setting can be defined globally under `defaults` or overridden per-purpose 
 
 | Key | Default | Description |
 |---|---|---|
-| `length` | `6` | Number of digits (4–9) |
+| `length` | `6` (`OTP_LENGTH` in `.env`) | Number of digits (4–9). Applies to every flow; the CMS OTP screens read it from the backend so they always show the right number of boxes |
 | `expires_in_minutes` | `10` | Minutes until the code expires |
 | `max_attempts` | `5` | Failed attempts before the code is locked |
 | `max_resends` | `3` | Times the user may request a new code |
@@ -188,7 +199,24 @@ The `SmsGateway` contract (`App\Contracts\SmsGateway`) defines a single `send(st
 
 ### 4. Password Reset Flow
 
-A multi-step, token-guarded password reset entirely via OTP — no email magic links required.
+A multi-step, token-guarded password reset entirely via OTP — no email magic links required. The CMS and the API share `PasswordResetService`, but each has its own routes and request classes.
+
+#### API (mobile)
+
+| Step | Method | Endpoint | Body | Result |
+|---|---|---|---|---|
+| 1 | `POST` | `/api/auth/password/forgot` | `email` | Always `200` "Please check your email for a verification code." A code is only sent when the account exists |
+| 2 | `POST` | `/api/auth/password/verify` | `email`, `otp` | Returns `{ reset_token, expires_in }` (single-use, 15 minutes) |
+| — | `POST` | `/api/auth/password/resend` | `email` | Sends a new code; same `200` for unknown emails |
+| 3 | `POST` | `/api/auth/password/reset` | `reset_token`, `password`, `password_confirmation` | Sets the password; `422 reset_token_invalid` if the token is wrong, expired or already used |
+
+Follows the OWASP forgot-password guidance:
+- The responses never reveal whether an email is registered (unknown emails get the same `200` on forgot and resend, and `otp_invalid` on verify).
+- Only the holder of the `reset_token` from step 2 can set the new password, so knowing an email is not enough to take over a reset.
+- After a reset every existing API token for the user stops working (see [Token revocation](#1-api-authentication-jwt)); the user logs in again.
+- All four endpoints are rate limited to 3 requests per 60 minutes per IP, and resending is limited to once every 60 seconds.
+
+#### CMS (admin)
 
 | Route | Description |
 |---|---|
@@ -206,7 +234,7 @@ A multi-step, token-guarded password reset entirely via OTP — no email magic l
 - Routes are protected by middleware: `password-reset.pending` (token must exist and be unverified) or `password-reset.verified` (token must already be verified).
 - The `PasswordResetService` rolls back OTP creation if delivery fails, preventing silent lock-outs.
 - Email addresses are masked in the UI (e.g. `jo***@example.com`).
-- A `PasswordReset` event is fired after a successful reset.
+- A `PasswordReset` event is fired after a successful reset, and the user's API tokens are revoked.
 
 ---
 
@@ -316,11 +344,13 @@ Editable rich-text pages that the mobile app consumes via API.
 | `GET` | `/cms/static-content` | List all content pages |
 | `PUT` | `/cms/static-content/{staticContent}` | Update a page's title and description |
 
+The description is edited with the Tiptap rich text editor (`RichTextEditor`) and **stored as HTML** (headings, bold/italic/underline, lists, links). Several pages can be edited at once. The editor is loaded on demand, only when "Edit Details" is clicked. Read-only views render the HTML through `RichText`, which sanitises it with DOMPurify. Older plain-text content still loads with its line breaks.
+
 #### API (Public)
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/static-content/{type}` | Fetch a single content page by type slug |
+| `GET` | `/api/{type}` | Fetch a single content page, e.g. `/api/terms_and_conditions`. `description` is HTML |
 
 ---
 
@@ -408,27 +438,37 @@ Files are stored at path: `uploads/videos/{file_id}_{file_name}` on the configur
 
 ### 14. Standardised API Responses
 
-All API controllers use the `ApiResponse` trait for consistent JSON envelopes:
+**Every** response under `/api/*` uses one envelope, including errors raised by the framework (validation, authentication, 404/405, rate limiting, server errors and maintenance mode). The full contract with raw sample bodies for every endpoint is in [`docs/api-response-reference.pdf`](api-response-reference.pdf); share that with mobile developers.
 
 **Success:**
 ```json
-{
-  "status": 200,
-  "message": null,
-  "data": { ... }
-}
+{ "status": 200, "message": null, "data": { ... } }
+```
+
+**Paginated success** (any `LengthAwarePaginator`, e.g. the notifications list):
+```json
+{ "status": 200, "message": "...", "data": [ ... ], "meta": { "current_page": 1, "last_page": 2, "per_page": 20, "total": 22, "from": 1, "to": 20 } }
 ```
 
 **Error:**
 ```json
-{
-  "status": 401,
-  "message": "Unauthorized",
-  "errors": null
-}
+{ "status": 422, "code": "validation_failed", "message": "The email field is required.", "errors": { "email": ["The email field is required."] } }
 ```
 
-Throttle exceptions (`429`) and OTP exceptions (`422`) are automatically converted to the same structured format by the exception handler in `bootstrap/app.php`.
+- `code` is a stable, machine-readable value from `App\Enums\ApiErrorCode` (e.g. `invalid_credentials`, `account_blocked`, `otp_expired`, `reset_token_invalid`, `too_many_requests`). Clients should branch on `code`, never on `message`.
+- `errors` is a field → messages map for validation and OTP errors, otherwise `null`.
+- A 500 returns a safe generic message; a `debug` block is added only when `APP_DEBUG=true`.
+
+**How it works:**
+
+| Piece | Role |
+|---|---|
+| `App\Support\ApiEnvelope` | Builds every success/error body; adds `meta` automatically for paginated data |
+| `App\Traits\ApiResponse` | Controller helpers: `successResponse()`, `errorResponse($message, $status, $errors, $errorCode)`, `resourceResponse()` |
+| `App\Exceptions\ApiExceptionRenderer` | Registered in `bootstrap/app.php`; converts every exception on `api/*` into the envelope |
+| `App\Exceptions\OtpException` | Carries an `ApiErrorCode` `reason` (e.g. `OtpExpired`) that becomes the response `code` |
+
+**Validation:** every endpoint validates through a dedicated FormRequest class. When the CMS and API accept different input for the same action, they use separate classes (e.g. `Auth\VerifyPasswordOtpRequest` for the CMS, `Api\VerifyPasswordResetOtpRequest` for the API) instead of one class with conditional rules.
 
 ---
 
@@ -504,6 +544,40 @@ With the `saving` hook in place, the slug is regenerated whenever `title` change
 
 ---
 
+### 16. CMS Frontend (React + Tailwind)
+
+The CMS is built from the Figma "Design Foundation" components and themed entirely through design tokens, so a new project only needs a new `theme.css`.
+
+#### Styling
+
+| File | Holds |
+|---|---|
+| `resources/css/app.css` | Imports only (fonts, Tailwind, the two files below) |
+| `resources/css/theme.css` | Design tokens: colour scales (`primary`, `secondary`, `neutral`, `success`, `warning`, `error`, `info`), text styles, shadows, modal backdrop, and layout backgrounds (`app-background`, `auth-background`, `auth-panel`) |
+| `resources/css/utilities.css` | Custom Tailwind utilities (`@utility`), e.g. `scrollbar-none` and `autofill-none` |
+
+Components are styled with Tailwind classes that reference the tokens (e.g. `bg-primary-500`, `text-body-xs`). There is no separate component stylesheet; change a token and every component follows.
+
+#### Structure
+
+| Folder | Contents |
+|---|---|
+| `Layouts/` | Exactly two layouts: `auth-layout` (login, forgot/reset password) and `app-layout` (sidebar + header for logged-in pages) |
+| `Components/buttons/` | `Button` (giant/large/medium/small/tiny; filled/outline/clear; primary/danger), `IconButton`, `TextButton` |
+| `Components/inputs/` | `Input`, `Select`, `Textarea`, `RichTextEditor`, `Checkbox`, `Radio`, `Toggle`, `OtpInput`, `DateRangePicker`. Input, Select, Textarea and the editor share `field.tsx` (sizes, statuses, filled/outline variants, disabled state, label and helper text) |
+| `Components/badges/`, `feedback/`, `modals/` | `Badge`, `Alert`, toasts (`lib/toast`), `Modal`, `ConfirmModal`, `OtpModal`, `SuccessModal` |
+| `Components/common/` | `Card`, `Tabs`, `Popover`, `DropdownMenu`, `SortMenu`, `Avatar`, `DetailField`, `RichText`, … |
+| `Components/icons/` | Icons exported from Figma as React components (`currentColor`) |
+
+#### Conventions
+
+- **Pages load on demand.** `app.tsx` resolves each Inertia page as its own chunk, so a page only downloads the code it uses. Heavy components (the rich text editor) are additionally lazy-loaded with `React.lazy`.
+- **Forms** use `useFieldForm` (`resources/js/lib/use-field-form.ts`), a wrapper around Inertia's `useForm` whose `setField(name, value)` updates a field and clears that field's validation error.
+- **Dropdowns** (`Popover`) render in a portal, flip upwards when there is no room below and follow their trigger on scroll, so they are never clipped by scroll containers.
+- **Page titles** come from each layout's `pageTitle`/`title` and render as `Page | APP_NAME` in the browser tab. The favicon is `public/favicon.svg`.
+
+---
+
 ## Configuration Reference
 
 | File | Key | Description |
@@ -514,7 +588,9 @@ With the `saving` hook in place, the slug is regenerated whenever `title` change
 | `config/otp.php` | `purposes.<name>.delivery.channels` | Per-purpose delivery channel override |
 | `config/users.php` | `require_approval` | `true` to require admin approval before users can log in |
 | `config/filesystems.php` | `disks.s3.*` | AWS S3 credentials and bucket for video uploads |
-| `.env` | `JWT_SECRET` | Secret key for JWT token signing |
+| `.env` | `JWT_SECRET` | Secret key for JWT token signing. Generate it with `php artisan jwt:secret`; API login fails without it |
+| `.env` | `OTP_LENGTH` | Number of OTP digits for every flow (default `6`) |
+| `.env` | `APP_NAME` | Shown after the page name in browser tab titles |
 
 ---
 
@@ -528,11 +604,23 @@ With the `saving` hook in place, the slug is regenerated whenever `title` change
 | No | `POST` | `/api/auth/login` | Login |
 | JWT | `POST` | `/api/auth/logout` | Logout |
 | JWT | `POST` | `/api/auth/refresh` | Refresh token |
-| JWT | `POST` | `/api/auth/me` | Current user |
-| JWT | `GET` | `/api/user` | Current user (shorthand) |
+| No | `POST` | `/api/auth/password/forgot` | Password reset: send code |
+| No | `POST` | `/api/auth/password/verify` | Password reset: verify code, get `reset_token` |
+| No | `POST` | `/api/auth/password/resend` | Password reset: resend code |
+| No | `POST` | `/api/auth/password/reset` | Password reset: set new password |
+| JWT | `GET` | `/api/profile` | Current user |
+| JWT | `POST` | `/api/profile` | Update profile (multipart for `avatar`) |
+| JWT | `GET` | `/api/user` | Current user (same as `GET /api/profile`) |
+| JWT | `POST` | `/api/change-password` | Change password |
+| JWT | `POST` | `/api/device-tokens` | Register a device for push notifications |
+| JWT | `GET` | `/api/notifications` | Paginated notifications (`?page=N`) |
+| JWT | `PATCH` | `/api/notifications/{id}/read` | Mark one notification as read |
+| JWT | `PATCH` | `/api/notifications/mark-all-as-read` | Mark all as read |
 | No | `GET` | `/api/faqs` | Public FAQ list |
-| No | `GET` | `/api/static-content/{type}` | Public static content |
-| No | `POST` | `/api/contact-us` | Submit support ticket |
+| No | `GET` | `/api/{type}` | Public static content (`terms_and_conditions`, `privacy_policy`, `community_guidelines`) |
+| Optional | `POST` | `/api/contact-us` | Submit support ticket |
+
+Login, register and the password-reset endpoints are rate limited to 3 requests per 60 minutes per IP.
 
 ### CMS Routes (`/cms/*`)
 
