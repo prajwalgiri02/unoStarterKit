@@ -27,18 +27,35 @@ class UserManagerController extends Controller
         $search = $request->string('search')->trim()->toString();
         $search = $search !== '' ? $search : null;
 
-        $users = $this->userManagerService->listUsers($search);
+        $approvalEnabled = $this->userApprovalService->isEnabled();
+        $status = $this->option($request, 'status', ['active', 'blocked']);
+        $approval = $approvalEnabled ? $this->option($request, 'approval', ['approved', 'pending']) : null;
+
+        $users = $this->userManagerService->listUsers($search, $status, $approval);
 
         return Inertia::render('cms/user-management/index', [
             'users' => UserResource::collection($users),
-            'pendingUsers' => $this->userApprovalService->isEnabled()
+            'pendingUsers' => $approvalEnabled
                 ? UserResource::collection($this->userManagerService->listPendingUsers($search))
                 : null,
             'pendingCount' => $this->userApprovalService->pendingCount(),
+            'approvalEnabled' => $approvalEnabled,
             'filters' => [
                 'search' => $search ?? '',
+                'status' => $status ?? '',
+                'approval' => $approval ?? '',
             ],
         ]);
+    }
+
+    /**
+     * @param  list<string>  $allowed
+     */
+    private function option(Request $request, string $key, array $allowed): ?string
+    {
+        $value = $request->string($key)->toString();
+
+        return in_array($value, $allowed, true) ? $value : null;
     }
 
     public function show(User $user): Response

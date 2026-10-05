@@ -20,12 +20,15 @@ class UserManagerService
     /**
      * @return LengthAwarePaginator<int, User>
      */
-    public function listUsers(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    public function listUsers(?string $search = null, ?string $status = null, ?string $approval = null, int $perPage = 10): LengthAwarePaginator
     {
         return $this->search(User::query(), $search)
             ->with('roles')
             ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
-            ->when($this->userApprovalService->isEnabled(), fn ($query) => $query->whereNotNull('approved_at'))
+            ->when($status === 'active', fn ($query) => $query->whereNull('blocked_at'))
+            ->when($status === 'blocked', fn ($query) => $query->whereNotNull('blocked_at'))
+            ->when($approval === 'approved', fn ($query) => $query->whereNotNull('approved_at'))
+            ->when($approval === 'pending', fn ($query) => $query->whereNull('approved_at'))
             ->orderByDesc('created_at')
             ->paginate($perPage)
             ->withQueryString();

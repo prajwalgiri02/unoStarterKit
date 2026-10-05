@@ -3,6 +3,7 @@ import Button from "@/Components/buttons/button";
 import IconButton from "@/Components/buttons/icon-button";
 import Avatar from "@/Components/common/avatar";
 import Card from "@/Components/common/card";
+import FilterMenu from "@/Components/common/filter-menu";
 import { ArrowDownIcon, EditIcon, TrashIcon } from "@/Components/icons";
 import HeaderSearch from "@/Components/layouts/header-search";
 import ConfirmModal from "@/Components/modals/confirm-modal";
@@ -33,7 +34,25 @@ function ApprovalBadge({ approved }: { approved: boolean }) {
     );
 }
 
-function UserManagement({ users, pendingUsers, pendingCount }: UserListPageProps) {
+const STATUS_OPTIONS = [
+    { value: "active", label: "Active" },
+    { value: "blocked", label: "Blocked" },
+];
+
+const APPROVAL_OPTIONS = [
+    { value: "approved", label: "Approved" },
+    { value: "pending", label: "Pending" },
+];
+
+function applyFilter(key: "status" | "approval", value: string | null) {
+    const params = Object.fromEntries(new URLSearchParams(window.location.search));
+    delete params.page;
+    if (value) params[key] = value;
+    else delete params[key];
+    router.get(window.location.pathname, params, { preserveState: true, preserveScroll: true, replace: true });
+}
+
+function UserManagement({ users, pendingUsers, pendingCount, approvalEnabled, filters }: UserListPageProps) {
     const [pendingOpen, setPendingOpen] = useState(true);
     const [userToDelete, setUserToDelete] = useState<UserCms | null>(null);
     const [deleting, setDeleting] = useState(false);
@@ -71,6 +90,9 @@ function UserManagement({ users, pendingUsers, pendingCount }: UserListPageProps
     const userColumns: Column<UserCms>[] = [
         { key: "name", header: "Name", render: (user) => <NameCell user={user} /> },
         { key: "location", header: "Location", render: (user) => user.location ?? "—" },
+        ...(approvalEnabled
+            ? [{ key: "approval", header: "Approval", render: (user: UserCms) => <ApprovalBadge approved={user.is_approved} /> }]
+            : []),
         {
             key: "status",
             header: "Status",
@@ -140,7 +162,27 @@ function UserManagement({ users, pendingUsers, pendingCount }: UserListPageProps
                 </Card>
             )}
 
-            <Card title="All Users">
+            <Card
+                title="All Users"
+                actions={
+                    <>
+                        {approvalEnabled && (
+                            <FilterMenu
+                                label="Approval"
+                                options={APPROVAL_OPTIONS}
+                                value={filters.approval || null}
+                                onChange={(value) => applyFilter("approval", value)}
+                            />
+                        )}
+                        <FilterMenu
+                            label="Status"
+                            options={STATUS_OPTIONS}
+                            value={filters.status || null}
+                            onChange={(value) => applyFilter("status", value)}
+                        />
+                    </>
+                }
+            >
                 <DataTable columns={userColumns} rows={users.data} rowKey={(user) => user.id} caption="All users" emptyMessage="No users found" />
                 {users.meta && (
                     <Pagination links={users.meta.links} from={users.meta.from} to={users.meta.to} total={users.meta.total} />

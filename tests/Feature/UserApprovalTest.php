@@ -171,8 +171,59 @@ class UserApprovalTest extends TestCase
                 ->where('pendingUsers.meta.current_page', 3)
                 ->where('pendingUsers.meta.total', 5)
                 ->has('users.data', 10)
-                ->where('users.meta.total', 12)
-                ->where('users.data', fn ($users) => collect($users)->every(fn ($user) => $user['is_approved'])));
+                ->where('users.meta.total', 17));
+    }
+
+    public function test_all_users_can_be_filtered_by_approval_and_status(): void
+    {
+        config(['users.require_approval' => true]);
+
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        $pending = User::factory()->pendingApproval()->create(['name' => 'Pending Active']);
+        $pending->assignRole('user');
+        $blocked = User::factory()->approved()->create(['name' => 'Approved Blocked', 'blocked_at' => now()]);
+        $blocked->assignRole('user');
+        $active = User::factory()->approved()->create(['name' => 'Approved Active']);
+        $active->assignRole('user');
+
+        $names = fn (array $query) => $this->actingAs($admin)
+            ->get(route('cms.user-manager.index', $query))
+            ->assertOk()
+            ->viewData('page')['props']['users']['data'];
+
+        $this->assertEqualsCanonicalizing(['Pending Active', 'Approved Blocked', 'Approved Active'], array_column($names([]), 'name'));
+        $this->assertSame(['Pending Active'], array_column($names(['approval' => 'pending']), 'name'));
+        $this->assertEqualsCanonicalizing(['Approved Blocked', 'Approved Active'], array_column($names(['approval' => 'approved']), 'name'));
+        $this->assertSame(['Approved Blocked'], array_column($names(['status' => 'blocked']), 'name'));
+        $this->assertEqualsCanonicalizing(['Pending Active', 'Approved Active'], array_column($names(['status' => 'active']), 'name'));
+        $this->assertSame(['Approved Active'], array_column($names(['status' => 'active', 'approval' => 'approved']), 'name'));
+        $this->assertCount(3, $names(['status' => 'nonsense', 'approval' => 'nonsense']));
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index', ['status' => 'blocked', 'approval' => 'pending']))
+            ->assertInertia(fn ($page) => $page
+                ->where('approvalEnabled', true)
+                ->where('filters.status', 'blocked')
+                ->where('filters.approval', 'pending')
+                ->has('users.data', 0)
+                ->where('pendingCount', 1));
+    }
+
+    public function test_approval_filter_is_ignored_when_approval_is_disabled(): void
+    {
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        User::factory()->pendingApproval()->create()->assignRole('user');
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index', ['approval' => 'pending']))
+            ->assertInertia(fn ($page) => $page
+                ->where('approvalEnabled', false)
+                ->where('filters.approval', '')
+                ->has('users.data', 1));
     }
 
     public function test_user_manager_search_filters_both_lists(): void
@@ -194,8 +245,8 @@ class UserApprovalTest extends TestCase
                 ->where('pendingCount', 2)
                 ->has('pendingUsers.data', 1)
                 ->where('pendingUsers.data.0.name', 'Jane Pending')
-                ->has('users.data', 1)
-                ->where('users.data.0.name', 'Jane Approved'));
+                ->has('users.data', 2)
+                ->where('users.data', fn ($users) => collect($users)->pluck('name')->sort()->values()->all() === ['Jane Approved', 'Jane Pending']));
     }
 
     public function test_pending_list_falls_back_to_its_last_page_when_the_page_empties(): void

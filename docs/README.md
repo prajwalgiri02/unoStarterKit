@@ -294,7 +294,7 @@ Registration approvals can be toggled via the `users.require_approval` config ke
 |---|---|---|
 | `POST` | `/cms/admin/users/{user}/approve` | Approve a specific user |
 
-The User Manager page has two lists. **Users Pending Approval** shows unapproved users, 2 per page (`?pending_page=N`), with a badge counting every pending user. **All Users** shows the remaining non-admin users, 10 per page (`?page=N`); when approval is on it leaves pending users out. The header search filters both lists by name or email as you type and resets both to page 1.
+The User Manager page has two lists. **Users Pending Approval** shows unapproved users, 2 per page (`?pending_page=N`), with a badge counting every pending user. **All Users** shows every non-admin user, pending ones included, 10 per page (`?page=N`). It has two filters: **Status** (`?status=active|blocked`) and, when approval is on, **Approval** (`?approval=approved|pending`); invalid values are ignored. The header search filters both lists by name or email as you type and resets both to page 1.
 
 The `EnsureUserApproved` middleware is aliased as `approved` and applied globally to all authenticated CMS routes.
 

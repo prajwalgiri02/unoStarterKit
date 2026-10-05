@@ -28,7 +28,8 @@ export interface UserListPageProps {
     users: PaginatedResponse<UserCms>;
     pendingUsers: PaginatedResponse<UserCms> | null;
     pendingCount: number;
-    filters: { search: string };
+    approvalEnabled: boolean;
+    filters: { search: string; status: string; approval: string };
 }
 
 export interface UserDetailPageProps {
