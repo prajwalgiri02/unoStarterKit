@@ -16,13 +16,41 @@ final class Prompter
      * @param  resource  $input
      * @param  resource  $output
      * @param  Closure(): mixed|null  $fallbackInput  Opens the real console when the input stream is already at its end.
+     * @param  Closure(): ?string|null  $lineReader  Reads one answer instead of the input stream; null means no more input.
+     * @param  Closure(): ?string|null  $secretReader  Reads one hidden answer instead of the input stream.
      */
     public function __construct(
         private $input,
         private $output,
         private readonly bool $hideSecrets = false,
         private ?Closure $fallbackInput = null,
+        private readonly ?Closure $lineReader = null,
+        private readonly ?Closure $secretReader = null,
     ) {}
+
+    public static function forComposer(object $io): self
+    {
+        $read = function (string $method) use ($io): ?string {
+            if (! $io->isInteractive()) {
+                return null;
+            }
+
+            try {
+                $answer = $io->{$method}('', '');
+            } catch (\Throwable) {
+                return null;
+            }
+
+            return is_string($answer) ? $answer : null;
+        };
+
+        return new self(
+            STDIN,
+            STDOUT,
+            lineReader: fn (): ?string => $read('ask'),
+            secretReader: fn (): ?string => $read('askAndHideAnswer') ?? $read('ask'),
+        );
+    }
 
     public static function forTerminal(): self
     {
@@ -244,6 +272,10 @@ final class Prompter
 
     private function readLine(): string
     {
+        if ($this->lineReader !== null) {
+            return $this->readFrom($this->lineReader);
+        }
+
         $line = fgets($this->input);
 
         if ($line === false && $this->fallbackInput !== null) {
@@ -264,8 +296,23 @@ final class Prompter
         return rtrim($line, "\r\n");
     }
 
+    private function readFrom(Closure $reader): string
+    {
+        $line = $reader();
+
+        if ($line === null) {
+            throw new InstallAborted('Input ended before all questions were answered.');
+        }
+
+        return rtrim($line, "\r\n");
+    }
+
     private function readSecret(): string
     {
+        if ($this->secretReader !== null) {
+            return trim($this->readFrom($this->secretReader));
+        }
+
         if (! $this->hideSecrets && ! $this->usingConsole) {
             return trim($this->readLine());
         }

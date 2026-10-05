@@ -67,11 +67,11 @@
         ],
         "post-root-package-install": [
             "Composer\\Config::disableProcessTimeout",
-            "@php installer/setup.php --from-composer"
+            "Installer\\ComposerHook::install"
         ],
         "post-create-project-cmd": [
             "Composer\\Config::disableProcessTimeout",
-            "@php installer/setup.php --finish --from-composer"
+            "Installer\\ComposerHook::finish"
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"

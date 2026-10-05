@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Installer\EnvEditor;
+use Installer\InstallAborted;
 use Installer\Installer;
 use Installer\Prompter;
 use PHPUnit\Framework\TestCase;
@@ -263,6 +264,80 @@ class InstallerTest extends TestCase
 
         $this->assertSame(1, $code);
         $this->assertStringContainsString('Unknown section(s): admin', $output);
+    }
+
+    public function test_the_composer_prompter_reads_answers_from_the_composer_io(): void
+    {
+        $io = $this->composerIo(['Grocery Go', '', 'secret'], interactive: true);
+        $prompter = Prompter::forComposer($io);
+
+        $this->assertSame('Grocery Go', $prompter->text('Name'));
+        $this->assertSame('fallback', $prompter->text('Slug', 'fallback'));
+        $this->assertSame('secret', $prompter->password('Password'));
+        $this->assertSame(['ask', 'ask', 'askAndHideAnswer'], $io->methods);
+    }
+
+    public function test_the_composer_prompter_aborts_when_composer_is_not_interactive(): void
+    {
+        $prompter = Prompter::forComposer($this->composerIo(['ignored'], interactive: false));
+
+        $this->expectException(InstallAborted::class);
+
+        $prompter->text('Name');
+    }
+
+    public function test_the_composer_prompter_aborts_when_the_input_ends(): void
+    {
+        $prompter = Prompter::forComposer($this->composerIo([], interactive: true));
+
+        $this->expectException(InstallAborted::class);
+
+        $prompter->text('Name');
+    }
+
+    /**
+     * @param  list<string>  $answers
+     */
+    private function composerIo(array $answers, bool $interactive): object
+    {
+        return new class($answers, $interactive)
+        {
+            /** @var list<string> */
+            public array $methods = [];
+
+            /**
+             * @param  list<string>  $answers
+             */
+            public function __construct(private array $answers, private readonly bool $interactive) {}
+
+            public function isInteractive(): bool
+            {
+                return $this->interactive;
+            }
+
+            public function ask(string $question, mixed $default = null): mixed
+            {
+                $this->methods[] = 'ask';
+
+                return $this->next();
+            }
+
+            public function askAndHideAnswer(string $question): mixed
+            {
+                $this->methods[] = 'askAndHideAnswer';
+
+                return $this->next();
+            }
+
+            private function next(): string
+            {
+                if ($this->answers === []) {
+                    throw new \RuntimeException('Aborted');
+                }
+
+                return array_shift($this->answers);
+            }
+        };
     }
 
     private function withAdminSection(): \Closure

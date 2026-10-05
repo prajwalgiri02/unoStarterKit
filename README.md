@@ -39,7 +39,7 @@ What happens:
 3. Composer installs the packages.
 4. Setup finishes: keys, migrations, seeding, and `npm install` / `npm run build` if you said yes.
 
-If your terminal does not let Composer read the keyboard (this can happen on Windows), the questions are skipped, the packages are still installed, and the command ends by telling you to finish in the same terminal:
+The questions are asked by Composer itself, so they work in a normal terminal on Windows, Mac and Linux. If Composer runs without a keyboard (for example with `--no-interaction`, or in CI), the questions are skipped, the packages are still installed, and the command ends by telling you to finish in a terminal:
 
 ```bash
 cd grocery-go
