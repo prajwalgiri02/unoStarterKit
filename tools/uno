@@ -6,9 +6,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-REPO="${UNO_REPO:-git@github.com:prajwalgiri02/unoStarterKit.git}"
-
-composer create-project prajwalgiri02/unostarterkit "$1" --no-install --no-scripts --remove-vcs --repository="{\"type\":\"vcs\",\"url\":\"$REPO\",\"no-api\":true}"
+composer create-project unotechno/starterkit "$1" --no-install --no-scripts --remove-vcs
 
 cd "$1"
 php installer/setup.php

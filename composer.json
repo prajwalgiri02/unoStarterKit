@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "prajwalgiri02/unostarterkit",
+    "name": "unotechno/starterkit",
     "type": "project",
     "description": "Laravel + React/Inertia starter kit with a CMS admin panel, JWT API, OTP, SMS and push notifications.",
     "keywords": [

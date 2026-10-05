@@ -26,18 +26,12 @@ Included out of the box:
 
 ## Creating a new project
 
-You need SSH access to the GitHub repository. Creating a project is two commands, like `laravel new`:
+Creating a project is two commands, like `laravel new`:
 
 ```bash
-composer create-project prajwalgiri02/unostarterkit grocery-go --no-install --no-scripts --remove-vcs --repository='{"type":"vcs","url":"git@github.com:prajwalgiri02/unoStarterKit.git","no-api":true}'
+composer create-project unotechno/starterkit grocery-go --no-install --no-scripts --remove-vcs
 cd grocery-go
 php installer/setup.php
-```
-
-In PowerShell, escape the JSON quotes in the first command:
-
-```powershell
-composer create-project prajwalgiri02/unostarterkit grocery-go --no-install --no-scripts --remove-vcs --repository='{\"type\":\"vcs\",\"url\":\"git@github.com:prajwalgiri02/unoStarterKit.git\",\"no-api\":true}'
 ```
 
 What happens:
@@ -45,7 +39,7 @@ What happens:
 1. **Command 1** downloads only the kit's files, which takes a few seconds. `--no-install` skips the Composer packages, `--no-scripts` stops Composer from running anything, and `--remove-vcs` gives the project a fresh start without the kit's `.git` history and without Composer asking about it.
 2. **Command 2** runs the installer in your own terminal, so it can read your keyboard. It asks every question first, then installs the Composer packages, then finishes setup (keys, database, seeding, npm).
 
-Composer installs the latest tagged release (`v1.0.0`, `v1.1.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
+Composer installs the latest tagged release (`v2.1.0`, `v2.2.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
 
 ### One command with `uno`
 
@@ -68,7 +62,7 @@ Composer runs scripts without connecting your keyboard on Windows, so a script c
 ### Cloning instead
 
 ```bash
-git clone git@github.com:prajwalgiri02/unoStarterKit.git grocery-go
+git clone https://github.com/prajwalgiri02/unoStarterKit.git grocery-go
 cd grocery-go
 rm -rf .git          # PowerShell: Remove-Item -Recurse -Force .git
 php installer/setup.php
@@ -78,11 +72,11 @@ php installer/setup.php
 ### Publishing a new version of the kit
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v2.2.0
+git push origin v2.2.0
 ```
 
-New projects pick up the newest tag. Existing projects are not affected.
+The package is listed on [Packagist](https://packagist.org/packages/unotechno/starterkit). Its GitHub webhook publishes every pushed tag as a new version, so there is nothing else to upload. New projects pick up the newest tag. Existing projects are not affected.
 
 ---
 
@@ -122,6 +116,7 @@ When you add code to a shared file that only makes sense with a module, wrap it 
 |---|---|---|
 | Modules | Which sidebar modules to keep | Yes |
 | Application | Name, URL | Yes |
+| Admin account | Admin email, admin password (leave it blank to generate one) | Yes, on a full install only |
 | Database | Driver, host, port, database name, username, password | Yes |
 | Authentication | Require admin approval for new users? (only with User Manager), require email verification?, require mobile verification?, OTP delivery channel | Yes |
 | Mail | Mailer, SMTP host, port, username, password, from address | Optional |
@@ -159,13 +154,15 @@ If a step in phase 2 fails, the installer stops and tells you what went wrong. Y
 
 `php artisan uno:install` (or `php installer/setup.php` when `vendor/` does not exist yet) runs both phases in one go.
 
-### Default admin login
+### Admin account
 
-| Email | Password |
-|---|---|
-| `developers@appifany.com.au` | `Test@123` |
+There is no default admin login. The installer asks for the admin email and password and the seeder creates that account with the `admin` role. The password must be at least 8 characters.
 
-Change this password after the first login on any shared or deployed environment.
+If you press Enter at the password question, the installer generates a random 16-character password and shows it once, so write it down. It is also repeated in the final summary of that run.
+
+The password is stored in `.env` only until seeding finishes, then it is cleared (`ADMIN_PASSWORD=`). Re-running the seeder never resets the password of an account that already exists. Sign in at `/cms/login` and change the password under Settings.
+
+Without the installer (for example in CI), set `ADMIN_EMAIL` and optionally `ADMIN_PASSWORD` in `.env` before `php artisan db:seed`. If `ADMIN_EMAIL` is empty, no admin is created and the seeder says so. If `ADMIN_PASSWORD` is empty, one is generated and printed.
 
 ---
 
