@@ -1,25 +1,35 @@
 import Input from "@/Components/inputs/input";
 import { router } from "@inertiajs/react";
 import { SearchIcon } from "@/Components/icons";
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState } from "react";
 
 type HeaderSearchProps = {
     placeholder?: string;
 };
 
-export default function HeaderSearch({ placeholder = "Search" }: HeaderSearchProps) {
-    const [value, setValue] = useState(
-        () => new URLSearchParams(window.location.search).get("search") ?? "",
-    );
+const SEARCH_DELAY_MS = 300;
 
-    const submit = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key !== "Enter") return;
-        const params = Object.fromEntries(new URLSearchParams(window.location.search));
-        delete params.page;
-        if (value) params.search = value;
-        else delete params.search;
-        router.get(window.location.pathname, params, { preserveState: true, replace: true });
-    };
+function currentSearch() {
+    return new URLSearchParams(window.location.search).get("search") ?? "";
+}
+
+function search(term: string) {
+    const params = Object.fromEntries(new URLSearchParams(window.location.search));
+    delete params.page;
+    if (term) params.search = term;
+    else delete params.search;
+    router.get(window.location.pathname, params, { preserveState: true, preserveScroll: true, replace: true });
+}
+
+export default function HeaderSearch({ placeholder = "Search" }: HeaderSearchProps) {
+    const [value, setValue] = useState(currentSearch);
+
+    useEffect(() => {
+        const term = value.trim();
+        if (term === currentSearch()) return;
+        const timer = window.setTimeout(() => search(term), SEARCH_DELAY_MS);
+        return () => window.clearTimeout(timer);
+    }, [value]);
 
     return (
         <div className="hidden w-68 md:block">
@@ -29,7 +39,6 @@ export default function HeaderSearch({ placeholder = "Search" }: HeaderSearchPro
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                onKeyDown={submit}
                 startIcon={<SearchIcon />}
             />
         </div>
