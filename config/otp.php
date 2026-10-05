@@ -47,6 +47,9 @@ return [
 
         'password_change' => [
             'expires_in_minutes' => 5,
+            'delivery' => [
+                'channels' => 'mail',
+            ],
         ],
 
         'email_verification' => [

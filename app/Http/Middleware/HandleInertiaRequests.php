@@ -53,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                         'id' => $item->id,
                         'title' => $item->notification->title ?? '',
                         'message' => $item->notification->message ?? '',
+                        'url' => $item->notification->url ?? null,
                         'read' => $item->read_at !== null,
                         'created_at' => $item->created_at?->toIso8601String(),
                     ])

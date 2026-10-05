@@ -33,12 +33,12 @@ function ApprovalBadge({ approved }: { approved: boolean }) {
     );
 }
 
-function UserManagement({ users }: UserListPageProps) {
+function UserManagement({ users, pendingUsers }: UserListPageProps) {
     const [pendingOpen, setPendingOpen] = useState(true);
     const [userToDelete, setUserToDelete] = useState<UserCms | null>(null);
     const [deleting, setDeleting] = useState(false);
 
-    const pending = users.data.filter((user) => !user.is_approved);
+    const pending = pendingUsers.data;
 
     const approve = (user: UserCms) => {
         router.post(`/cms/admin/users/${user.id}/approve`, {}, { preserveScroll: true });

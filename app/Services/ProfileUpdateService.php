@@ -32,12 +32,7 @@ final class ProfileUpdateService
     public function initiate(User $user, array $attributes, ?UploadedFile $avatar = null): array
     {
         if ($avatar !== null) {
-            $oldAvatar = $user->avatar;
             $attributes['avatar'] = $this->imageUploadService->upload($avatar, 'avatars');
-
-            if ($oldAvatar) {
-                $this->imageUploadService->delete($oldAvatar);
-            }
         }
 
         $requiresOtp = false;
@@ -54,18 +49,19 @@ final class ProfileUpdateService
         }
 
         if (! $requiresOtp) {
+            $oldAvatar = $user->avatar;
+
             $user->update($attributes);
+
+            $this->deleteReplacedAvatar($oldAvatar, $user->avatar);
 
             return ['status' => 'updated'];
         }
 
-        // We use the current email as destination for OTP
-        $destination = $user->email;
-
         $generated = $this->otpService->create(
             channel: OtpChannel::EMAIL,
-            purpose: OtpPurpose::PASSWORD_CHANGE, // Or EMAIL_VERIFICATION, using PASSWORD_CHANGE for general profile update
-            destination: $destination,
+            purpose: OtpPurpose::PASSWORD_CHANGE,
+            destination: $pendingChanges['email'] ?? $user->email,
             metadata: [
                 'user_id' => $user->id,
                 'pending_changes' => $pendingChanges,
@@ -111,20 +107,34 @@ final class ProfileUpdateService
         $otherChanges = $metadata['other_changes'] ?? [];
 
         $user = User::findOrFail($userId);
+        $oldAvatar = $user->avatar;
 
         DB::transaction(function () use ($user, $pendingChanges, $otherChanges, $otp) {
             $data = array_merge($otherChanges, $pendingChanges);
+
+            if (isset($data['email'])) {
+                $data['email_verified_at'] = now();
+            }
 
             if (isset($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
                 $data['remember_token'] = Str::random(60);
             }
 
-            $user->update($data);
+            $user->forceFill($data)->save();
             $this->otpService->consume($otp);
         });
 
+        $this->deleteReplacedAvatar($oldAvatar, $user->avatar);
+
         return $user;
+    }
+
+    private function deleteReplacedAvatar(?string $oldAvatar, ?string $newAvatar): void
+    {
+        if ($oldAvatar && $oldAvatar !== $newAvatar) {
+            $this->imageUploadService->delete($oldAvatar);
+        }
     }
 
     public function resend(Otp $otp): void
@@ -152,16 +162,5 @@ final class ProfileUpdateService
     public function resendCooldownRemaining(Otp $otp): int
     {
         return $this->otpService->resendCooldownRemaining($otp);
-    }
-
-    public function maskEmail(string $email): string
-    {
-        [$username, $domain] = array_pad(explode('@', $email, 2), 2, '');
-        if ($username === '' || $domain === '') {
-            return $email;
-        }
-        $visibleCharacters = min(2, strlen($username));
-
-        return substr($username, 0, $visibleCharacters).str_repeat('*', max(2, strlen($username) - $visibleCharacters)).'@'.$domain;
     }
 }

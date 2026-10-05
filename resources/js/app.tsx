@@ -1,10 +1,9 @@
 import { createRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
-
-const appName = import.meta.env.VITE_APP_NAME || 'Borrowed'
+import { APP_NAME } from '@/lib/constants/app'
 
 createInertiaApp({
-    title: title => (title ? `${title} | ${appName}` : appName),
+    title: title => (title ? `${title} | ${APP_NAME}` : APP_NAME),
     resolve: async name => {
         const pages = import.meta.glob<{ default: any }>('./Pages/**/*.tsx')
         const page = pages[`./Pages/${name}.tsx`]

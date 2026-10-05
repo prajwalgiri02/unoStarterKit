@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserManager\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\UserApprovalService;
 use App\Services\UserManagerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class UserManagerController extends Controller
 {
     public function __construct(
         private readonly UserManagerService $userManagerService,
+        private readonly UserApprovalService $userApprovalService,
     ) {}
 
     public function index(Request $request): Response
@@ -29,6 +31,7 @@ class UserManagerController extends Controller
 
         return Inertia::render('cms/user-management/index', [
             'users' => UserResource::collection($users),
+            'pendingUsers' => UserResource::collection($this->userApprovalService->pendingUsers()),
             'filters' => [
                 'search' => $search ?? '',
             ],

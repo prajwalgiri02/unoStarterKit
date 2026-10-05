@@ -100,7 +100,7 @@ The first question is which sidebar modules the project needs:
 | Messages & Support | Contact-us tickets (CMS page and `POST /api/contact-us`) |
 | Static Content | Terms, privacy policy, community guidelines (CMS page and `GET /api/{type}`) |
 | FAQs | FAQ management (CMS page and `GET /api/faqs`) |
-| Notifications | Broadcast notifications, the header inbox, `GET /api/notifications` |
+| Notifications | Broadcast notifications to app users, the admin header inbox (alerts for new registrations and contact-us messages), `GET /api/notifications` |
 
 Dashboard, Settings, authentication, profile and device tokens are always included.
 
@@ -114,7 +114,7 @@ Shared code that belongs to a module is wrapped in markers, which the installer 
 // @endmodule:notifications
 ```
 
-When you add code to a shared file that only makes sense with a module, wrap it in that module's markers. When you add a new file to a module, add it to that module's `paths` in `config/installer.php`.
+When you add code to a shared file that only makes sense with a module, wrap it in that module's markers. When you add a new file to a module, add it to that module's `paths` in `installer/config.php`.
 
 ### What it asks
 
@@ -131,7 +131,7 @@ When you add code to a shared file that only makes sense with a module, wrap it 
 
 Optional sections are offered as a checklist. Tick the ones this project uses; the rest are skipped and can be added later with `--only` (see below).
 
-All questions, defaults and module file lists live in `config/installer.php`, so what the installer asks can be changed there without touching the command.
+All questions, defaults and module file lists live in `installer/config.php`, so what the installer asks can be changed there without touching the command.
 
 Values that are the same for every project are set automatically and not asked:
 
@@ -295,6 +295,8 @@ POST /api/auth/login
 ```
 
 `device_id` and `device_token` must be sent together. `platform` is `android`, `ios` or `web`; `token_type` is `fcm` (default) or `apns`. Only `fcm` tokens receive pushes.
+
+The device is saved only when a token is issued. When admin approval is on, register answers `403 account_pending_approval` without a token, and when sign-up verification is on it answers with the code screens instead, so send the device details again on the first successful login or verify.
 
 When Firebase gives the app a new token, update it:
 

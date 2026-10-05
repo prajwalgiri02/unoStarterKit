@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\NotificationType;
 use App\Jobs\BroadcastNotificationJob;
 use App\Models\Notification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -13,7 +14,10 @@ class NotificationBroadcastService
 {
     public function paginate(int $perPage = 20): LengthAwarePaginator
     {
-        return Notification::with('creator')->latest()->paginate($perPage);
+        return Notification::with('creator')
+            ->where('type', NotificationType::Broadcast)
+            ->latest()
+            ->paginate($perPage);
     }
 
     /**
@@ -33,6 +37,7 @@ class NotificationBroadcastService
         $isScheduled = ! empty($data['scheduled_at']);
 
         $notification = Notification::create([
+            'type' => NotificationType::Broadcast,
             'title' => $data['title'],
             'message' => $data['message'],
             'location' => $data['location'] ?? null,

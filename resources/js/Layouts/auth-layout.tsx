@@ -3,6 +3,7 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { ArrowLeftIcon } from "@/Components/icons";
 import { useEffect, type ReactNode } from "react";
 import { notify } from "@/lib/toast";
+import { APP_NAME } from "@/lib/constants/app";
 import { Toaster } from "sonner";
 
 type AuthLayoutProps = {
@@ -41,7 +42,7 @@ export default function AuthLayout({
             <aside className="hidden shrink-0 items-center justify-center rounded-[30px] bg-auth-panel lg:flex lg:w-[56.5%]">
                 <img
                     src="/images/auth-logo.svg"
-                    alt="Borrowed"
+                    alt={APP_NAME}
                     className="w-[305px] max-w-[60%]"
                 />
             </aside>

@@ -23,9 +23,14 @@ class UpdateProfileRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->user()->id],
             'password' => ['nullable', 'string', Password::defaults(), 'confirmed'],
             'password_confirmation' => ['nullable', 'string'],
-            'phone' => [VerificationChannel::PHONE->isRequired() ? 'required' : 'nullable', 'string', new AustralianPhoneNumber],
+            'phone' => [$this->phoneIsRequired() ? 'required' : 'nullable', 'string', new AustralianPhoneNumber],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
+    }
+
+    private function phoneIsRequired(): bool
+    {
+        return VerificationChannel::PHONE->isRequired() && ! $this->user()->hasRole('admin');
     }
 
     public function profileAttributes(): array

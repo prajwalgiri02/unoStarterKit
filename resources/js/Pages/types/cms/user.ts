@@ -26,6 +26,7 @@ export interface UserCms {
 
 export interface UserListPageProps {
     users: PaginatedResponse<UserCms>;
+    pendingUsers: { data: UserCms[] };
     filters: { search: string };
 }
 

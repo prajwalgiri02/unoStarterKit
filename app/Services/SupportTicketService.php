@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Collection;
 
 class SupportTicketService
 {
+    public function __construct(
+        // @module:notifications
+        private readonly AdminAlertService $adminAlertService,
+        // @endmodule:notifications
+    ) {}
+
     /**
      * @param  array{type?: string, sort?: string}  $filters
      * @return Collection<int, SupportTicket>
@@ -59,7 +65,7 @@ class SupportTicketService
      */
     public function create(array $data): SupportTicket
     {
-        return SupportTicket::create([
+        $ticket = SupportTicket::create([
             'user_id' => $data['user_id'] ?? null,
             'name' => $data['name'],
             'email' => $data['email'],
@@ -67,5 +73,11 @@ class SupportTicketService
             'type' => $data['type'],
             'status' => SupportTicketStatus::Pending,
         ]);
+
+        // @module:notifications
+        $this->adminAlertService->contactUsReceived($ticket);
+        // @endmodule:notifications
+
+        return $ticket;
     }
 }

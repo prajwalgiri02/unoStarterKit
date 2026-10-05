@@ -10,29 +10,10 @@ use App\Http\Requests\Auth\VerifyPasswordOtpRequest;
 use App\Models\Otp;
 use App\Services\ProfileUpdateService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class ProfileOtpController extends Controller
 {
     public function __construct(private readonly ProfileUpdateService $profileUpdateService) {}
-
-    public function show(Request $request, string $token): Response|RedirectResponse
-    {
-        $otp = $this->findValidOtp($token);
-
-        if ($otp === null) {
-            return $this->invalidSession();
-        }
-
-        return Inertia::render('cms/Admin/Settings/OtpVerify', [
-            'token' => $token,
-            'email' => $this->profileUpdateService->maskEmail($otp->destination),
-            'resendAvailableAt' => $this->profileUpdateService->resendAvailableAt($otp)?->toIso8601String(),
-            'status' => $request->session()->get('status'),
-        ]);
-    }
 
     public function verify(VerifyPasswordOtpRequest $request, string $token): RedirectResponse
     {

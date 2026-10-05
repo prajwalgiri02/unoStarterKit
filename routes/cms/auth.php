@@ -2,18 +2,12 @@
 
 use App\Http\Controllers\cms\Auth\ForgotPasswordController;
 use App\Http\Controllers\cms\Auth\LoginController;
-use App\Http\Controllers\cms\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::controller(LoginController::class)->group(function () {
         Route::get('/login', 'create')->name('auth.login');
         Route::post('/login', 'store')->name('auth.login.store')->middleware('throttle:5,1');
-    });
-
-    Route::controller(RegisterController::class)->group(function () {
-        Route::get('/register', 'create')->name('auth.register');
-        Route::post('/register', 'store')->name('auth.register.store');
     });
 
     Route::get('/forgot-password', [ForgotPasswordController::class, 'create'])

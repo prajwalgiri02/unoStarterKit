@@ -20,7 +20,10 @@ class BroadcastNotificationJob implements ShouldQueue
 
     public function handle(PushNotificationService $push): void
     {
-        $query = User::query();
+        $query = User::query()
+            ->whereDoesntHave('roles', fn ($roles) => $roles->where('name', 'admin'))
+            ->whereNull('blocked_at')
+            ->when(config('users.require_approval'), fn ($users) => $users->whereNotNull('approved_at'));
 
         if (! $this->notification->send_to_all) {
             if ($this->notification->location) {

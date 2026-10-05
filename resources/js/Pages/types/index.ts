@@ -8,6 +8,7 @@ export type AppNotification = {
     id: number;
     title: string;
     message: string;
+    url: string | null;
     read: boolean;
     created_at: string | null;
 };

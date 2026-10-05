@@ -104,6 +104,8 @@ All mobile/SPA clients authenticate with stateless JWT tokens.
 - A user who has **not verified their email or mobile number** (when sign-up verification is on) receives `403` with `code: verification_required`, and a fresh code is sent. See [Sign-up verification](#sign-up-verification).
 - A user whose account is **pending admin approval** receives `403` with `code: account_pending_approval`.
 
+Register follows the same rule: when `USER_REQUIRE_APPROVAL` is on, the account is created but `POST /api/auth/register` answers `403` with `code: account_pending_approval` and no token. Its device token is not saved, so the app should send it again at the first successful login.
+
 The token response (inside the standard envelope, see [Standardised API Responses](#14-standardised-api-responses)):
 
 ```json
@@ -134,7 +136,7 @@ Both are `false` by default, so register and login behave exactly as above until
 |---|---|---|---|---|
 | 1 | `POST` | `/api/auth/register` | as before | Account is created but **no token** is returned. `data` is `{ verification_required: ["email"], otp_length: 6 }` and a code is sent to each channel listed |
 | 2 | `POST` | `/api/auth/verification/verify` | `email`, `channel` (`email` or `phone`), `otp`, optional device fields | Marks that channel verified. If another channel is still listed in `verification_required`, returns `200` with the remaining list; once nothing is left, returns the normal token response |
-| � | `POST` | `/api/auth/verification/resend` | `email`, `channel` | Sends a new code; same `200` for unknown or already-verified accounts |
+| � | `POST` | `/api/auth/verification/resend` | `email`, `channel` | Sends a new code; same `200` for unknown or already-verified accounts |
 
 - **Login before verifying:** `403 verification_required` with the same `data` as step 1, and a new code is sent, so the app can open the code screen straight away.
 - **Admin approval:** when `USER_REQUIRE_APPROVAL` is also on, the user verifies first; the verify step then answers `403 account_pending_approval` instead of a token until an admin approves them.
@@ -154,11 +156,10 @@ The Admin CMS uses Laravel session-based authentication, served as a single-page
 
 | Route name | Method | Path | Description |
 |---|---|---|---|
-| `cms.auth.login` | `GET / POST` | `/cms/login` | Login form and submit (rate-limited: 5/min) |
-| `cms.auth.register` | `GET / POST` | `/cms/register` | Registration form and submit |
+| `cms.auth.login` | `GET / POST` | `/cms/login` | Login form and submit (rate-limited: 5/min). Only accounts with the `admin` role can sign in |
 | `cms.auth.logout` | `POST` | `/cms/logout` | Log out of the session |
 
-Unauthenticated requests to any protected CMS route are automatically redirected to `/cms/login`.
+Unauthenticated requests to any protected CMS route are automatically redirected to `/cms/login`. The CMS has no registration; app users sign up through `POST /api/auth/register`.
 
 ---
 
@@ -266,13 +267,12 @@ Follows the OWASP forgot-password guidance:
 
 ### 5. Profile Settings with OTP Verification
 
-Admins can update their profile from the Settings page. Changes to **email** or **password** require OTP verification before being applied.
+Admins can update their profile from the Settings page. Changes to **email** or **password** require OTP verification before being applied. The code is entered in a modal on the Settings page. When the email changes, the code is sent to the **new** address, and verifying it marks that address as verified. A password-only change sends the code to the current address. Settings codes are always sent by email. Phone is never required for admins.
 
 | Route | Description |
 |---|---|
 | `GET /cms/settings` | View current profile |
 | `PUT /cms/settings` | Submit changes (triggers OTP if email/password changed) |
-| `GET /cms/settings/verify/{token}` | OTP entry form |
 | `POST /cms/settings/verify/{token}` | Verify code and apply changes |
 | `POST /cms/settings/resend/{token}` | Resend the verification code |
 
@@ -292,8 +292,9 @@ Registration approvals can be toggled via the `users.require_approval` config ke
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/cms/admin/users/pending` | List all pending users |
 | `POST` | `/cms/admin/users/{user}/approve` | Approve a specific user |
+
+Pending users are listed in the **Users Pending Approval** section of the User Manager page, which shows every pending user regardless of the page of the main list.
 
 The `EnsureUserApproved` middleware is aliased as `approved` and applied globally to all authenticated CMS routes.
 
@@ -416,9 +417,11 @@ Admins can broadcast push notifications from the CMS to any subset of users.
 
 | Field | Behaviour |
 |---|---|
-| `send_to_all = true` | Broadcast to every registered user |
+| `send_to_all = true` | Broadcast to every app user |
 | `location` | Filter by the user's `location` field |
 | `subscription_type` | Comma-separated list (e.g. `free,monthly`) matched against the user's `subscription_type` |
+
+Broadcasts only go to app users: admins, blocked users and (when approval is on) users still waiting for approval never receive them.
 
 **Scheduling:** Set `scheduled_at` to defer delivery; leave it `null` to send immediately.
 
@@ -428,6 +431,21 @@ Admins can broadcast push notifications from the CMS to any subset of users.
 3. Users are processed in chunks of 500 to handle large audiences efficiently.
 
 **Firebase token management:** Devices register their FCM tokens via the `FirebaseTokens` model. Each token stores the `device_token` and `platform`.
+
+**Admin inbox (header bell):** admins receive alerts, not broadcasts. `AdminAlertService` creates one for every admin when:
+
+| Event | Message | Opens |
+|---|---|---|
+| A user registers via `POST /api/auth/register` | "Jane Doe registered." or, when approval is on, "Jane Doe registered and is waiting for approval." | The user in User Manager |
+| A message arrives via `POST /api/contact-us` | "Sam (sam@example.com) sent a message." | Messages & Support |
+
+Alerts are stored in the `notifications` table with `type = admin_alert` (broadcasts use `type = broadcast`), so they never appear in the broadcast history. Clicking an alert marks it as read and opens its link.
+
+| Method | Path | Description |
+|---|---|---|
+| `PATCH` | `/cms/notifications/{userNotification}/read` | Mark one inbox item as read |
+| `PATCH` | `/cms/notifications/mark-all-read` | Mark all inbox items as read |
+| `DELETE` | `/cms/notifications/clear-all` | Clear the inbox |
 
 > The FCM dispatch stub in `NotificationController::sendToFirebase()` is ready for implementation with `kreait/laravel-firebase` or direct FCM v1 HTTP calls. For production, dispatch a queued Job instead of sending inline.
 
@@ -657,7 +675,6 @@ Login, register and the password-reset endpoints are rate limited to 3 requests 
 | Auth required | Role | Method | Path | Feature |
 |---|---|---|---|---|
 | No | — | `GET/POST` | `/cms/login` | Login |
-| No | — | `GET/POST` | `/cms/register` | Register |
 | No | — | `GET/POST` | `/cms/forgot-password` | Initiate password reset |
 | No | — | `GET/POST` | `/cms/forgot-password/verify/{token}` | Verify OTP |
 | No | — | `POST` | `/cms/forgot-password/resend/{token}` | Resend OTP |
@@ -666,9 +683,8 @@ Login, register and the password-reset endpoints are rate limited to 3 requests 
 | Yes | admin | `POST` | `/cms/logout` | Logout |
 | Yes | admin | `GET` | `/cms/dashboard` | Dashboard |
 | Yes | admin | `GET/PUT` | `/cms/settings` | Profile settings |
-| Yes | admin | `GET/POST` | `/cms/settings/verify/{token}` | OTP verification for settings |
+| Yes | admin | `POST` | `/cms/settings/verify/{token}` | OTP verification for settings |
 | Yes | admin | `POST` | `/cms/settings/resend/{token}` | Resend settings OTP |
-| Yes | admin | `GET` | `/cms/admin/users/pending` | Pending approvals |
 | Yes | admin | `POST` | `/cms/admin/users/{user}/approve` | Approve user |
 | Yes | admin | `GET/PUT/DELETE` | `/cms/user-manager/*` | User management |
 | Yes | admin | `POST` | `/cms/user-manager/{user}/toggle-block` | Block/unblock user |
@@ -676,3 +692,4 @@ Login, register and the password-reset endpoints are rate limited to 3 requests 
 | Yes | admin | `GET/PUT` | `/cms/static-content/*` | Static content management |
 | Yes | admin | `GET/PATCH/DELETE` | `/cms/messages/*` | Support ticket management |
 | Yes | admin | `GET/POST` | `/cms/notifications` | Push notifications |
+| Yes | admin | `PATCH/DELETE` | `/cms/notifications/*` | Admin inbox (mark read, clear) |

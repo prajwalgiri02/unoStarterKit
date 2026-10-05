@@ -23,7 +23,7 @@ class EnsureApiTokenIsCurrent
         $guard = auth('api');
         $user = $guard->user();
 
-        if ($user instanceof User && (int) $guard->getPayload()->get('tv') !== $user->token_version) {
+        if ($user instanceof User && (int) $guard->getPayload()->get('tv') !== (int) $user->token_version) {
             throw new AuthenticationException('Unauthenticated.', ['api']);
         }
 

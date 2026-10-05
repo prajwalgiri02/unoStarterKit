@@ -20,42 +20,48 @@ class UserApprovalTest extends TestCase
         $this->seed(RoleAndPermission::class);
     }
 
-    public function test_registration_logs_in_immediately_when_approval_is_disabled(): void
+    public function test_cms_has_no_registration_route(): void
     {
-        config(['users.require_approval' => false]);
-
-        $response = $this->post('/cms/register', [
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
-
-        $response->assertRedirect('/cms/dashboard');
-        $this->assertAuthenticatedAs(User::query()->where('email', 'jane@example.com')->first());
+        $this->get('/cms/register')->assertNotFound();
+        $this->post('/cms/register')->assertNotFound();
     }
 
-    public function test_registration_requires_approval_before_login_when_enabled(): void
+    public function test_app_user_cannot_sign_in_to_the_cms(): void
+    {
+        $user = User::factory()->approved()->create([
+            'email' => 'user@example.com',
+            'password' => 'password123',
+        ]);
+        $user->assignRole('user');
+
+        $this->post('/cms/login', [
+            'email' => 'user@example.com',
+            'password' => 'password123',
+        ])->assertSessionHasErrors(['email' => __('auth.failed')]);
+
+        $this->assertGuest();
+    }
+
+    public function test_registration_returns_a_token_when_approval_is_disabled(): void
+    {
+        $this->registerViaApi()
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['access_token', 'user']]);
+    }
+
+    public function test_registration_returns_no_token_while_approval_is_pending(): void
     {
         config(['users.require_approval' => true]);
 
-        $response = $this->post('/cms/register', [
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
+        $this->registerViaApi()
+            ->assertForbidden()
+            ->assertJsonPath('code', 'account_pending_approval')
+            ->assertJsonMissingPath('data.access_token');
 
-        $response
-            ->assertRedirect(route('cms.auth.login'))
-            ->assertSessionHas('success');
-
-        $this->assertGuest();
-
-        $user = User::query()->where('email', 'jane@example.com')->first();
-        $this->assertNotNull($user);
+        $user = User::query()->where('email', 'jane@example.com')->firstOrFail();
         $this->assertNull($user->approved_at);
         $this->assertTrue($user->hasRole('user'));
+        $this->assertDatabaseCount('firebase_tokens', 0);
     }
 
     public function test_pending_user_cannot_sign_in_until_approved(): void
@@ -68,13 +74,12 @@ class UserApprovalTest extends TestCase
         ]);
         $user->assignRole('user');
 
-        $response = $this->post('/cms/login', [
+        $this->postJson('/api/auth/login', [
             'email' => 'pending@example.com',
             'password' => 'password123',
-        ]);
-
-        $response->assertSessionHasErrors('email');
-        $this->assertGuest();
+        ])
+            ->assertForbidden()
+            ->assertJsonPath('code', 'account_pending_approval');
     }
 
     public function test_admin_can_sign_in_without_approval_when_feature_is_enabled(): void
@@ -101,10 +106,7 @@ class UserApprovalTest extends TestCase
     {
         config(['users.require_approval' => true]);
 
-        $admin = User::factory()->approved()->create([
-            'email' => 'admin@example.com',
-            'password' => 'password123',
-        ]);
+        $admin = User::factory()->approved()->create();
         $admin->assignRole('admin');
 
         $pendingUser = User::factory()->pendingApproval()->create([
@@ -121,35 +123,68 @@ class UserApprovalTest extends TestCase
 
         $this->assertNotNull($pendingUser->fresh()->approved_at);
 
-        auth()->logout();
-
-        $this->post('/cms/login', [
+        $this->postJson('/api/auth/login', [
             'email' => 'pending@example.com',
             'password' => 'password123',
-        ])->assertRedirect('/cms/dashboard');
-
-        $this->assertAuthenticatedAs($pendingUser->fresh());
+        ])->assertOk();
     }
 
-    public function test_non_admin_cannot_access_pending_user_approval_routes(): void
+    public function test_user_manager_lists_every_pending_user_regardless_of_page(): void
     {
         config(['users.require_approval' => true]);
 
-        $user = User::factory()->approved()->create([
-            'password' => 'password123',
-        ]);
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        $pendingUser = User::factory()->pendingApproval()->create(['created_at' => now()->subYear()]);
+        $pendingUser->assignRole('user');
+
+        User::factory()->approved()->count(20)->create()->each->assignRole('user');
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('cms/user-management/index')
+                ->has('pendingUsers.data', 1)
+                ->where('pendingUsers.data.0.id', $pendingUser->id)
+                ->where('users.data', fn ($users) => collect($users)->doesntContain('id', $pendingUser->id)));
+    }
+
+    public function test_pending_users_route_is_removed(): void
+    {
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        $this->actingAs($admin)->get('/cms/admin/users/pending')->assertNotFound();
+    }
+
+    public function test_non_admin_cannot_approve_users(): void
+    {
+        config(['users.require_approval' => true]);
+
+        $user = User::factory()->approved()->create();
         $user->assignRole('user');
 
         $pendingUser = User::factory()->pendingApproval()->create();
         $pendingUser->assignRole('user');
 
         $this->actingAs($user)
-            ->get(route('cms.admin.users.pending'))
-            ->assertForbidden();
-
-        $this->actingAs($user)
             ->post(route('cms.admin.users.approve', $pendingUser))
             ->assertForbidden();
     }
     // @endmodule:user_manager
+
+    private function registerViaApi()
+    {
+        return $this->postJson('/api/auth/register', [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'device_id' => 'device-1',
+            'device_token' => 'fcm-token-1',
+            'platform' => 'android',
+        ]);
+    }
 }

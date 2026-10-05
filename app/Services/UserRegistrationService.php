@@ -8,7 +8,11 @@ use App\Models\User;
 
 class UserRegistrationService
 {
-    public function __construct() {}
+    public function __construct(
+        // @module:notifications
+        private readonly AdminAlertService $adminAlertService,
+        // @endmodule:notifications
+    ) {}
 
     /**
      * @param  array{name: string, email: string, password: string, phone?: string|null}  $attributes
@@ -24,6 +28,10 @@ class UserRegistrationService
         $user->save();
 
         $user->assignRole('user');
+
+        // @module:notifications
+        $this->adminAlertService->userRegistered($user, $this->requiresApproval());
+        // @endmodule:notifications
 
         return $user;
     }

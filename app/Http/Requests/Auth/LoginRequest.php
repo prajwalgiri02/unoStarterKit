@@ -46,6 +46,14 @@ class LoginRequest extends FormRequest
 
         $user = Auth::user();
 
+        if ($user !== null && ! $user->hasRole('admin')) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
         if ($user !== null && $user->isPendingApproval()) {
             Auth::logout();
 

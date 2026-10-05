@@ -32,6 +32,18 @@ export default function NotificationDropdown({ notifications }: NotificationDrop
         router.delete("/cms/notifications/clear-all", visitOptions);
     };
 
+    const openNotification = (notification: AppNotification) => {
+        setOpen(false);
+        const visitLink = () => {
+            if (notification.url?.startsWith("/")) router.visit(notification.url);
+        };
+        if (notification.read) {
+            visitLink();
+            return;
+        }
+        router.patch(`/cms/notifications/${notification.id}/read`, {}, { ...visitOptions, onSuccess: visitLink });
+    };
+
     return (
         <Popover
             open={open}
@@ -94,29 +106,32 @@ export default function NotificationDropdown({ notifications }: NotificationDrop
                 ) : (
                     <ul className="max-h-[600px] overflow-y-auto scrollbar-none rounded-b-2xl">
                         {notifications.map((n) => (
-                            <li
-                                key={n.id}
-                                className={`flex justify-between gap-6 px-6 py-3 ${n.read ? "" : "bg-primary-50"}`}
-                            >
-                                <div className="flex min-w-0 items-center gap-3">
-                                    <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-primary-500 text-base-white">
-                                        <LogoMark className="size-5" />
-                                    </span>
-                                    <div className="min-w-0 text-body-xs text-neutral-900">
-                                        <p className="font-medium">{n.title}</p>
-                                        {n.message && <p className="line-clamp-2">{n.message}</p>}
-                                    </div>
-                                </div>
-                                <div className="flex shrink-0 flex-col items-end gap-1">
-                                    <span className="text-link-sm font-normal whitespace-nowrap text-neutral-400">
-                                        {formatRelativeTime(n.created_at)}
-                                    </span>
-                                    {!n.read && (
-                                        <span className="size-[5px] rounded-full bg-primary-500">
-                                            <span className="sr-only">Unread</span>
+                            <li key={n.id}>
+                                <button
+                                    type="button"
+                                    onClick={() => openNotification(n)}
+                                    className={`flex w-full cursor-pointer justify-between gap-6 px-6 py-3 text-left outline-none transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50 ${n.read ? "" : "bg-primary-50"}`}
+                                >
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-primary-500 text-base-white">
+                                            <LogoMark className="size-5" />
                                         </span>
-                                    )}
-                                </div>
+                                        <div className="min-w-0 text-body-xs text-neutral-900">
+                                            <p className="font-medium">{n.title}</p>
+                                            {n.message && <p className="line-clamp-2">{n.message}</p>}
+                                        </div>
+                                    </div>
+                                    <div className="flex shrink-0 flex-col items-end gap-1">
+                                        <span className="text-link-sm font-normal whitespace-nowrap text-neutral-400">
+                                            {formatRelativeTime(n.created_at)}
+                                        </span>
+                                        {!n.read && (
+                                            <span className="size-[5px] rounded-full bg-primary-500">
+                                                <span className="sr-only">Unread</span>
+                                            </span>
+                                        )}
+                                    </div>
+                                </button>
                             </li>
                         ))}
                     </ul>

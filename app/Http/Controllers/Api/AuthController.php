@@ -57,6 +57,10 @@ class AuthController extends Controller
             return $this->successResponse($this->verificationData($user), $this->codeSentMessage($user));
         }
 
+        if ($user->isPendingApproval()) {
+            return $this->errorResponse('Your account has been created and is pending approval.', 403, errorCode: ApiErrorCode::AccountPendingApproval);
+        }
+
         $token = Auth::guard('api')->login($user);
 
         $this->registerDevice($user, $request->device());
