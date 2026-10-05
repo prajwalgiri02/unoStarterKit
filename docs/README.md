@@ -482,7 +482,7 @@ Files are stored at path: `uploads/videos/{file_id}_{file_name}` on the configur
 
 ### 14. Standardised API Responses
 
-**Every** response under `/api/*` uses one envelope, including errors raised by the framework (validation, authentication, 404/405, rate limiting, server errors and maintenance mode). The full contract with raw sample bodies for every endpoint is in [`docs/api-response-reference.pdf`](api-response-reference.pdf); share that with mobile developers.
+**Every** response under `/api/*` uses one envelope, including errors raised by the framework (validation, authentication, 404/405, rate limiting, server errors and maintenance mode). The full contract with raw sample bodies for every endpoint is in [`docs/api-response-reference.md`](api-response-reference.md); share that with mobile developers.
 
 **Success:**
 ```json
@@ -658,12 +658,14 @@ Components are styled with Tailwind classes that reference the tokens (e.g. `bg-
 | No | `POST` | `/api/auth/password/reset` | Password reset: set new password |
 | JWT | `GET` | `/api/profile` | Current user |
 | JWT | `POST` | `/api/profile` | Update profile (multipart for `avatar`) |
+| JWT | `DELETE` | `/api/profile` | Delete the account (`password` required; admins cannot) |
 | JWT | `GET` | `/api/user` | Current user (same as `GET /api/profile`) |
 | JWT | `POST` | `/api/change-password` | Change password |
 | JWT | `POST` | `/api/device-tokens` | Register a device for push notifications |
-| JWT | `GET` | `/api/notifications` | Paginated notifications (`?page=N`) |
+| JWT | `GET` | `/api/notifications` | Paginated notifications (`?page=N`); `meta.unread_count` is the unread total |
 | JWT | `PATCH` | `/api/notifications/{id}/read` | Mark one notification as read |
 | JWT | `PATCH` | `/api/notifications/mark-all-as-read` | Mark all as read |
+| JWT | `DELETE` | `/api/notifications` | Clear all notifications |
 | No | `GET` | `/api/faqs` | Public FAQ list |
 | No | `GET` | `/api/{type}` | Public static content (`terms_and_conditions`, `privacy_policy`, `community_guidelines`) |
 | Optional | `POST` | `/api/contact-us` | Submit support ticket |

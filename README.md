@@ -100,7 +100,7 @@ The first question is which sidebar modules the project needs:
 | Messages & Support | Contact-us tickets (CMS page and `POST /api/contact-us`) |
 | Static Content | Terms, privacy policy, community guidelines (CMS page and `GET /api/{type}`) |
 | FAQs | FAQ management (CMS page and `GET /api/faqs`) |
-| Notifications | Broadcast notifications to app users, the admin header inbox (alerts for new registrations and contact-us messages), `GET /api/notifications` |
+| Notifications | Broadcast notifications to app users, the admin header inbox (alerts for new registrations and contact-us messages), `GET /api/notifications` (with unread count) and `DELETE /api/notifications` |
 
 Dashboard, Settings, authentication, profile and device tokens are always included.
 
@@ -313,6 +313,43 @@ POST /api/auth/logout          (requires the JWT)
 ```
 
 One device belongs to one user: if another user logs in on the same device, the token moves to them. Tokens that Firebase reports as invalid are deleted automatically after each send.
+
+---
+
+## Mobile API: account and notifications
+
+All of these require the JWT.
+
+### Delete account
+
+```json
+DELETE /api/profile
+{ "password": "current-password" }
+```
+
+The password must match, otherwise the request answers `422` and nothing is deleted. On success the account, its device tokens, verification codes, notification inbox and avatar are deleted, and the token stops working. Support tickets the user sent are kept, without a link to the user. Admin accounts cannot be deleted this way and answer `422`.
+
+### Notifications
+
+```
+GET    /api/notifications                    list, newest first
+PATCH  /api/notifications/{id}/read          mark one as read
+PATCH  /api/notifications/mark-all-as-read   mark all as read
+DELETE /api/notifications                    clear all
+```
+
+The list response includes the unread total next to the pagination fields:
+
+```json
+{
+  "status": 200,
+  "message": "Notifications retrieved successfully",
+  "data": [],
+  "meta": { "current_page": 1, "last_page": 1, "per_page": 20, "total": 0, "from": null, "to": null, "unread_count": 0 }
+}
+```
+
+`unread_count` counts every unread notification of the user, not only the current page.
 
 ---
 
