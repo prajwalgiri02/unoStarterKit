@@ -123,10 +123,10 @@ When you add code to a shared file that only makes sense with a module, wrap it 
 | Modules | Which sidebar modules to keep | Yes |
 | Application | Name, URL | Yes |
 | Database | Driver, host, port, database name, username, password | Yes |
-| Authentication | Require admin approval for new users? (only with User Manager), OTP delivery channel | Yes |
+| Authentication | Require admin approval for new users? (only with User Manager), require email verification?, require mobile verification?, OTP delivery channel | Yes |
 | Mail | Mailer, SMTP host, port, username, password, from address | Optional |
 | File uploads | Local disk or Amazon S3 (access key, secret, region, bucket) | Optional |
-| SMS | ClickSend username, API key, sender ID, country | Optional, required when OTP uses SMS |
+| SMS | ClickSend username, API key, sender ID, country | Optional, required when OTP uses SMS or mobile verification is on |
 | Firebase | Path to the service account JSON file | Optional |
 
 Optional sections are offered as a checklist. Tick the ones this project uses; the rest are skipped and can be added later with `--only` (see below).
@@ -192,7 +192,7 @@ This:
 | `modules` | Removing modules the project no longer needs (modules cannot be added back) |
 | `app` | Renaming the app or changing its URL |
 | `database` | Moving to a different database or changing credentials |
-| `auth` | Turning admin approval on/off, or switching OTP between email, SMS or both |
+| `auth` | Turning admin approval or email/mobile verification on/off, or switching OTP between email, SMS or both |
 | `mail` | Setting up or changing the mail server |
 | `firebase` | Adding push notifications, or replacing the service account file |
 | `storage` | Switching uploads between the local disk and S3, or changing the bucket |

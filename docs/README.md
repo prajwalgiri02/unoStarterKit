@@ -98,10 +98,11 @@ All mobile/SPA clients authenticate with stateless JWT tokens.
 | `POST` | `/api/auth/refresh` | Issue a new token; the current one must not have expired yet |
 | `GET` | `/api/profile` | Return the authenticated user's profile |
 
-**Login guards:**
+**Login guards** (checked in this order):
 - Wrong email or password returns `401` with `code: invalid_credentials`.
-- A user whose account is **pending admin approval** receives `403` with `code: account_pending_approval`.
 - A user whose account has been **blocked** receives `403` with `code: account_blocked`.
+- A user who has **not verified their email or mobile number** (when sign-up verification is on) receives `403` with `code: verification_required`, and a fresh code is sent. See [Sign-up verification](#sign-up-verification).
+- A user whose account is **pending admin approval** receives `403` with `code: account_pending_approval`.
 
 The token response (inside the standard envelope, see [Standardised API Responses](#14-standardised-api-responses)):
 
@@ -117,6 +118,31 @@ The token response (inside the standard envelope, see [Standardised API Response
   }
 }
 ```
+
+#### Sign-up verification
+
+Users can be required to verify their email, their mobile number, or both, with a one-time code before they get a token. Each is switched on separately in `.env`:
+
+```dotenv
+USER_REQUIRE_EMAIL_VERIFICATION=true
+USER_REQUIRE_PHONE_VERIFICATION=false
+```
+
+Both are `false` by default, so register and login behave exactly as above until one is turned on. Email codes always go by email; phone codes always go by SMS, so phone verification makes `phone` required on register and profile update and needs the [SMS gateway](#sms-gateway) configured. Admin accounts are never asked to verify.
+
+| Step | Method | Endpoint | Body | Result |
+|---|---|---|---|---|
+| 1 | `POST` | `/api/auth/register` | as before | Account is created but **no token** is returned. `data` is `{ verification_required: ["email"], otp_length: 6 }` and a code is sent to each channel listed |
+| 2 | `POST` | `/api/auth/verification/verify` | `email`, `channel` (`email` or `phone`), `otp`, optional device fields | Marks that channel verified. If another channel is still listed in `verification_required`, returns `200` with the remaining list; once nothing is left, returns the normal token response |
+| — | `POST` | `/api/auth/verification/resend` | `email`, `channel` | Sends a new code; same `200` for unknown or already-verified accounts |
+
+- **Login before verifying:** `403 verification_required` with the same `data` as step 1, and a new code is sent, so the app can open the code screen straight away.
+- **Admin approval:** when `USER_REQUIRE_APPROVAL` is also on, the user verifies first; the verify step then answers `403 account_pending_approval` instead of a token until an admin approves them.
+- **Changing email or phone:** when `POST /api/profile` changes a channel that must be verified, that channel becomes unverified and a code is sent to the new address. The profile response says so, and `user.pending_verifications` lists it. The app verifies it with step 2; the user's current token keeps working. An admin changing a user's email in the CMS also clears it, and the user is asked for a code at their next login.
+- **Errors:** wrong, expired or used-up codes use the normal OTP error codes (`otp_invalid`, `otp_expired`, `otp_attempt_limit`, `otp_resend_cooldown`, `otp_resend_limit`). Verifying a channel that is already verified returns `422 otp_already_verified` and never a token.
+- **Rate limits:** verify 6 requests per minute, resend 3 per minute, plus the 60-second resend cooldown.
+
+The `user` object (in the token response and `GET /api/profile`) includes `is_email_verified`, `is_phone_verified`, `email_verified_at`, `phone_verified_at` and `pending_verifications` (the channels still to verify under the current settings). In the CMS, the user details page shows a notice when a user's email or mobile number is not verified.
 
 **Token revocation:** every JWT carries a `tv` claim matching `users.token_version`. A password reset increments the version, and the `EnsureApiTokenIsCurrent` middleware (appended to the `api` middleware group) rejects older tokens with `401 unauthenticated`, signing the user out on every device.
 
@@ -174,8 +200,8 @@ SMS    â€” sent to the user's phone number via the SmsGateway
 |---|---|---|
 | `PASSWORD_RESET` | `password_reset` | Forgot-password flow |
 | `PASSWORD_CHANGE` | `password_change` | Profile settings update |
-| `EMAIL_VERIFICATION` | `email_verification` | Future: email change confirmation |
-| `PHONE_VERIFICATION` | `phone_verification` | Future: phone number onboarding |
+| `EMAIL_VERIFICATION` | `email_verification` | Sign-up email verification and email changes (API) |
+| `PHONE_VERIFICATION` | `phone_verification` | Sign-up mobile verification and phone changes (API, by SMS) |
 | `LOGIN_VERIFICATION` | `login_verification` | Future: 2FA login step |
 
 #### OTP Configuration (`config/otp.php`)
@@ -258,7 +284,7 @@ Pending changes (new email, new hashed password) are stored in the OTP's `metada
 
 Registration approvals can be toggled via the `users.require_approval` config key.
 
-- When **enabled**: newly registered users have `approved_at = null` and cannot log in to either the CMS or the API until an admin approves them.
+- When **enabled**: newly registered users have `approved_at = null` and cannot log in to either the CMS or the API until an admin approves them. If sign-up verification is also on, users verify their email/phone first and then wait for approval.
 - When **disabled**: users are auto-approved on registration.
 - Admin accounts are always considered approved regardless of the setting.
 
@@ -587,6 +613,8 @@ Components are styled with Tailwind classes that reference the tokens (e.g. `bg-
 | `config/otp.php` | `delivery.channels` | Global delivery channel: `mail`, `sms`, or `both` |
 | `config/otp.php` | `purposes.<name>.delivery.channels` | Per-purpose delivery channel override |
 | `config/users.php` | `require_approval` | `true` to require admin approval before users can log in |
+| `config/users.php` | `verification.email` | `USER_REQUIRE_EMAIL_VERIFICATION`: `true` to require an email code before a token is issued |
+| `config/users.php` | `verification.phone` | `USER_REQUIRE_PHONE_VERIFICATION`: `true` to require an SMS code before a token is issued |
 | `config/filesystems.php` | `disks.s3.*` | AWS S3 credentials and bucket for video uploads |
 | `.env` | `JWT_SECRET` | Secret key for JWT token signing. Generate it with `php artisan jwt:secret`; API login fails without it |
 | `.env` | `OTP_LENGTH` | Number of OTP digits for every flow (default `6`) |
@@ -604,6 +632,8 @@ Components are styled with Tailwind classes that reference the tokens (e.g. `bg-
 | No | `POST` | `/api/auth/login` | Login |
 | JWT | `POST` | `/api/auth/logout` | Logout |
 | JWT | `POST` | `/api/auth/refresh` | Refresh token |
+| No | `POST` | `/api/auth/verification/verify` | Sign-up verification: verify code, get token |
+| No | `POST` | `/api/auth/verification/resend` | Sign-up verification: resend code |
 | No | `POST` | `/api/auth/password/forgot` | Password reset: send code |
 | No | `POST` | `/api/auth/password/verify` | Password reset: verify code, get `reset_token` |
 | No | `POST` | `/api/auth/password/resend` | Password reset: resend code |

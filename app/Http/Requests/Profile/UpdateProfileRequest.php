@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Profile;
 
+use App\Enums\VerificationChannel;
 use App\Rules\AustralianPhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
@@ -22,7 +23,7 @@ class UpdateProfileRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->user()->id],
             'password' => ['nullable', 'string', Password::defaults(), 'confirmed'],
             'password_confirmation' => ['nullable', 'string'],
-            'phone' => ['nullable', 'string', new AustralianPhoneNumber],
+            'phone' => [VerificationChannel::PHONE->isRequired() ? 'required' : 'nullable', 'string', new AustralianPhoneNumber],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }

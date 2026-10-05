@@ -253,7 +253,7 @@ final class Installer
             return [];
         }
 
-        $forced = array_keys(array_filter($optional, fn (array $section): bool => isset($section['required_when']) && $this->matches($section['required_when'])));
+        $forced = array_keys(array_filter($optional, fn (array $section): bool => isset($section['required_when']) && $this->matchesAny($section['required_when'])));
         $choices = array_diff_key($optional, array_flip($forced));
 
         foreach ($forced as $key) {
@@ -427,6 +427,21 @@ final class Installer
     /**
      * @param  array<string, string|list<string>>  $conditions
      */
+    private function matchesAny(array $conditions): bool
+    {
+        if (! array_is_list($conditions)) {
+            return $this->matches($conditions);
+        }
+
+        foreach ($conditions as $set) {
+            if ($this->matches($set)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function matches(array $conditions): bool
     {
         foreach ($conditions as $key => $expected) {

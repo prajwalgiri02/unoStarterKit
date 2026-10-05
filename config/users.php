@@ -15,4 +15,19 @@ return [
 
     'require_approval' => env('USER_REQUIRE_APPROVAL', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Require new users to verify their email and/or mobile number
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, API users must enter a one-time code before a token is
+    | issued. Phone codes are sent by SMS. Admins are never asked to verify.
+    |
+    */
+
+    'verification' => [
+        'email' => env('USER_REQUIRE_EMAIL_VERIFICATION', false),
+        'phone' => env('USER_REQUIRE_PHONE_VERIFICATION', false),
+    ],
+
 ];

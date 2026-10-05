@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\VerificationChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\ChangePassword;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Services\ImageUploadService;
 use App\Services\UserManagerService;
+use App\Services\UserVerificationService;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
@@ -17,6 +20,7 @@ class ProfileController extends Controller
     public function __construct(
         private readonly UserManagerService $userManagerService,
         private readonly ImageUploadService $imageUploadService,
+        private readonly UserVerificationService $verificationService,
     ) {}
 
     public function index()
@@ -40,13 +44,29 @@ class ProfileController extends Controller
             }
         }
 
-        $updated = $this->userManagerService->updateUser(
-            $user,
-            $attributes,
-            $user,
-        );
+        $previous = ['email' => $user->email, 'phone' => $user->phone];
 
-        return $this->successResponse(new UserResource($updated), 'Profile Updated Successfully', 200);
+        [$updated, $changed] = DB::transaction(function () use ($user, $attributes, $previous, $request): array {
+            $updated = $this->userManagerService->updateUser(
+                $user,
+                $attributes,
+                $user,
+            );
+
+            $changed = array_values(array_filter(
+                $updated->pendingVerifications(),
+                fn (VerificationChannel $channel): bool => $previous[$channel->attribute()] !== $updated->{$channel->attribute()},
+            ));
+
+            $this->verificationService->sendCodes($updated, $changed, [
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return [$updated, $changed];
+        });
+
+        return $this->successResponse(new UserResource($updated), $this->updatedMessage($changed), 200);
     }
 
     public function changePassword(ChangePassword $request)
@@ -58,5 +78,19 @@ class ProfileController extends Controller
         );
 
         return $this->successResponse(null, 'Password Changed Successfully', 200);
+    }
+
+    /**
+     * @param  list<VerificationChannel>  $changed
+     */
+    private function updatedMessage(array $changed): string
+    {
+        if ($changed === []) {
+            return 'Profile Updated Successfully';
+        }
+
+        $labels = implode(' and ', array_map(fn (VerificationChannel $channel): string => $channel->label(), $changed));
+
+        return "Profile Updated Successfully. We have sent a verification code to your new {$labels}.";
     }
 }

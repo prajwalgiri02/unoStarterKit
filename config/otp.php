@@ -50,11 +50,14 @@ return [
         ],
 
         'email_verification' => [
-            'expires_in_minutes' => 0.5,
+            'expires_in_minutes' => 10,
+            'delivery' => [
+                'channels' => 'mail',
+            ],
         ],
 
         'phone_verification' => [
-            'expires_in_minutes' => 0.5,
+            'expires_in_minutes' => 10,
             'delivery' => [
                 'channels' => 'sms',
             ],

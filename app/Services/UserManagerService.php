@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\VerificationChannel;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
@@ -48,6 +49,7 @@ class UserManagerService
         $payload = array_intersect_key($attributes, array_flip([
             'name',
             'email',
+            'phone',
             'avatar',
             'location',
             'subscription_type',
@@ -55,6 +57,12 @@ class UserManagerService
         ]));
 
         $user->fill($payload);
+
+        foreach (VerificationChannel::cases() as $channel) {
+            if ($channel->isRequired() && $user->isDirty($channel->attribute())) {
+                $user->{$channel->verifiedAtColumn()} = null;
+            }
+        }
 
         if (array_key_exists('password', $payload) && filled($payload['password'])) {
             $user->password = $payload['password'];

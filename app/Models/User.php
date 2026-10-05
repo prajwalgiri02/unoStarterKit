@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\VerificationChannel;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -48,6 +49,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'approved_at' => 'datetime',
             'blocked_at' => 'datetime',
             'password' => 'hashed',
@@ -81,6 +83,33 @@ class User extends Authenticatable implements JWTSubject
     public function isBlocked(): bool
     {
         return $this->blocked_at !== null;
+    }
+
+    public function hasVerified(VerificationChannel $channel): bool
+    {
+        return $this->{$channel->verifiedAtColumn()} !== null;
+    }
+
+    /**
+     * @return list<VerificationChannel>
+     */
+    public function pendingVerifications(): array
+    {
+        if ($this->hasRole('admin')) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            VerificationChannel::cases(),
+            fn (VerificationChannel $channel): bool => $channel->isRequired()
+                && filled($this->{$channel->attribute()})
+                && ! $this->hasVerified($channel),
+        ));
+    }
+
+    public function isPendingVerification(): bool
+    {
+        return $this->pendingVerifications() !== [];
     }
 
     public function firebaseTokens()

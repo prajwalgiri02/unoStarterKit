@@ -22,6 +22,7 @@ enum ApiErrorCode: string
     case InvalidCredentials = 'invalid_credentials';
     case AccountPendingApproval = 'account_pending_approval';
     case AccountBlocked = 'account_blocked';
+    case VerificationRequired = 'verification_required';
 
     case ResetTokenInvalid = 'reset_token_invalid';
     case OtpNotFound = 'otp_not_found';

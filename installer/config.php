@@ -10,7 +10,8 @@
 |           "paths" plus every region wrapped in module markers in shared
 |           files. The first path is used to detect whether it is installed.
 | sections  Questions. "optional" sections are offered in a checklist,
-|           "required_when" forces an optional section on.
+|           "required_when" forces an optional section on; a list of
+|           condition sets forces it when any one of them matches.
 | steps     Run after .env is written, each in a fresh process.
 |
 | ask       (top level) set modules or services to false to skip that question:
@@ -170,6 +171,8 @@ return [
             'label' => 'Authentication',
             'fields' => [
                 'USER_REQUIRE_APPROVAL' => ['type' => 'confirm', 'label' => 'Require admin approval for new users?', 'default' => false, 'when_module' => 'user_manager', 'hidden_value' => false],
+                'USER_REQUIRE_EMAIL_VERIFICATION' => ['type' => 'confirm', 'label' => 'Require new users to verify their email with a code?', 'default' => false],
+                'USER_REQUIRE_PHONE_VERIFICATION' => ['type' => 'confirm', 'label' => 'Require new users to verify their mobile number with an SMS code?', 'default' => false],
                 'OTP_DELIVERY_CHANNELS' => ['type' => 'select', 'label' => 'OTP delivery channel', 'default' => 'mail', 'options' => [
                     'mail' => 'Email',
                     'sms' => 'SMS',
@@ -216,7 +219,10 @@ return [
             'label' => 'SMS (ClickSend)',
             'optional' => true,
             'default' => false,
-            'required_when' => ['OTP_DELIVERY_CHANNELS' => ['sms', 'both']],
+            'required_when' => [
+                ['OTP_DELIVERY_CHANNELS' => ['sms', 'both']],
+                ['USER_REQUIRE_PHONE_VERIFICATION' => [true, 'true']],
+            ],
             'fields' => [
                 'SMS_DRIVER' => ['type' => 'select', 'label' => 'SMS provider', 'default' => 'clicksend', 'options' => [
                     'clicksend' => 'ClickSend',

@@ -25,10 +25,10 @@ function NameCell({ user }: { user: UserCms }) {
     );
 }
 
-function VerificationBadge({ approved }: { approved: boolean }) {
+function ApprovalBadge({ approved }: { approved: boolean }) {
     return (
         <Badge size="tiny" variant="soft" color={approved ? "success" : "warning"}>
-            {approved ? "Verified" : "Pending"}
+            {approved ? "Approved" : "Pending"}
         </Badge>
     );
 }
@@ -57,7 +57,7 @@ function UserManagement({ users }: UserListPageProps) {
     const pendingColumns: Column<UserCms>[] = [
         { key: "name", header: "Name", render: (user) => <NameCell user={user} /> },
         { key: "location", header: "Location", render: (user) => user.location ?? "—" },
-        { key: "verification", header: "Verification", render: () => <VerificationBadge approved={false} /> },
+        { key: "approval", header: "Approval", render: () => <ApprovalBadge approved={false} /> },
         {
             key: "actions",
             header: "Actions",
@@ -73,7 +73,7 @@ function UserManagement({ users }: UserListPageProps) {
     const userColumns: Column<UserCms>[] = [
         { key: "name", header: "Name", render: (user) => <NameCell user={user} /> },
         { key: "location", header: "Location", render: (user) => user.location ?? "—" },
-        { key: "verification", header: "Verification", render: (user) => <VerificationBadge approved={user.is_approved} /> },
+        { key: "approval", header: "Approval", render: (user) => <ApprovalBadge approved={user.is_approved} /> },
         {
             key: "status",
             header: "Status",
@@ -110,14 +110,14 @@ function UserManagement({ users }: UserListPageProps) {
                         aria-expanded={pendingOpen}
                         className="flex w-fit cursor-pointer items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-primary-50"
                     >
-                        <span className="text-subtitle-lg font-medium text-neutral-800">Users Pending Verification</span>
+                        <span className="text-subtitle-lg font-medium text-neutral-800">Users Pending Approval</span>
                         <span className="flex size-8 items-center justify-center rounded-full bg-primary-500 text-body-sm font-bold text-neutral-50">
                             {pending.length}
                         </span>
                         <ArrowDownIcon className={`size-6 text-primary-500 transition-transform ${pendingOpen ? "" : "-rotate-90"}`} />
                     </button>
                     {pendingOpen && (
-                        <DataTable columns={pendingColumns} rows={pending} rowKey={(user) => user.id} caption="Users pending verification" />
+                        <DataTable columns={pendingColumns} rows={pending} rowKey={(user) => user.id} caption="Users pending approval" />
                     )}
                 </Card>
             )}

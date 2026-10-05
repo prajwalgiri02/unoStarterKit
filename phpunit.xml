@@ -32,6 +32,9 @@
         <env name="MAIL_MAILER" value="array" force="true"/>
         <env name="QUEUE_CONNECTION" value="sync" force="true"/>
         <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="USER_REQUIRE_APPROVAL" value="false" force="true"/>
+        <env name="USER_REQUIRE_EMAIL_VERIFICATION" value="false" force="true"/>
+        <env name="USER_REQUIRE_PHONE_VERIFICATION" value="false" force="true"/>
         <env name="PULSE_ENABLED" value="false" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false" force="true"/>
         <env name="NIGHTWATCH_ENABLED" value="false" force="true"/>

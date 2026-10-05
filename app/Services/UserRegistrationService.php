@@ -11,7 +11,7 @@ class UserRegistrationService
     public function __construct() {}
 
     /**
-     * @param  array{name: string, email: string, password: string}  $attributes
+     * @param  array{name: string, email: string, password: string, phone?: string|null}  $attributes
      */
     public function register(array $attributes): User
     {

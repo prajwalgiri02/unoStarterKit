@@ -7,11 +7,22 @@ import ConfirmModal from "@/Components/modals/confirm-modal";
 import UserProfileCard from "@/Components/users/user-profile-card";
 import AppLayout from "@/Layouts/app-layout";
 import { formatDate } from "@/lib/helper";
-import type { UserDetailPageProps } from "@/Pages/types/cms/user";
+import type { UserDetailPageProps, VerificationChannel } from "@/Pages/types/cms/user";
 import { router } from "@inertiajs/react";
 import { useState } from "react";
 
 type Confirmation = "block" | "delete" | null;
+
+const unverifiedCopy: Record<VerificationChannel, { title: string; body: string }> = {
+    email: {
+        title: "Email Not Verified",
+        body: "This account has not verified its email address. The user will be sent a code the next time they log in to the app.",
+    },
+    phone: {
+        title: "Mobile Number Not Verified",
+        body: "This account has not verified its mobile number. The user will be sent a code by SMS the next time they log in to the app.",
+    },
+};
 
 function UserView({ user: { data: user } }: UserDetailPageProps) {
     const [confirmation, setConfirmation] = useState<Confirmation>(null);
@@ -50,7 +61,7 @@ function UserView({ user: { data: user } }: UserDetailPageProps) {
             {!user.is_approved && (
                 <Alert
                     tone="info"
-                    title="User Pending Verification"
+                    title="User Pending Approval"
                     actions={
                         <Button size="medium" onClick={approve}>
                             Approve
@@ -60,6 +71,12 @@ function UserView({ user: { data: user } }: UserDetailPageProps) {
                     This user is waiting for approval before they can use the platform.
                 </Alert>
             )}
+
+            {user.pending_verifications.map((channel) => (
+                <Alert key={channel} tone="warning" title={unverifiedCopy[channel].title}>
+                    {unverifiedCopy[channel].body}
+                </Alert>
+            ))}
 
             <dl className="grid max-w-3xl grid-cols-1 gap-5 md:grid-cols-2">
                 <DetailField label="Full Name">{user.name}</DetailField>
@@ -71,9 +88,9 @@ function UserView({ user: { data: user } }: UserDetailPageProps) {
                         {user.is_blocked ? "Blocked" : "Active"}
                     </Badge>
                 </DetailField>
-                <DetailField label="Verification">
+                <DetailField label="Approval">
                     <Badge size="tiny" variant="soft" color={user.is_approved ? "success" : "warning"}>
-                        {user.is_approved ? "Verified" : "Pending"}
+                        {user.is_approved ? "Approved" : "Pending"}
                     </Badge>
                 </DetailField>
                 <DetailField label="Subscription">{user.subscription_type ?? "—"}</DetailField>
