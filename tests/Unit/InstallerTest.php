@@ -226,6 +226,63 @@ class InstallerTest extends TestCase
      * @param  list<string>|null  $only
      * @return array{0: int, 1: string}
      */
+    public function test_admin_credentials_are_asked_saved_and_the_password_is_cleared_after_seeding(): void
+    {
+        [$code, $output] = $this->install("Grocery Go\nadmin@grocery.test\nSecret@123\n2\n1\ny\n", tweak: $this->withAdminSection());
+
+        $env = new EnvEditor($this->base.'/.env');
+
+        $this->assertSame(0, $code, $output);
+        $this->assertSame('admin@grocery.test', $env->get('ADMIN_EMAIL'));
+        $this->assertSame('', $env->get('ADMIN_PASSWORD'));
+        $this->assertStringContainsString('Admin login:  admin@grocery.test', $output);
+        $this->assertStringNotContainsString('Secret@123', $output);
+    }
+
+    public function test_a_blank_admin_password_is_generated_and_shown_once(): void
+    {
+        [$code, $output] = $this->install("Grocery Go\nadmin@grocery.test\n\n2\n1\ny\n", tweak: $this->withAdminSection());
+
+        $this->assertSame(0, $code, $output);
+        $this->assertSame(1, preg_match('/Generated password: (\S{16})\b/', $output, $matches), $output);
+        $this->assertStringContainsString("{$matches[1]} (generated, shown once)", $output);
+        $this->assertSame('', (new EnvEditor($this->base.'/.env'))->get('ADMIN_PASSWORD'));
+    }
+
+    public function test_a_short_admin_password_is_asked_again(): void
+    {
+        [$code, $output] = $this->install("Grocery Go\nadmin@grocery.test\nshort\nSecret@123\n2\n1\ny\n", tweak: $this->withAdminSection());
+
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString('must be at least 8 characters', $output);
+    }
+
+    public function test_the_admin_section_cannot_be_reconfigured_with_only(): void
+    {
+        [$code, $output] = $this->install('', only: ['admin'], tweak: $this->withAdminSection());
+
+        $this->assertSame(1, $code);
+        $this->assertStringContainsString('Unknown section(s): admin', $output);
+    }
+
+    private function withAdminSection(): \Closure
+    {
+        return function (array $config): array {
+            $config['ask'] = ['modules' => false, 'services' => false];
+            $config['sections']['app']['fields']['APP_URL']['ask'] = false;
+
+            $admin = ['label' => 'Admin account', 'install_only' => true, 'fields' => [
+                'ADMIN_EMAIL' => ['type' => 'text', 'label' => 'Admin email', 'required' => true, 'rules' => 'email'],
+                'ADMIN_PASSWORD' => ['type' => 'password', 'label' => 'Admin password', 'rules' => 'min:8', 'generate' => 16],
+            ]];
+
+            $config['sections'] = ['app' => $config['sections']['app'], 'admin' => $admin] + $config['sections'];
+            $config['steps'][] = ['label' => 'Seed', 'command' => ['php', 'artisan', 'db:seed'], 'scrub' => ['ADMIN_PASSWORD']];
+
+            return $config;
+        };
+    }
+
     private function install(string $input, ?array $only = null, bool $finishOnly = false, bool $fromComposer = false, ?\Closure $tweak = null): array
     {
         $in = fopen('php://memory', 'r+');

@@ -30,4 +30,20 @@ return [
         'phone' => env('USER_REQUIRE_PHONE_VERIFICATION', false),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | First admin account
+    |--------------------------------------------------------------------------
+    |
+    | Created by the database seeder when no user with this email exists. A
+    | blank password is replaced by a random one that is printed once. The
+    | password is only used on creation; an existing account is never reset.
+    |
+    */
+
+    'admin' => [
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];

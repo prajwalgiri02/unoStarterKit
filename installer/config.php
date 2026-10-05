@@ -17,12 +17,18 @@
 | ask       (top level) set modules or services to false to skip that question:
 |           every module stays installed, optional services are not asked.
 |
+| Section options: optional, default, required_when, install_only (asked on a
+| full install only, never by --only).
+| Step options: id, label, command, unless_env, confirm, scrub (env keys that
+| are emptied once the step succeeds).
+|
 | Field options: ask (false uses the default without asking), default_from
 | (default is the snake_case of another answer), type (text|password|select|
 | confirm|file), label, default,
 | default_by [FIELD, [value => default]], options, required, rules,
 | when [FIELD => value|values], when_module, hidden_value,
-| remove_when_hidden, store and hint (file).
+| remove_when_hidden, store and hint (file), generate (password length; a
+| blank answer becomes a random password that is shown once).
 |
 */
 
@@ -154,6 +160,15 @@ return [
             ],
         ],
 
+        'admin' => [
+            'label' => 'Admin account',
+            'install_only' => true,
+            'fields' => [
+                'ADMIN_EMAIL' => ['type' => 'text', 'label' => 'Admin email', 'required' => true, 'rules' => 'email'],
+                'ADMIN_PASSWORD' => ['type' => 'password', 'label' => 'Admin password', 'rules' => 'min:8', 'generate' => 16],
+            ],
+        ],
+
         'database' => [
             'label' => 'Database',
             'fields' => [
@@ -260,7 +275,7 @@ return [
         ['label' => 'Generating JWT secret', 'command' => ['php', 'artisan', 'jwt:secret', '--force'], 'unless_env' => 'JWT_SECRET'],
         ['label' => 'Linking storage', 'command' => ['php', 'artisan', 'storage:link', '--force']],
         ['label' => 'Running migrations', 'command' => ['php', 'artisan', 'migrate', '--force']],
-        ['label' => 'Seeding roles, admin user and content', 'command' => ['php', 'artisan', 'db:seed', '--force']],
+        ['label' => 'Seeding roles, admin user and content', 'command' => ['php', 'artisan', 'db:seed', '--force'], 'scrub' => ['ADMIN_PASSWORD']],
         ['id' => 'npm_install', 'label' => 'Installing npm packages', 'command' => ['npm', 'install'], 'confirm' => 'Install frontend dependencies (npm install) after setup?'],
         ['id' => 'npm_build', 'label' => 'Building frontend assets', 'command' => ['npm', 'run', 'build'], 'confirm' => 'Build frontend assets (npm run build) after that?'],
     ],

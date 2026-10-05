@@ -22,6 +22,9 @@ final class Installer
     /** @var list<string> */
     private array $keptModules = [];
 
+    /** @var array<string, string> */
+    private array $generated = [];
+
     /**
      * @param  array<string, mixed>  $config
      * @param  Closure(list<string>, string): array{0: int, 1: string}|null  $runner
@@ -76,7 +79,7 @@ final class Installer
      */
     private function ask(?array $only, bool $fromComposer): int
     {
-        $valid = ['modules', ...array_keys($this->config['sections'])];
+        $valid = ['modules', ...array_keys(array_filter($this->config['sections'], fn (array $section): bool => ! ($section['install_only'] ?? false)))];
         $unknown = $only === null ? [] : array_diff($only, $valid);
 
         if ($unknown !== []) {
@@ -318,16 +321,49 @@ final class Installer
         }
 
         $label = $field['label'];
+        $label .= isset($field['generate']) ? ' (Enter generates one)' : '';
         $required = (bool) ($field['required'] ?? false);
         $validate = fn (string $value): ?string => $this->checkRules($label, $field['rules'] ?? null, $value);
 
         $this->answers[$key] = match ($field['type'] ?? 'text') {
             'select' => $this->io->select($label, $field['options'], array_key_exists((string) $default, $field['options']) ? (string) $default : null),
             'confirm' => $this->io->confirm($label, filter_var($default ?? false, FILTER_VALIDATE_BOOLEAN)),
-            'password' => $this->io->password($label, $required, $current, $validate),
+            'password' => $this->askPassword($key, $field, $label, $required, $current, $validate),
             'file' => $this->askFile($field, $current),
             default => $this->io->text($label, $default === null ? null : (string) $default, $required, $validate),
         };
+    }
+
+    /**
+     * @param  array<string, mixed>  $field
+     * @param  callable(string): ?string  $validate
+     */
+    private function askPassword(string $key, array $field, string $label, bool $required, ?string $current, callable $validate): string
+    {
+        $value = $this->io->password($label, $required, $current, $validate);
+
+        if ($value !== '' || ! isset($field['generate'])) {
+            return $value;
+        }
+
+        $value = $this->generatePassword((int) $field['generate']);
+        $this->generated[$key] = $value;
+        $this->io->success('Generated password: '.$value);
+        $this->io->warning('It is shown once. Write it down now and change it after the first login.');
+
+        return $value;
+    }
+
+    private function generatePassword(int $length): string
+    {
+        $alphabet = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $password = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+
+        return $password;
     }
 
     /**
@@ -400,6 +436,7 @@ final class Installer
                 $rule === 'url' => filter_var($value, FILTER_VALIDATE_URL) === false ? "The {$name} must be a valid URL, for example http://myapp.test." : null,
                 $rule === 'email' => filter_var($value, FILTER_VALIDATE_EMAIL) === false ? "The {$name} must be a valid email address." : null,
                 $rule === 'integer' => ctype_digit($value) ? null : "The {$name} must be a whole number.",
+                str_starts_with($rule, 'min:') => strlen($value) >= (int) substr($rule, 4) ? null : "The {$name} must be at least ".substr($rule, 4).' characters.',
                 str_starts_with($rule, 'regex:') => preg_match(substr($rule, 6), $value) === 1 ? null : "The {$name} has an invalid format (letters, numbers and underscores only).",
                 default => null,
             };
@@ -685,6 +722,8 @@ final class Installer
             }
 
             $this->io->success($step['label']);
+
+            $this->scrub($step['scrub'] ?? []);
         }
 
         $state = $this->basePath.'/'.self::STATE_FILE;
@@ -696,6 +735,24 @@ final class Installer
         $this->summary();
 
         return 0;
+    }
+
+    /**
+     * @param  list<string>  $keys
+     */
+    private function scrub(array $keys): void
+    {
+        if ($keys === []) {
+            return;
+        }
+
+        $env = new EnvEditor($this->envPath());
+
+        foreach ($keys as $key) {
+            $env->set($key, '');
+        }
+
+        $env->save();
     }
 
     /**
@@ -763,6 +820,11 @@ final class Installer
         $this->io->line();
         $this->io->success('Installation complete.');
         $this->io->line("   Admin panel:  {$url}/cms/login");
+
+        if (($email = $env->get('ADMIN_EMAIL')) !== null) {
+            $this->io->line("   Admin login:  {$email}".(isset($this->generated['ADMIN_PASSWORD']) ? " / {$this->generated['ADMIN_PASSWORD']} (generated, shown once)" : ''));
+        }
+
         $this->io->line('   Start dev:    composer dev');
         $this->io->line('   Modules:      '.($modules === [] ? 'none' : implode('; ', $modules)));
         $this->io->line('   Add later:    php artisan uno:install --only=mail,storage,sms,firebase');
