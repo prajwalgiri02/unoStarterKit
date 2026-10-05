@@ -26,7 +26,27 @@ Included out of the box:
 
 ## Creating a new project
 
-Creating a project is two commands, like `laravel new`:
+Creating a project is one command:
+
+```bash
+composer create-project unotechno/starterkit grocery-go
+```
+
+What happens:
+
+1. Composer downloads the kit's files.
+2. The installer starts straight away and asks every question (modules, app name, database, admin account, services).
+3. Composer installs the packages.
+4. Setup finishes: keys, migrations, seeding, and `npm install` / `npm run build` if you said yes.
+
+If your terminal does not let Composer read the keyboard (this can happen on Windows), the questions are skipped, the packages are still installed, and the command ends by telling you to finish in the same terminal:
+
+```bash
+cd grocery-go
+php installer/setup.php
+```
+
+Nothing is lost: that is the same installer, started by hand. To make it two steps from the start, download only the files first, then run the installer yourself:
 
 ```bash
 composer create-project unotechno/starterkit grocery-go --no-install --no-scripts --remove-vcs
@@ -34,12 +54,9 @@ cd grocery-go
 php installer/setup.php
 ```
 
-What happens:
+`--no-install` skips the Composer packages (the installer installs them after the questions), `--no-scripts` stops Composer from starting the installer, and `--remove-vcs` removes the kit's `.git` folder when Composer installed from source. Tagged releases are downloaded as archives, so there is no `.git` folder to remove.
 
-1. **Command 1** downloads only the kit's files, which takes a few seconds. `--no-install` skips the Composer packages, `--no-scripts` stops Composer from running anything, and `--remove-vcs` gives the project a fresh start without the kit's `.git` history and without Composer asking about it.
-2. **Command 2** runs the installer in your own terminal, so it can read your keyboard. It asks every question first, then installs the Composer packages, then finishes setup (keys, database, seeding, npm).
-
-Composer installs the latest tagged release (`v2.1.0`, `v2.2.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
+Composer installs the latest tagged release (`v2.2.0`, `v2.3.0`, ...). To install the latest `main` instead, add `dev-main` after the project name.
 
 ### One command with `uno`
 
@@ -49,16 +66,12 @@ Install the `uno` command once per computer and creating a project is a single c
 uno grocery-go
 ```
 
-It runs the two commands above for you. To install it, copy the file for your system from the `tools/` folder of this repository into a folder that is on your PATH:
+It runs the two-step version above for you, in your own terminal so the keyboard always works. To install it, copy the file for your system from the `tools/` folder of this repository into a folder that is on your PATH:
 
 - **Windows:** copy `tools/uno.cmd` to a PATH folder such as `C:\ProgramData\ComposerSetup\bin` (where `composer` lives).
 - **Mac / Linux:** copy `tools/uno` to `/usr/local/bin/uno` and run `chmod +x /usr/local/bin/uno`.
 
 To get the file without cloning the whole repository, download it from GitHub or from any existing project created with the kit (`tools/` is included in every project).
-### Why not one command?
-
-Composer runs scripts without connecting your keyboard on Windows, so a script cannot ask questions there. Running the installer yourself as the second command avoids that. (`composer create-project` without the flags still works: the installer skips its questions when it detects it cannot read input and tells you to run `php installer/setup.php`.)
-
 ### Cloning instead
 
 ```bash
