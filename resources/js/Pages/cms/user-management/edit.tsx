@@ -6,9 +6,17 @@ import AppLayout from "@/Layouts/app-layout";
 import type { UserDetailPageProps } from "@/Pages/types/cms/user";
 import { router } from "@inertiajs/react";
 import useFieldForm from "@/lib/use-field-form";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+
+function listReturnUrl() {
+    const back = new URLSearchParams(window.location.search).get("back");
+    return back?.startsWith("/cms/user-manager") ? back : null;
+}
 
 function UserEdit({ user: { data: user } }: UserDetailPageProps) {
+    const [returnUrl] = useState(listReturnUrl);
+    const backHref = returnUrl ?? `/cms/user-manager/${user.id}`;
+
     const { data, setField, put, processing, errors } = useFieldForm({
         name: user.name,
         email: user.email,
@@ -28,7 +36,7 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
     return (
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-6">
-                <BackLink href={`/cms/user-manager/${user.id}`}>User Details</BackLink>
+                <BackLink href={backHref}>{returnUrl ? "User Manager" : "User Details"}</BackLink>
                 <UserProfileCard user={user} onToggleBlock={toggleBlock} />
             </div>
 
@@ -76,7 +84,7 @@ function UserEdit({ user: { data: user } }: UserDetailPageProps) {
                     <Button type="submit" disabled={processing}>
                         {processing ? "Saving..." : "Save Changes"}
                     </Button>
-                    <Button variant="outline" onClick={() => router.visit(`/cms/user-manager/${user.id}`)}>
+                    <Button variant="outline" onClick={() => router.visit(backHref)}>
                         Cancel
                     </Button>
                 </div>

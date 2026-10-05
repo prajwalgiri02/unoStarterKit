@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserApprovalService
@@ -18,19 +18,18 @@ class UserApprovalService
     }
 
     /**
-     * @return Collection<int, User>
+     * @return Builder<User>
      */
-    public function pendingUsers(): Collection
+    public function pendingUsersQuery(): Builder
     {
-        if (! $this->isEnabled()) {
-            return new Collection;
-        }
-
         return User::query()
             ->whereNull('approved_at')
-            ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
-            ->orderBy('created_at')
-            ->get();
+            ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'));
+    }
+
+    public function pendingCount(): int
+    {
+        return $this->isEnabled() ? $this->pendingUsersQuery()->count() : 0;
     }
 
     public function approve(User $user): User

@@ -15,7 +15,9 @@ function currentSearch() {
 
 function search(term: string) {
     const params = Object.fromEntries(new URLSearchParams(window.location.search));
-    delete params.page;
+    for (const key of Object.keys(params)) {
+        if (key === "page" || key.endsWith("_page")) delete params[key];
+    }
     if (term) params.search = term;
     else delete params.search;
     router.get(window.location.pathname, params, { preserveState: true, preserveScroll: true, replace: true });

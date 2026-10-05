@@ -151,6 +151,84 @@ class UserApprovalTest extends TestCase
                 ->where('users.data', fn ($users) => collect($users)->doesntContain('id', $pendingUser->id)));
     }
 
+    public function test_user_manager_paginates_both_lists_and_counts_every_pending_user(): void
+    {
+        config(['users.require_approval' => true]);
+
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        User::factory()->pendingApproval()->count(5)->create()->each->assignRole('user');
+        User::factory()->approved()->count(12)->create()->each->assignRole('user');
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index', ['pending_page' => 3]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('pendingCount', 5)
+                ->has('pendingUsers.data', 1)
+                ->where('pendingUsers.meta.per_page', 2)
+                ->where('pendingUsers.meta.current_page', 3)
+                ->where('pendingUsers.meta.total', 5)
+                ->has('users.data', 10)
+                ->where('users.meta.total', 12)
+                ->where('users.data', fn ($users) => collect($users)->every(fn ($user) => $user['is_approved'])));
+    }
+
+    public function test_user_manager_search_filters_both_lists(): void
+    {
+        config(['users.require_approval' => true]);
+
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        User::factory()->pendingApproval()->create(['name' => 'Jane Pending'])->assignRole('user');
+        User::factory()->pendingApproval()->create(['name' => 'Other Pending'])->assignRole('user');
+        User::factory()->approved()->create(['name' => 'Jane Approved'])->assignRole('user');
+        User::factory()->approved()->create(['name' => 'Other Approved'])->assignRole('user');
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index', ['search' => 'Jane']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('pendingCount', 2)
+                ->has('pendingUsers.data', 1)
+                ->where('pendingUsers.data.0.name', 'Jane Pending')
+                ->has('users.data', 1)
+                ->where('users.data.0.name', 'Jane Approved'));
+    }
+
+    public function test_pending_list_falls_back_to_its_last_page_when_the_page_empties(): void
+    {
+        config(['users.require_approval' => true]);
+
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        User::factory()->pendingApproval()->count(2)->create()->each->assignRole('user');
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index', ['pending_page' => 2]))
+            ->assertInertia(fn ($page) => $page
+                ->where('pendingUsers.meta.current_page', 1)
+                ->has('pendingUsers.data', 2));
+    }
+
+    public function test_pending_list_is_not_sent_when_approval_is_disabled(): void
+    {
+        $admin = User::factory()->approved()->create();
+        $admin->assignRole('admin');
+
+        User::factory()->pendingApproval()->create()->assignRole('user');
+
+        $this->actingAs($admin)
+            ->get(route('cms.user-manager.index'))
+            ->assertInertia(fn ($page) => $page
+                ->where('pendingUsers', null)
+                ->where('pendingCount', 0)
+                ->has('users.data', 1));
+    }
+
     public function test_pending_users_route_is_removed(): void
     {
         $admin = User::factory()->approved()->create();

@@ -7,34 +7,60 @@ namespace App\Services;
 use App\Enums\VerificationChannel;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class UserManagerService
 {
-    public function __construct() {}
+    public function __construct(
+        private readonly UserApprovalService $userApprovalService,
+    ) {}
 
     /**
      * @return LengthAwarePaginator<int, User>
      */
-    public function listUsers(?string $search = null, int $perPage = 15): LengthAwarePaginator
+    public function listUsers(?string $search = null, int $perPage = 10): LengthAwarePaginator
     {
-        return User::query()
+        return $this->search(User::query(), $search)
             ->with('roles')
-            // Exclude users with the 'admin' role
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('name', 'admin');
-            })
-            ->when(
-                filled($search),
-                fn ($query) => $query->where(function ($query) use ($search): void {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                }),
-            )
+            ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
+            ->when($this->userApprovalService->isEnabled(), fn ($query) => $query->whereNotNull('approved_at'))
             ->orderByDesc('created_at')
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function listPendingUsers(?string $search = null, int $perPage = 2): LengthAwarePaginator
+    {
+        $paginate = fn (?int $page = null): LengthAwarePaginator => $this
+            ->search($this->userApprovalService->pendingUsersQuery(), $search)
+            ->with('roles')
+            ->orderBy('created_at')
+            ->paginate($perPage, pageName: 'pending_page', page: $page)
+            ->withQueryString();
+
+        $users = $paginate();
+
+        return $users->isEmpty() && $users->currentPage() > 1 ? $paginate($users->lastPage()) : $users;
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    private function search(Builder $query, ?string $search): Builder
+    {
+        return $query->when(
+            filled($search),
+            fn ($query) => $query->where(function ($query) use ($search): void {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            }),
+        );
     }
 
     public function getUser(User $user): User

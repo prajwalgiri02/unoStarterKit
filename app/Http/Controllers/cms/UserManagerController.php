@@ -31,7 +31,10 @@ class UserManagerController extends Controller
 
         return Inertia::render('cms/user-management/index', [
             'users' => UserResource::collection($users),
-            'pendingUsers' => UserResource::collection($this->userApprovalService->pendingUsers()),
+            'pendingUsers' => $this->userApprovalService->isEnabled()
+                ? UserResource::collection($this->userManagerService->listPendingUsers($search))
+                : null,
+            'pendingCount' => $this->userApprovalService->pendingCount(),
             'filters' => [
                 'search' => $search ?? '',
             ],

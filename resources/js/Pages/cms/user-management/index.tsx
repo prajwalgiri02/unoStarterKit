@@ -33,12 +33,10 @@ function ApprovalBadge({ approved }: { approved: boolean }) {
     );
 }
 
-function UserManagement({ users, pendingUsers }: UserListPageProps) {
+function UserManagement({ users, pendingUsers, pendingCount }: UserListPageProps) {
     const [pendingOpen, setPendingOpen] = useState(true);
     const [userToDelete, setUserToDelete] = useState<UserCms | null>(null);
     const [deleting, setDeleting] = useState(false);
-
-    const pending = pendingUsers.data;
 
     const approve = (user: UserCms) => {
         router.post(`/cms/admin/users/${user.id}/approve`, {}, { preserveScroll: true });
@@ -73,7 +71,6 @@ function UserManagement({ users, pendingUsers }: UserListPageProps) {
     const userColumns: Column<UserCms>[] = [
         { key: "name", header: "Name", render: (user) => <NameCell user={user} /> },
         { key: "location", header: "Location", render: (user) => user.location ?? "—" },
-        { key: "approval", header: "Approval", render: (user) => <ApprovalBadge approved={user.is_approved} /> },
         {
             key: "status",
             header: "Status",
@@ -89,7 +86,14 @@ function UserManagement({ users, pendingUsers }: UserListPageProps) {
             className: "w-24",
             render: (user) => (
                 <div className="flex items-center gap-1">
-                    <IconButton label={`Edit ${user.name}`} onClick={() => router.visit(`/cms/user-manager/${user.id}/edit`)}>
+                    <IconButton
+                        label={`Edit ${user.name}`}
+                        onClick={() =>
+                            router.visit(`/cms/user-manager/${user.id}/edit`, {
+                                data: { back: window.location.pathname + window.location.search },
+                            })
+                        }
+                    >
                         <EditIcon />
                     </IconButton>
                     <IconButton label={`Delete ${user.name}`} tone="danger" onClick={() => setUserToDelete(user)}>
@@ -102,7 +106,7 @@ function UserManagement({ users, pendingUsers }: UserListPageProps) {
 
     return (
         <div className="flex flex-col gap-6">
-            {pending.length > 0 && (
+            {pendingUsers && pendingCount > 0 && (
                 <Card>
                     <button
                         type="button"
@@ -111,13 +115,27 @@ function UserManagement({ users, pendingUsers }: UserListPageProps) {
                         className="flex w-fit cursor-pointer items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-primary-50"
                     >
                         <span className="text-subtitle-lg font-medium text-neutral-800">Users Pending Approval</span>
-                        <span className="flex size-8 items-center justify-center rounded-full bg-primary-500 text-body-sm font-bold text-neutral-50">
-                            {pending.length}
+                        <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-primary-500 px-2 text-body-sm font-bold text-neutral-50">
+                            {pendingCount}
                         </span>
                         <ArrowDownIcon className={`size-6 text-primary-500 transition-transform ${pendingOpen ? "" : "-rotate-90"}`} />
                     </button>
                     {pendingOpen && (
-                        <DataTable columns={pendingColumns} rows={pending} rowKey={(user) => user.id} caption="Users pending approval" />
+                        <>
+                            <DataTable
+                                columns={pendingColumns}
+                                rows={pendingUsers.data}
+                                rowKey={(user) => user.id}
+                                caption="Users pending approval"
+                                emptyMessage="No pending users match your search"
+                            />
+                            <Pagination
+                                links={pendingUsers.meta.links}
+                                from={pendingUsers.meta.from}
+                                to={pendingUsers.meta.to}
+                                total={pendingUsers.meta.total}
+                            />
+                        </>
                     )}
                 </Card>
             )}
