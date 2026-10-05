@@ -30,6 +30,14 @@ class UserNotificationService
             ->get();
     }
 
+    public function unreadCount(User $user): int
+    {
+        return UserNotification::where('notifiable_id', $user->id)
+            ->where('notifiable_type', User::class)
+            ->whereNull('read_at')
+            ->count();
+    }
+
     public function markAsRead(UserNotification $userNotification): void
     {
         $userNotification->update(['read_at' => now()]);

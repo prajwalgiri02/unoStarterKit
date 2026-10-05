@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\VerificationChannel;
+use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -107,6 +109,23 @@ class UserManagerService
         $this->ensureActorCanManage($user, $actor, allowSelf: false);
 
         $user->delete();
+    }
+
+    public function deleteOwnAccount(User $user): void
+    {
+        if ($user->hasRole('admin')) {
+            throw ValidationException::withMessages([
+                'user' => 'Admin accounts cannot be deleted from the app.',
+            ]);
+        }
+
+        DB::transaction(function () use ($user): void {
+            Otp::query()->whereIn('destination', array_filter([$user->email, $user->phone]))->delete();
+            // @module:notifications
+            $user->userNotifications()->delete();
+            // @endmodule:notifications
+            $user->delete();
+        });
     }
 
     public function toggleBlock(User $user, User $actor): User

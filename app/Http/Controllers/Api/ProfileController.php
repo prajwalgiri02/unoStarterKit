@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\VerificationChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\ChangePassword;
+use App\Http\Requests\Profile\DeleteAccountRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Services\ImageUploadService;
@@ -78,6 +79,22 @@ class ProfileController extends Controller
         );
 
         return $this->successResponse(null, 'Password Changed Successfully', 200);
+    }
+
+    public function destroy(DeleteAccountRequest $request)
+    {
+        $user = auth()->user();
+        $avatar = $user->avatar;
+
+        $this->userManagerService->deleteOwnAccount($user);
+
+        if ($avatar) {
+            $this->imageUploadService->delete($avatar);
+        }
+
+        auth()->logout();
+
+        return $this->successResponse(null, 'Account deleted successfully');
     }
 
     /**

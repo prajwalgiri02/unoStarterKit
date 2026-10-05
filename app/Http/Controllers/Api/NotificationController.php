@@ -18,9 +18,23 @@ class NotificationController extends Controller
 
     public function index(): JsonResponse
     {
-        $notifications = $this->service->paginate(auth('api')->user());
+        $user = auth('api')->user();
 
-        return $this->successResponse(NotificationResource::collection($notifications), 'Notifications retrieved successfully');
+        $body = $this->successResponse(
+            NotificationResource::collection($this->service->paginate($user)),
+            'Notifications retrieved successfully',
+        )->getData(true);
+
+        $body['meta']['unread_count'] = $this->service->unreadCount($user);
+
+        return response()->json($body);
+    }
+
+    public function clearAll(): JsonResponse
+    {
+        $this->service->clearAll(auth('api')->user());
+
+        return $this->successResponse([], 'All notifications cleared');
     }
 
     public function markAsRead(UserNotification $notification): JsonResponse

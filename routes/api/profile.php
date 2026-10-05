@@ -7,4 +7,5 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index']);
     Route::post('/profile', [ProfileController::class, 'store']);
     Route::post('/change-password', [ProfileController::class, 'changePassword']);
+    Route::delete('/profile', [ProfileController::class, 'destroy']);
 });
