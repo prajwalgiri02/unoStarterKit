@@ -1,16 +1,16 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type" | "aria-label"> & {
-    label: string;
-    tone?: "neutral" | "primary" | "danger";
-    children: ReactNode;
-};
-
 const toneClasses = {
     neutral: "text-neutral-600 hover:bg-neutral-50",
     primary: "text-primary-500 hover:bg-primary-50",
     danger: "text-error-500 hover:bg-error-50",
 } as const;
+
+type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type" | "aria-label"> & {
+    label: string;
+    tone?: keyof typeof toneClasses;
+    children: ReactNode;
+};
 
 export default function IconButton({ label, tone = "neutral", className = "", children, ...rest }: IconButtonProps) {
     return (
