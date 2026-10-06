@@ -288,7 +288,9 @@ final class Installer
     private function askSection(string $key, array $section): void
     {
         do {
-            $this->io->heading($section['label']);
+            if (array_filter($section['fields'], fn (array $field): bool => ($field['ask'] ?? true) !== false) !== []) {
+                $this->io->heading($section['label']);
+            }
 
             foreach ($section['fields'] as $envKey => $field) {
                 $this->askField($envKey, $field);
@@ -828,7 +830,14 @@ final class Installer
         $this->io->line("   Admin panel:  {$url}/cms/login");
 
         if (($email = $env->get('ADMIN_EMAIL')) !== null) {
-            $this->io->line("   Admin login:  {$email}".(isset($this->generated['ADMIN_PASSWORD']) ? " / {$this->generated['ADMIN_PASSWORD']} (generated, shown once)" : ''));
+            $field = $this->config['sections']['admin']['fields']['ADMIN_PASSWORD'] ?? [];
+            $password = match (true) {
+                isset($this->generated['ADMIN_PASSWORD']) => " / {$this->generated['ADMIN_PASSWORD']} (generated, shown once)",
+                ($field['ask'] ?? true) === false && isset($field['default']) => " / {$field['default']}",
+                default => '',
+            };
+
+            $this->io->line("   Admin login:  {$email}{$password}");
         }
 
         $this->io->line('   Start dev:    composer dev');

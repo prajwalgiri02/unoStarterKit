@@ -164,8 +164,8 @@ return [
             'label' => 'Admin account',
             'install_only' => true,
             'fields' => [
-                'ADMIN_EMAIL' => ['type' => 'text', 'label' => 'Admin email', 'default' => 'developers@appifany.com.au', 'required' => true, 'rules' => 'email'],
-                'ADMIN_PASSWORD' => ['type' => 'password', 'label' => 'Admin password', 'rules' => 'min:8', 'generate' => 16],
+                'ADMIN_EMAIL' => ['ask' => false, 'type' => 'text', 'label' => 'Admin email', 'default' => 'developers@appifany.com.au', 'required' => true, 'rules' => 'email'],
+                'ADMIN_PASSWORD' => ['ask' => false, 'type' => 'password', 'label' => 'Admin password', 'default' => 'Test@123', 'rules' => 'min:8'],
             ],
         ],
 
