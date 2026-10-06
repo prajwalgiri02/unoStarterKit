@@ -512,6 +512,12 @@ final class Installer
             return $slug === '' ? 'laravel' : $slug;
         }
 
+        if ($field['default_from_folder'] ?? false) {
+            $name = ucwords(trim((string) preg_replace('/[-_\s]+/', ' ', basename($this->basePath))));
+
+            return $name === '' ? ($field['default'] ?? null) : $name;
+        }
+
         return $field['default'] ?? null;
     }
 

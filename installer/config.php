@@ -155,7 +155,7 @@ return [
         'app' => [
             'label' => 'Application',
             'fields' => [
-                'APP_NAME' => ['type' => 'text', 'label' => 'Application name', 'required' => true],
+                'APP_NAME' => ['default_from_folder' => true, 'type' => 'text', 'label' => 'Application name', 'required' => true],
                 'APP_URL' => ['ask' => false, 'type' => 'text', 'label' => 'Application URL', 'default' => 'http://localhost', 'required' => true, 'rules' => 'url'],
             ],
         ],
@@ -164,7 +164,7 @@ return [
             'label' => 'Admin account',
             'install_only' => true,
             'fields' => [
-                'ADMIN_EMAIL' => ['type' => 'text', 'label' => 'Admin email', 'required' => true, 'rules' => 'email'],
+                'ADMIN_EMAIL' => ['type' => 'text', 'label' => 'Admin email', 'default' => 'developers@appifany.com.au', 'required' => true, 'rules' => 'email'],
                 'ADMIN_PASSWORD' => ['type' => 'password', 'label' => 'Admin password', 'rules' => 'min:8', 'generate' => 16],
             ],
         ],
